@@ -1,0 +1,171 @@
+This document contains only finalized/frozen decisions. Update only when a new decision is explicitly frozen — do not add speculative or pending items here.
+
+
+PROJECT
+
+Name: NxtHealth
+Tagline: Your trusted guide for your next healthcare decision.
+
+Elevator pitch: Explainable healthcare decision-support platform for before/during/after treatment. Transparency, not blind recommendations — every output answers Why? Why not? Alternatives? Trade-offs? Confidence/limitations.
+
+Hard constraint: NOT an AI doctor, symptom checker, or disease predictor. No module output may read as diagnostic or predictive.
+
+Constraints: Solo dev, ~2-3 day hackathon build, polished not just MVP. Free/open-source only (no paid APIs/DBs/auth/OCR). Built from GitHub starter templates, not scratch. Fewer moving parts beats more.
+
+
+THE SIX MODULES
+
+1. Insurance/Policy Advisor (top priority, primary USP) — profile (city, budget, age, marital status, kids, family history) matched against curated policy DB. AI explains why a policy was recommended and the trade-off accepted; never invents a policy. Graceful "no good match" handling — closest fit + explicit caveat, never silent. Stateless beyond profile.
+
+2. Preventive Health Planner (#2) — profile (BMI, family history, lifestyle) → advice tied to a specific stated reason, never generic tips. Stateless beyond profile.
+
+3. Generic Medicine Alternatives (#3) — DB lookup only, never AI-generated (avoids hallucinated drug info). States "not available" if no match. Stateless.
+
+4 & 5. Term / Prescription Explainer (combined module) — single module, `context` flag (`term` vs `prescription`) adjusts the prompt. Plain-language comprehension aid only — not a cost-comparison tool, not decision logic. Stateless.
+
+6. Recovery Guidance (lower priority) — manual schedule: medicine timeline, test dates, report hand-off reminders. Only module with persisted state (`recovery_items`). One active plan per user, no multi-plan support, no auto-fill from other modules (accepted trade-off of dropping history — see below).
+
+
+HISTORY FEATURE — DROPPED (frozen)
+
+No per-search/per-query history persisted anywhere. Insurance Advisor, Generic Medicine Alternatives, and Term/Prescription Explainer are fully stateless beyond the shared `profiles` table. Recovery Guidance is the sole exception — its data is active/forward-looking state (a working plan), not a log of past actions.
+
+
+CENTRAL USER PROFILE (frozen)
+
+One profile per user (`profiles` table), filled progressively as modules are used, editable by the user at any time. User-facing source of truth, not a hidden backend cache.
+
+
+INPUT-HANDLING RULE (frozen, platform-wide)
+
+Any field mapped to a real data boundary (system only has data for certain values) must be a dropdown/constrained range — never free text. Applies everywhere the field is edited, including the profile screen itself.
+
+City/budget → dropdowns sourced from `policies` data (no separate list). Age/height/weight/sleep → numeric with range validation. Family history/existing conditions/gender → fixed checklists/dropdown (vocab below). Existing conditions strictly self-reported, never AI-inferred (inferring would cross into diagnostic territory).
+
+
+TECH STACK (frozen)
+
+Frontend: Next.js on Vercel. Backend: Node/Express on Render, kept as a separate service (scalability + room to extend). Repo: one GitHub monorepo, /frontend + /backend subfolders. Database: Supabase Postgres (JSONB handles the profile's flexible shape; relational tables handle policy filtering — one DB, no second needed). Auth: Supabase built-in (Firebase ruled out as redundant). Cold-start mitigation: ping backend on page load + spinner state on first backend-triggering action regardless of warm state. LLM: Gemini API, Flash/Flash-Lite tier only (Pro not viable on free tier — avoid accidentally testing against it). Free-tier requests may be used by Google to improve their models — avoid highly sensitive data if that becomes a concern later. Estimated code split: ~65% frontend / 35% backend.
+
+
+DATABASE SCHEMA — OVERVIEW (frozen)
+
+Five tables: policies, policy_details, medicines (reference, static); profiles, recovery_items (user data, RLS-protected). Insurance Advisor + Preventive Planner run off profiles + reference tables. Generic Medicine Alternatives + Term/Prescription Explainer are fully stateless (query/LLM-call only, no writes).
+
+policies (matchable/filterable fields):
+id, insurer_name, plan_name, min_entry_age, max_entry_age, sum_insured_options, city_tier, ped_waiting_months, max_dependents, policy_type, premium_min_20_35, premium_max_20_35, premium_min_36_50, premium_max_36_50, premium_min_50plus, premium_max_50plus, premium_mapping_note, needs_manual_review
+
+policy_details (1:1 via policy_id; rich text fed to AI for explanations, kept verbatim not summarized):
+policy_id, entry_age_description, premium_description, room_rent_capping_rules, maternity_benefit_details, restoration_benefit_rules, opd_coverage_details, consumables_cover_status, air_ambulance_global_cover, copay_percentage, network_hospital_tier, claim_settlement_ratio_percentage, no_claim_bonus_structure, annual_health_checkup_terms, pre_post_hospitalization_days, teleconsultation_digital_perks, organ_donor_expenses_rules
+
+Status: 25+ policies sourced via AI-assisted extraction, needs_manual_review flag on uncertain fields (PED waiting period + premium fields = highest priority to verify). Doubling to ~50+ in progress to reduce match sparsity.
+
+medicines (reference only — never confuse with user-provided data; user only ever supplies the medicine name they typed):
+medicine_name, brand_manufacturer, active_ingredient, drug_class, common_use_case, generic_alternative_names, generic_manufacturers_examples, estimated_brand_price_inr, estimated_generic_price_inr, price_difference_note, dosage_form, needs_manual_verification
+active_ingredient is the highest-stakes field in the project (wrong data = a wrong medical fact, not just a bad demo) — verify against 1mg/PharmEasy/Jan Aushadhi before trusting live.
+
+profiles — one row per user, id = auth.users.id:
+Top-level: id, identity (jsonb), lifestyle (jsonb), medical (jsonb), created_at, updated_at. Three separate jsonb columns (not one blob) to prevent concurrent-write clobbering across modules, while keeping jsonb's no-migration flexibility.
+- identity (must-have unless noted): name, age, gender, city, budget_band, marital_status, kids_count
+- lifestyle: height_cm*, weight_kg* (must-have); smoking_status, alcohol_consumption, exercise_frequency, dietary_preference, sleep_hours_avg (good-to-have)
+- medical: family_history* (must-have); existing_conditions (good-to-have, strictly self-reported)
+10 must-have + 6 good-to-have = 16 core fields, every field consumed by at least one module. "Required" is enforced at the app/form layer only (Postgres can't enforce NOT NULL on individual jsonb keys). gender = text column + CHECK constraint, not a native enum (easier to edit the allowed list later, no migration). updated_at set explicitly by app code on every write, no DB trigger.
+
+recovery_items — one row per scheduled item, not per user:
+id, user_id (FK → profiles.id), item_type (CHECK: medicine/test/report_reminder), medicine_name, dosage, frequency, test_name, scheduled_date (single shared date column — start date / test date / hand-off date depending on item_type), end_date (medicine only, nullable otherwise), completed (bool, default false), created_at. One active plan per user, no multi-plan support, fully manual entry.
+
+
+DROPDOWN / CHECKLIST VOCABULARY (frozen)
+
+Gender — 4-option dropdown: Male / Female / Other / Prefer not to disclose
+
+Family History & Existing Conditions — shared 15-item checklist, identical list for both fields (kept in sync deliberately), only the question framing differs:
+- family_history: "Does anyone in your immediate family have any of these?"
+- existing_conditions: "Do you currently have any of these?"
+
+1. Diabetes (Type 1 or 2)  2. Hypertension  3. Heart Disease  4. Stroke  5. Cancer (any type)
+6. Kidney Disease  7. Liver Disease  8. Thyroid Disorder  9. Asthma/Respiratory Condition  10. Obesity
+11. Arthritis/Joint Disorders  12. Mental Health Condition (Depression, Anxiety, etc.)  13. PCOS/PCOD
+14. Migraine/Chronic Headaches  15. None of the above
+
+"None of the above" is mutually exclusive with all other options (frontend enforcement, not yet built). No free-text "Other" option on either checklist, per the input-handling rule.
+
+
+MATCHING LOGIC — INSURANCE ADVISOR (frozen)
+
+Step 0: city_tier accepts special value "All Cities" for nationwide policies. Matching treats city_tier = user_city OR 'All Cities' as a match (data convention, no schema change).
+
+Step 1 — hard SQL filter, no AI: age BETWEEN min/max_entry_age; city match (incl. All Cities); kids_count <= max_dependents; budget checked against the correct age-bracket premium column pair (20-35/36-50/50+), resolved explicitly before comparison. needs_manual_review=true policies are INCLUDED but flagged for an explicit unverified-data caveat downstream.
+
+Step 2 — cascading fallback (only if Step 1 returns zero rows; age & city_tier are permanent floors, never relaxed):
+1. Soft budget extend — same filter, premium ceiling ×1.10 (internal only, never shown as a raw number — surfaced only as "slightly above your selected budget")
+2. Query A — drop budget_band entirely
+3. Query B — drop kids_count/max_dependents entirely
+4. Query C — drop both
+
+All returning tiers are merged, deduped by policy_id; a policy appearing in multiple tiers keeps the smallest-relaxation tag (priority: soft-extend > A > B > C), so downstream explanations can state the real trade-off plainly. Zero rows even after Query C = genuine "no good match" — honest empty state, never a forced/silent bad match.
+
+Step 3 — single Gemini call (combined rank + explain, not split): full merged/tagged candidate set (not pre-truncated) + user profile + policy_details → Gemini ranks top 3 and explains why/why-not/trade-off, incorporating each policy's relaxation tag and manual-review caveat. AI never determines eligibility — only ranks/explains within the SQL-determined set.
+
+
+MATCHING LOGIC — GENERIC MEDICINE ALTERNATIVES (frozen)
+
+Direct DB lookup only, no AI: WHERE medicine_name ILIKE '%input%' OR brand_manufacturer ILIKE '%input%'. No match → static "data not available" response. No fallback tiers.
+
+
+LLM LAYER — SHARED JSON OUTPUT SCHEMA (frozen)
+
+All 3 AI-touching modules (Insurance Advisor, Preventive Planner, Term/Prescription Explainer) return the same envelope:
+
+{
+  "status": "ok" | "no_match" | "error",
+  "results": [
+    { "title": string, "reference_id": string|null, "explanation": string,
+      "why_not": string|null, "alternatives": string|null, "trade_offs": string|null,
+      "confidence_level": "high"|"medium"|"low"|null, "confidence_note": string|null }
+  ]
+}
+
+Rules: `results` is always an array, even for 1 item (e.g. Term Explainer) — one rendering pattern across all modules. Every key always present; unused = explicit null, never omitted. Array order = rank priority (index 0 = top pick), never re-sorted downstream. `no_match` is a normal outcome (e.g. Insurance Advisor's fallback pipeline returns zero candidates — Gemini isn't called at all). Insurance Advisor leaves `alternatives` null by convention (the ranked array itself is the alternatives; `why_not` carries that weight). BMI is computed server-side from height/weight before being passed into the Preventive Planner prompt — never computed by the LLM.
+
+
+LLM LAYER — PROMPTS (frozen)
+
+Shared guardrail block, prepended verbatim to all 3 module prompts: "You are a health information assistant for NxtHealth. You are not a doctor, and you must never diagnose, predict outcomes, or suggest a specific treatment path. You only explain, compare, and clarify information that has been given to you. Always end with a note encouraging the user to confirm anything important with a qualified doctor or pharmacist. Respond ONLY with valid JSON matching the schema below — no markdown, no extra prose outside the JSON structure."
+
+Per-module logic:
+- Insurance Advisor — inputs: profile (age/city/budget_band/kids_count/marital_status) + full tagged SQL candidate set (incl. policy_details, relaxation tag, needs_manual_review). Ranks top 3, explains why/why-not, states relaxation trade-offs plainly, surfaces unverified-data caveats when flagged.
+- Preventive Planner — inputs: age/gender/computed BMI/lifestyle fields/family_history/existing_conditions. Generates 1-4 advice items, each tied to a specific data point (never generic tips). why_not/alternatives/trade_offs null unless a genuine trade-off exists.
+- Term/Prescription Explainer — inputs: context flag (term/prescription) + free-text input (the one AI module where free text is correct — no matching-DB boundary exists here, unlike Medicine Alternatives). Plain-language explanation, exactly 1 result item, why_not/alternatives/trade_offs always null.
+
+
+API CONTRACT (frozen)
+
+Only calls needing the Gemini key server-side go through Render — everything else (pure CRUD, already RLS-protected) goes directly Next.js → Supabase, bypassing the backend:
+- Direct-to-Supabase: profile read/write, recovery_items CRUD, medicine alternatives lookup (reference data, no AI/secret needed)
+- Render (Express) endpoints: POST /api/insurance-advisor, POST /api/preventive-planner, POST /api/term-explainer
+
+Profile-data trust model (accepted trade-off): frontend sends profile data directly in the request body rather than Render re-fetching it server-side. Simpler to build; a technically savvy user could submit tampered values. Accepted as low-risk for hackathon-demo scope only — would need revisiting for any real/production use.
+
+Error handling: expected outcomes (ok/no_match) → HTTP 200 with {status, results}. Genuine failures (Gemini timeout, malformed response) → HTTP 500 with {status:"error", message}.
+
+CORS: Express `cors` package, allow the deployed Vercel domain + localhost:3000. Needed from day one of local dev, not just at deploy time (Next.js dev server + Express already run on different ports = cross-origin).
+
+Deployment approach: a minimal skeleton (static-response Express route + near-blank Next.js page) is deployed to Render + Vercel early, before real module logic, to surface cold-start/CORS/env-var issues while there's time to fix them. Development then continues locally with incremental redeploys.
+
+
+IMPLEMENTATION NOTES — profiles & recovery_items (frozen, not yet built)
+
+RLS mandatory on both tables (restrict to auth.uid()) — non-negotiable given data sensitivity (age, family medical history, existing conditions); Supabase's anon key is client-visible, so without RLS any authenticated user could query another user's row directly. recovery_items.user_id should be indexed (FKs aren't auto-indexed by Supabase). Adding a jsonb field later = no migration; a new module later = one new table + its own RLS policy, no changes to existing tables. Real redesign only needed if a jsonb field ever needs fast cross-user filtering at scale (not a hackathon concern).
+
+
+EXPLICITLY DEFERRED — NOT YET DECIDED / NOT YET BUILT
+
+- Recovery Guidance's detailed data-entry UX (manual-entry confirmed, no further design)
+- AI-generated explanations are not persisted anywhere — regenerated fresh each session, accepted as ephemeral for hackathon scope
+- Frontend rendering of the explanation cards (JSON structure decided; actual UI build not started)
+- Stretch goal (Day 3, if time permits): interactive "which constraint to relax" UX for Insurance Advisor zero-match cases, instead of the current show-all-relaxation-tiers-at-once approach
+- Stretch goal (Day 3, if time permits): real push/email notification for Recovery Guidance reminders, currently scoped as in-app visual badge only
+
+
+Last updated: reflects all decisions frozen through the LLM/prompt layer, JSON output schema, API contract, error handling, CORS, and deployment approach. Remaining open items are listed above under Explicitly Deferred.
