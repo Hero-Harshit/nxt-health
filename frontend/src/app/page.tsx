@@ -1,70 +1,129 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
-type ConnectionStatus = "loading" | "connected" | "unreachable";
+type Context = "term" | "prescription";
+
+type ExplanationResult = {
+  title: string;
+  reference_id: string | null;
+  explanation: string;
+  why_not: string | null;
+  alternatives: string | null;
+  trade_offs: string | null;
+  confidence_level: "high" | "medium" | "low" | null;
+  confidence_note: string | null;
+};
+
+type ApiResponse =
+  | { status: "ok" | "no_match"; results: ExplanationResult[] }
+  | { status: "error"; message: string };
 
 export default function Home() {
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionStatus>("loading");
+  const [context, setContext] = useState<Context>("term");
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState<ExplanationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setResult(null);
+    setError(null);
+
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-
     if (!backendUrl) {
-      setConnectionStatus("unreachable");
+      setError("The backend URL is not configured.");
       return;
     }
 
-    const pingUrl = `${backendUrl.replace(/\/$/, "")}/api/ping`;
-    const controller = new AbortController();
+    setIsLoading(true);
 
-    async function pingBackend() {
-      try {
-        const response = await fetch(pingUrl, { signal: controller.signal });
-        const data: unknown = await response.json();
+    try {
+      const response = await fetch(
+        `${backendUrl.replace(/\/$/, "")}/api/term-explainer`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ context, input }),
+        },
+      );
+      const data: unknown = await response.json();
 
-        if (
-          response.ok &&
-          typeof data === "object" &&
-          data !== null &&
-          "status" in data &&
-          data.status === "ok"
-        ) {
-          setConnectionStatus("connected");
-          return;
-        }
-
-        setConnectionStatus("unreachable");
-      } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
-          setConnectionStatus("unreachable");
-        }
+      if (
+        response.ok &&
+        typeof data === "object" &&
+        data !== null &&
+        "status" in data &&
+        (data.status === "ok" || data.status === "no_match") &&
+        "results" in data &&
+        Array.isArray(data.results) &&
+        data.results.length === 1
+      ) {
+        setResult(data.results[0] as ExplanationResult);
+        return;
       }
+
+      if (
+        typeof data === "object" &&
+        data !== null &&
+        "message" in data &&
+        typeof data.message === "string"
+      ) {
+        setError(data.message);
+      } else {
+        setError("We could not explain that right now. Please try again.");
+      }
+    } catch {
+      setError("We could not reach the backend. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    void pingBackend();
-
-    return () => controller.abort();
-  }, []);
+  }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      {connectionStatus === "loading" ? (
-        <div className="flex items-center gap-3 text-zinc-700 dark:text-zinc-300">
-          <span
-            aria-label="Checking backend connection"
-            className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white"
-            role="status"
+    <main>
+      <h1>Term / Prescription Explainer</h1>
+
+      <form onSubmit={handleSubmit}>
+        <label>
+          Context
+          <select
+            value={context}
+            onChange={(event) => setContext(event.target.value as Context)}
+          >
+            <option value="term">Term</option>
+            <option value="prescription">Prescription</option>
+          </select>
+        </label>
+
+        <label>
+          {context === "term" ? "Healthcare term" : "Prescription text"}
+          <textarea
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            required
           />
-          <span>Checking backend connection</span>
-        </div>
-      ) : (
-        <p className="text-zinc-900 dark:text-zinc-100">
-          {connectionStatus === "connected"
-            ? "Backend connected"
-            : "Backend unreachable"}
-        </p>
+        </label>
+
+        <button disabled={isLoading} type="submit">
+          Explain
+        </button>
+      </form>
+
+      {isLoading && <p role="status">Loading…</p>}
+
+      {error && <p role="alert">{error}</p>}
+
+      {result && (
+        <article>
+          <h2>{result.title}</h2>
+          <details open>
+            <summary>Explanation</summary>
+            <p>{result.explanation}</p>
+          </details>
+          {result.confidence_note && <p>{result.confidence_note}</p>}
+        </article>
       )}
     </main>
   );
