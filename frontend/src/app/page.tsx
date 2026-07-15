@@ -25,23 +25,43 @@ type ExplanationResult = {
 };
 
 type ProfileState = {
+  name: string;
   age: string;
-  budgetBand: string;
-  city: string;
-  gender: string;
+  budgetBand: string; // Will store standard INR premium ranges
+  city: "Metropolitan" | "Rural" | "";
+  gender: "Male" | "Female" | "Other" | "Prefer not to disclose" | "";
+  maritalStatus: "Single" | "Married" | "Divorced" | "Widowed" | "";
+  kidsCount: number;
+  heightCm: number;
+  weightKg: number;
+  // Lifestyle fields
+  smokingStatus: "Non-smoker" | "Occasional" | "Regular" | "";
+  alcoholConsumption: "None" | "Social" | "Regular" | "";
+  exerciseFrequency: "Sedentary" | "1-2 days/week" | "3+ days/week" | "";
+  dietaryPreference: "Vegetarian" | "Non-Vegetarian" | "Eggitarian" | "Vegan" | "";
+  sleepHoursAvg: number;
+  // Medical
   familyHistory: string[];
   existingConditions: string[];
-  planPreference: string;
 };
 
 const emptyProfile: ProfileState = {
+  name: "",
   age: "",
   budgetBand: "",
   city: "",
   gender: "",
+  maritalStatus: "",
+  kidsCount: 0,
+  heightCm: 0,
+  weightKg: 0,
+  smokingStatus: "",
+  alcoholConsumption: "",
+  exerciseFrequency: "",
+  dietaryPreference: "",
+  sleepHoursAvg: 7,
   familyHistory: [],
   existingConditions: [],
-  planPreference: "",
 };
 
 const modules: Array<{ key: ModuleKey; label: string; caption: string; accent?: boolean }> = [
@@ -184,6 +204,27 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<ProfileState>(emptyProfile);
+  // --- RECOVERY GUIDANCE STATE ---
+  const [recoveryItems, setRecoveryItems] = useState<Array<{
+    id: string;
+    type: "medicine" | "test" | "reminder";
+    title: string;
+    detail: string;
+    targetDate: string;
+    completed: boolean;
+  }>>([
+    { id: "1", type: "medicine", title: "Inhaler / Maintenance", detail: "2 Puffs - Daily", targetDate: "2026-07-16T08:30", completed: false },
+    { id: "2", type: "test", title: "Blood Pressure Review", detail: "Clinic Visit Follow-up", targetDate: "2026-07-24T10:00", completed: false },
+  ]);
+
+  const [newItemType, setNewItemType] = useState<"medicine" | "test" | "reminder">("medicine");
+  const [newItemTitle, setNewItemTitle] = useState("");
+  const [newItemDetail, setNewItemDetail] = useState("");
+  const [newItemDate, setNewItemDate] = useState("");
+
+  const sortedRecoveryTimeline = useMemo(() => {
+    return [...recoveryItems].sort((a, b) => new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime());
+  }, [recoveryItems]);
 
   const hasProfile = useMemo(
     () => Object.values(profile).some((value) => {
@@ -196,30 +237,29 @@ export default function Home() {
   );
 
   const completeness = useMemo(() => {
-    const filledFields = [
-      profile.age,
-      profile.budgetBand,
-      profile.city,
-      profile.gender,
-      profile.planPreference,
-      profile.familyHistory.length > 0,
-      profile.existingConditions.length > 0,
-    ].filter(Boolean).length;
-    const total = 7;
+    const filledFields = Object.values(profile).filter((value) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === "number") return value > 0;
+      return value !== "";
+    }).length;
+
+    const total = 16;
     return {
       percent: Math.round((filledFields / total) * 100),
-      remaining: total - filledFields,
+      remaining: Math.max(0, total - filledFields),
     };
   }, [profile]);
 
-  const recoveryItems = [
+  const recoverySnapshotItems = [
     { label: "Next dose", value: "8:30 AM — inhaler" },
     { label: "Upcoming review", value: "July 24 — blood pressure check" },
     { label: "Care note", value: "Keep hydration steady and log symptoms" },
   ];
 
-  function updateProfile(field: keyof ProfileState, value: string | string[]) {
-    setProfile((current) => ({ ...current, [field]: value }));
+  function updateProfile(field: keyof ProfileState, value: any) {
+    const numericFields = ["kidsCount", "heightCm", "weightKg", "sleepHoursAvg"];
+    const parsedValue = numericFields.includes(field as string) ? (Number(value) || 0) : value;
+    setProfile((current) => ({ ...current, [field]: parsedValue }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -286,11 +326,10 @@ export default function Home() {
               key={module.key}
               type="button"
               onClick={() => setActiveModule(module.key)}
-              className={`w-full rounded-[18px] border px-4 py-3 text-left transition ${
-                activeModule === module.key
-                  ? "border-[var(--color-primary)] bg-[#dceee6] text-[var(--color-primary)]"
-                  : "border-transparent bg-transparent text-[var(--color-text)] hover:border-[var(--color-border)] hover:bg-[#f8efe1]"
-              }`}
+              className={`w-full rounded-[18px] border px-4 py-3 text-left transition ${activeModule === module.key
+                ? "border-[var(--color-primary)] bg-[#dceee6] text-[var(--color-primary)]"
+                : "border-transparent bg-transparent text-[var(--color-text)] hover:border-[var(--color-border)] hover:bg-[#f8efe1]"
+                }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <span className="font-semibold">{module.label}</span>
@@ -392,7 +431,7 @@ export default function Home() {
                 ))}
               </div>
             </div>
-          ) : hasProfile ? (
+          ) : activeModule === "welcome" && hasProfile ? (
             <div className="mx-auto max-w-6xl space-y-6">
               <section className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr]">
                 <div className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-6 shadow-[0_16px_48px_rgba(36,50,47,0.08)]">
@@ -418,7 +457,7 @@ export default function Home() {
                 <div className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-6 shadow-[0_16px_48px_rgba(36,50,47,0.08)]">
                   <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-tertiary)]">Recovery snapshot</p>
                   <div className="mt-4 space-y-3">
-                    {recoveryItems.map((item) => (
+                    {recoverySnapshotItems.map((item) => (
                       <div key={item.label} className="rounded-[18px] border border-[var(--color-border)] bg-[#fdf9f1] p-4">
                         <p className="text-sm text-[var(--color-tertiary)]">{item.label}</p>
                         <p className="mt-1 font-semibold">{item.value}</p>
@@ -601,122 +640,370 @@ export default function Home() {
 
           {activeModule === "recovery" ? (
             <div className="mx-auto max-w-5xl space-y-6">
-              <SectionCard title="Recovery guidance">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[20px] border border-[var(--color-border)] bg-[#fdf9f1] p-4">
-                    <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-tertiary)]">What to monitor</p>
-                    <p className="mt-3 text-sm leading-8 text-[var(--color-text)]">Track symptoms, appointments, and follow-up reminders in one view.</p>
+              <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
+
+                {/* ADD ITEM DASHBOARD CONTROL */}
+                <SectionCard title="+ Add Target Action Plan">
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs uppercase font-bold text-[var(--color-tertiary)]">Action Category</span>
+                      <div className="flex gap-2 mt-2">
+                        {(["medicine", "test", "reminder"] as const).map((t) => (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() => setNewItemType(t)}
+                            className={`flex-1 py-2 text-xs rounded-lg border font-semibold capitalize ${newItemType === t
+                              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                              : "border-[var(--color-border)] text-[var(--color-text)] hover:bg-[#f8efe1]"
+                              }`}
+                          >
+                            {t}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <label className="block text-sm font-medium">
+                      Action Title
+                      <input
+                        type="text"
+                        value={newItemTitle}
+                        onChange={(e) => setNewItemTitle(e.target.value)}
+                        placeholder={newItemType === "medicine" ? "e.g., Metformin" : newItemType === "test" ? "e.g., Fasting Blood Sugar" : "e.g., Post-op Walk"}
+                        className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+                      />
+                    </label>
+
+                    <label className="block text-sm font-medium">
+                      Instruction / Dosage Specifications
+                      <input
+                        type="text"
+                        value={newItemDetail}
+                        onChange={(e) => setNewItemDetail(e.target.value)}
+                        placeholder="e.g., 500mg - once daily after meal"
+                        className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+                      />
+                    </label>
+
+                    <label className="block text-sm font-medium">
+                      Target Execution Timestamp
+                      <input
+                        type="datetime-local"
+                        value={newItemDate}
+                        onChange={(e) => setNewItemDate(e.target.value)}
+                        className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newItemTitle || !newItemDate) return;
+                        setRecoveryItems(prev => [...prev, {
+                          id: Math.random().toString(),
+                          type: newItemType,
+                          title: newItemTitle,
+                          detail: newItemDetail,
+                          targetDate: newItemDate,
+                          completed: false
+                        }]);
+                        setNewItemTitle("");
+                        setNewItemDetail("");
+                        setNewItemDate("");
+                      }}
+                      className="w-full mt-2 rounded-full bg-[var(--color-primary)] py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                    >
+                      Append to Timeline Plan
+                    </button>
                   </div>
-                  <div className="rounded-[20px] border border-[var(--color-border)] bg-[#fdf9f1] p-4">
-                    <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-tertiary)]">Grounding note</p>
-                    <p className="mt-3 text-sm leading-8 text-[var(--color-text)]">Recovery guidance is supportive context, not a diagnosis or treatment plan.</p>
-                  </div>
-                </div>
-              </SectionCard>
+                </SectionCard>
+
+                {/* DYNAMIC VISUAL CHRONOLOGICAL TIMELINE */}
+                <SectionCard title="Unified Active Plan Timeline">
+                  {sortedRecoveryTimeline.length === 0 ? (
+                    <p className="text-sm text-[var(--color-tertiary)] text-center py-8">No recovery milestones defined yet.</p>
+                  ) : (
+                    <div className="relative border-l-2 border-[var(--color-border)] ml-4 pl-6 space-y-6">
+                      {sortedRecoveryTimeline.map((item) => (
+                        <div key={item.id} className="relative group">
+                          {/* Node indicator */}
+                          <div className={`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-[var(--color-surface)] shadow-sm ${item.completed ? "bg-[var(--color-tertiary)]" : item.type === "medicine" ? "bg-[#1f5b5b]" : "bg-[#e0a458]"
+                            }`} />
+
+                          <div className={`rounded-2xl border border-[var(--color-border)] p-4 transition ${item.completed ? "bg-[#efebe2] opacity-60" : "bg-[#fdf9f1]"
+                            }`}>
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-md text-[var(--color-text)]">{item.title}</span>
+                                  <Badge tone={item.type === "medicine" ? "teal" : item.type === "test" ? "amber" : "gray"}>
+                                    {item.type}
+                                  </Badge>
+                                </div>
+                                <p className="mt-1 text-sm text-[var(--color-text)]">{item.detail}</p>
+                                <p className="mt-2 text-xs text-[var(--color-tertiary)] font-mono">
+                                  Target: {new Date(item.targetDate).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                </p>
+                              </div>
+
+                              <input
+                                type="checkbox"
+                                checked={item.completed}
+                                onChange={() => {
+                                  setRecoveryItems(prev => prev.map(r => r.id === item.id ? { ...r, completed: !r.completed } : r));
+                                }}
+                                className="mt-1 h-5 w-5 rounded border-[var(--color-border)] accent-[var(--color-primary)] cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </SectionCard>
+              </div>
             </div>
           ) : null}
 
           {activeModule === "profile" ? (
             <div className="mx-auto max-w-5xl space-y-6">
               <SectionCard title="Build your profile">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <label className="block text-sm font-medium text-[var(--color-text)]">
-                    Age range
-                    <select
-                      value={profile.age}
-                      onChange={(event) => updateProfile("age", event.target.value)}
-                      className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+
+                  {/* SECTION 1: IDENTITY & DEMOGRAPHICS */}
+                  <div>
+                    <h4 className="text-md font-semibold mb-3 text-[var(--color-primary)] border-b pb-1 border-[var(--color-border)]">Core Identity</h4>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Full Name
+                        <input
+                          type="text"
+                          value={profile.name}
+                          onChange={(e) => updateProfile("name", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                          placeholder="Enter your name"
+                        />
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Age
+                        <input
+                          type="number"
+                          value={profile.age}
+                          onChange={(e) => updateProfile("age", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                          placeholder="e.g. 32"
+                          min="0"
+                          max="120"
+                        />
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Gender
+                        <select
+                          value={profile.gender}
+                          onChange={(e) => updateProfile("gender", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                        >
+                          <option value="">Select</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                          <option value="Prefer not to disclose">Prefer not to disclose</option>
+                        </select>
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Marital Status
+                        <select
+                          value={profile.maritalStatus}
+                          onChange={(e) => updateProfile("maritalStatus", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                        >
+                          <option value="">Select</option>
+                          <option value="Single">Single</option>
+                          <option value="Married">Married</option>
+                          <option value="Divorced">Divorced</option>
+                          <option value="Widowed">Widowed</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* SECTION 2: MATCH BOUNDARIES (POLICY DESIGN) */}
+                  <div>
+                    <h4 className="text-md font-semibold mb-3 text-[var(--color-primary)] border-b pb-1 border-[var(--color-border)]">Coverage Parameters</h4>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        City Classification
+                        <select
+                          value={profile.city}
+                          onChange={(e) => updateProfile("city", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                        >
+                          <option value="">Select Tier</option>
+                          <option value="Metropolitan">Metropolitan Area</option>
+                          <option value="Rural">Tier 2 / Rural Area</option>
+                        </select>
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Number of Children
+                        <input
+                          type="number"
+                          value={profile.kidsCount}
+                          onChange={(e) => updateProfile("kidsCount", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                          min="0"
+                          max="10"
+                        />
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Annual Premium Budget
+                        <select
+                          value={profile.budgetBand}
+                          onChange={(e) => updateProfile("budgetBand", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                        >
+                          <option value="">Select Target Range</option>
+                          <option value="Economy">Economy (₹5,000 - ₹15,000)</option>
+                          <option value="Moderate">Standard (₹15,000 - ₹35,000)</option>
+                          <option value="Premium">Comprehensive (₹35,000+)</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* SECTION 3: VITAL METRICS & LIFESTYLE */}
+                  <div>
+                    <h4 className="text-md font-semibold mb-3 text-[var(--color-primary)] border-b pb-1 border-[var(--color-border)]">Vitals & Lifestyle</h4>
+                    <div className="grid gap-4 md:grid-cols-3 mb-4">
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Height (cm)
+                        <input
+                          type="number"
+                          value={profile.heightCm || ""}
+                          onChange={(e) => updateProfile("heightCm", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                          placeholder="e.g. 175"
+                        />
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Weight (kg)
+                        <input
+                          type="number"
+                          value={profile.weightKg || ""}
+                          onChange={(e) => updateProfile("weightKg", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                          placeholder="e.g. 70"
+                        />
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Avg Sleep (Hours/Night)
+                        <input
+                          type="number"
+                          value={profile.sleepHoursAvg || ""}
+                          onChange={(e) => updateProfile("sleepHoursAvg", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                          min="4"
+                          max="12"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Smoking Status
+                        <select
+                          value={profile.smokingStatus}
+                          onChange={(e) => updateProfile("smokingStatus", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                        >
+                          <option value="">Select</option>
+                          <option value="Non-smoker">Non-smoker</option>
+                          <option value="Occasional">Occasional</option>
+                          <option value="Regular">Regular</option>
+                        </select>
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Alcohol
+                        <select
+                          value={profile.alcoholConsumption}
+                          onChange={(e) => updateProfile("alcoholConsumption", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                        >
+                          <option value="">Select</option>
+                          <option value="None">None</option>
+                          <option value="Social">Socially</option>
+                          <option value="Regular">Regularly</option>
+                        </select>
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Exercise Frequency
+                        <select
+                          value={profile.exerciseFrequency}
+                          onChange={(e) => updateProfile("exerciseFrequency", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                        >
+                          <option value="">Select</option>
+                          <option value="Sedentary">Sedentary (None)</option>
+                          <option value="1-2 days/week">1-2 days / week</option>
+                          <option value="3+ days/week">3+ days / week</option>
+                        </select>
+                      </label>
+
+                      <label className="block text-sm font-medium text-[var(--color-text)]">
+                        Dietary Preference
+                        <select
+                          value={profile.dietaryPreference}
+                          onChange={(e) => updateProfile("dietaryPreference", e.target.value)}
+                          className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
+                        >
+                          <option value="">Select</option>
+                          <option value="Vegetarian">Vegetarian</option>
+                          <option value="Non-Vegetarian">Non-Vegetarian</option>
+                          <option value="Eggitarian">Eggitarian</option>
+                          <option value="Vegan">Vegan</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* SECTION 4: MEDICAL MATRIX */}
+                  <div className="mt-6 space-y-4">
+                    <h4 className="text-md font-semibold text-[var(--color-primary)] border-b pb-1 border-[var(--color-border)]">Medical Parameters</h4>
+                    <ChecklistField
+                      title="Family History Matrix"
+                      description="Choose the conditions present in your biological family tree context."
+                      options={familyHistoryItems}
+                      selected={profile.familyHistory}
+                      onChange={(value) => updateProfile("familyHistory", value)}
+                    />
+                    <ChecklistField
+                      title="Personal Existing Conditions"
+                      description="Identify conditions that apply directly to your current health baseline."
+                      options={checklistOptions}
+                      selected={profile.existingConditions}
+                      onChange={(value) => updateProfile("existingConditions", value)}
+                    />
+                  </div>
+
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setActiveModule("welcome")}
+                      className="rounded-full bg-[var(--color-primary)] px-6 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(31,91,91,0.15)]"
                     >
-                      <option value="">Select</option>
-                      <option value="18-29">18-29</option>
-                      <option value="30-44">30-44</option>
-                      <option value="45-64">45-64</option>
-                      <option value="65+">65+</option>
-                    </select>
-                  </label>
-
-                  <label className="block text-sm font-medium text-[var(--color-text)]">
-                    Budget band
-                    <select
-                      value={profile.budgetBand}
-                      onChange={(event) => updateProfile("budgetBand", event.target.value)}
-                      className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
-                    >
-                      <option value="">Select</option>
-                      <option value="Under $100">Under $100</option>
-                      <option value="$100-$250">$100-$250</option>
-                      <option value="$250-$500">$250-$500</option>
-                      <option value="Over $500">Over $500</option>
-                    </select>
-                  </label>
-
-                  <label className="block text-sm font-medium text-[var(--color-text)]">
-                    City
-                    <select
-                      value={profile.city}
-                      onChange={(event) => updateProfile("city", event.target.value)}
-                      className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
-                    >
-                      <option value="">Select</option>
-                      <option value="Boston">Boston</option>
-                      <option value="Chicago">Chicago</option>
-                      <option value="Denver">Denver</option>
-                      <option value="Seattle">Seattle</option>
-                    </select>
-                  </label>
-
-                  <label className="block text-sm font-medium text-[var(--color-text)]">
-                    Gender
-                    <select
-                      value={profile.gender}
-                      onChange={(event) => updateProfile("gender", event.target.value)}
-                      className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
-                    >
-                      <option value="">Select</option>
-                      <option value="Woman">Woman</option>
-                      <option value="Man">Man</option>
-                      <option value="Non-binary">Non-binary</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                  </label>
-                </div>
-
-                <label className="mt-2 block text-sm font-medium text-[var(--color-text)]">
-                  Preferred guidance style
-                  <select
-                    value={profile.planPreference}
-                    onChange={(event) => updateProfile("planPreference", event.target.value)}
-                    className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)]"
-                  >
-                    <option value="">Select</option>
-                    <option value="Balanced details">Balanced details</option>
-                    <option value="Simplified overview">Simplified overview</option>
-                    <option value="Cost-focused">Cost-focused</option>
-                  </select>
-                </label>
-
-                <div className="mt-6 space-y-4">
-                  <ChecklistField
-                    title="Family history"
-                    description="Choose the health contexts you want to keep in view."
-                    options={familyHistoryItems}
-                    selected={profile.familyHistory}
-                    onChange={(value) => updateProfile("familyHistory", value)}
-                  />
-                  <ChecklistField
-                    title="Existing conditions"
-                    description="Choose the conditions that matter for your current planning context."
-                    options={checklistOptions}
-                    selected={profile.existingConditions}
-                    onChange={(value) => updateProfile("existingConditions", value)}
-                  />
-                </div>
-
-                <div className="mt-6 flex justify-end">
-                  <button type="button" className="rounded-full bg-[var(--color-primary)] px-6 py-3 text-sm font-semibold text-white">
-                    Save profile
-                  </button>
-                </div>
+                      Save Profile & Lock Parameters
+                    </button>
+                  </div>
+                </form>
               </SectionCard>
             </div>
           ) : null}
