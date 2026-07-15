@@ -1,0 +1,43 @@
+id,insurer_name,plan_name,min_entry_age,max_entry_age,sum_insured_options,city_tier,ped_waiting_months,max_dependents,policy_type,premium_min_20_35,premium_max_20_35,premium_min_36_50,premium_max_36_50,premium_min_50plus,premium_max_50plus,premium_mapping_note,needs_manual_review
+1,HDFC ERGO,my:Optima Secure,18,99.0,500000|750000|1000000|1500000|2000000|2500000|5000000|7500000|10000000|20000000,Both,36,12.0,Both,3000.0,8000.0,8000.0,18000.0,18000.0,35000.0,,true
+2,Niva Bupa,ReAssure 2.0 Platinum+,18,99.0,500000|10000000,Both,36,6.0,Both,9000.0,13000.0,15000.0,25000.0,35000.0,50000.0,,true
+3,Care Health Insurance,Care Supreme,18,99.0,500000|10000000,Both,36,6.0,Both,2900.0,5800.0,6500.0,12000.0,15500.0,28500.0,,true
+4,Aditya Birla Health Insurance,Activ One MAX,18,99.0,200000|60000000,Both,36,6.0,Both,3000.0,10000.0,8000.0,25000.0,25000.0,70000.0,,true
+5,ICICI Lombard,Elevate,18,125.0,500000|750000|1000000|1500000|2000000|2500000|5000000|10000000|30000000|unlimited,Both,36,5.0,Both,3000.0,8500.0,5500.0,15000.0,12000.0,35000.0,,true
+6,Bajaj Allianz,My Health Care Plan 1,18,65.0,300000|50000000,Both,36,,Both,3000.0,5000.0,6500.0,12000.0,15000.0,25000.0,max_dependents ambiguous: source says 2 Adults + dependent children (typically up to 4 children); parents can also be included in extended family configurations,true
+7,Tata AIG General Insurance,TATA AIG MediCare Select,18,99.0,500000|10000000,Both,36,5.0,Both,5000.0,9000.0,8000.0,18000.0,15000.0,25000.0,,true
+8,SBI General Insurance,Super Health Platinum Infinite,18,99.0,5000000|20000000,Both,24,,Both,12000.0,20000.0,25000.0,40000.0,45000.0,70000.0,max_dependents unparseable: source says 4 Adults + any number of children,true
+9,Reliance General Insurance (now marketed as IndusInd General Insurance),Reliance Health Infinity Insurance,18,65.0,300000|50000000,Both,36,20.0,Both,7500.0,21000.0,12000.0,35000.0,25000.0,60000.0,,true
+10,Star Health and Allied Insurance Company Limited,Super Star (UIN: SHAHLIP25036V012425),18,99.0,500000|10000000|unlimited,Both,36,6.0,Both,8000.0,15000.0,15000.0,28000.0,28000.0,50000.0,,true
+11,Star Health and Allied Insurance Company Limited,Star Women Care Insurance Policy,18,75.0,500000|10000000,Both,24,5.0,Both,3000.0,8000.0,8000.0,18000.0,18000.0,35000.0,,true
+12,Care Health Insurance,Care Senior,61,99.0,300000|1000000,Both,48,2.0,Both,,,,,25000.0,65000.0,Senior-only plan: no 20-35 or 36-50 bands applicable,true
+13,ACKO General Insurance,ACKO Platinum Health Plan,18,99.0,10000000|unlimited,Both,0,10.0,Both,,,,,,,No numeric premium bands provided in source; only descriptive labels (Low-Moderate/Moderate/High) | PED waiting period is a range (0-36 months depending on health evaluation); used minimum value. Premium bands absent: only descriptive labels provided without INR amounts.,true
+14,ManipalCigna,ProHealth Select (Variant A: Corporate/Affinity Channel | Variant B: Agency/Broking/Direct Channel),18,99.0,50000|2500000,Both,36,5.0,Both,4750.0,5500.0,6050.0,8500.0,12000.0,35000.0,,true
+15,ManipalCigna,"ManipalCigna Sarvah (Variants: Uttam, Param, Pratham)",18,99.0,500000|30000000,Both,36,5.0,Both,4000.0,10000.0,10000.0,20000.0,20000.0,40000.0,,true
+16,ICICI Lombard,MaxProtect (Classic & Premium variants),21,65.0,10000000|unlimited,Both,36,5.0,Both,4500.0,9000.0,10000.0,18000.0,20000.0,35000.0,,true
+17,ICICI Lombard,Health AdvantEdge,18,65.0,300000|30000000,Both,24,6.0,Both,2900.0,4600.0,5500.0,9500.0,12000.0,24000.0,,true
+18,Star Health and Allied Insurance Company Limited,Senior Citizens Red Carpet Health Insurance Policy,60,75.0,100000|500000|1000000|2500000,Both,12,2.0,Both,,,,,11590.0,57730.0,Senior-only plan with SI-based premiums (no standard age bands),true
+19,Go Digit General Insurance Ltd. (Digit Insurance),Digit Health Care Plus,18,99.0,10000|unlimited,Both,0,,Both,3000.0,6000.0,5000.0,10000.0,8000.0,15000.0,max_dependents unparseable: no explicit numeric cap given. PED waiting period customizable (0-48 months); used minimum value.,true
+20,Go Digit General Insurance Limited,Digit Infinity Wallet,18,99.0,200000|30000000,Both,36,8.0,Both,6400.0,7700.0,9800.0,14900.0,18500.0,33700.0,,true
+21,Star Health and Allied Insurance,Family Health Optima Insurance Plan,18,65.0,100000|2500000,Both,36,9.0,Family Floater,12500.0,16500.0,18000.0,28000.0,35000.0,55000.0,,true
+22,Tata AIG,MediCare Premier,18,65.0,500000|1000000|1500000|2000000|2500000|5000000|7500000|10000000|20000000|30000000,Both,24,7.0,Both,5000.0,8000.0,8000.0,15000.0,15000.0,30000.0,,true
+23,SBI General Insurance,Arogya Supreme (Pro / Plus / Premium variants),18,65.0,100000|50000000,Both,36,6.0,Both,13000.0,17000.0,16000.0,32000.0,36000.0,59000.0,,true
+24,Aditya Birla Health Insurance,Activ One NXT,18,99.0,200000|60000000,Both,36,6.0,Both,6000.0,8600.0,8200.0,14200.0,14500.0,24000.0,,true
+25,IndusInd General Insurance,IndusInd Health Global,18,65.0,15000000|unlimited,Both,36,5.0,Both,40000.0,80000.0,80000.0,150000.0,150000.0,250000.0,sum_insured_options complex: USD and INR values mixed; used INR 1.5Cr minimum and Unlimited maximum,true
+26,Star Health and Allied Insurance Company Limited,Star Comprehensive Insurance Policy,18,65.0,500000|10000000,Both,36,5.0,Both,3000.0,7000.0,5000.0,12000.0,12000.0,25000.0,,true
+27,HDFC ERGO,Optima Restore,18,65.0,300000|500000|1000000|1500000|2000000|2500000|5000000|10000000,Both,36,9.0,Both,3000.0,9000.0,9000.0,18000.0,18000.0,35000.0,,true
+28,Niva Bupa,Health Premia (Silver / Gold / Platinum variants),18,65.0,500000|5000000|10000000|10000000|30000000,Both,24,6.0,Both,8000.0,12000.0,11500.0,17000.0,20000.0,28000.0,,true
+29,Niva Bupa,Niva Bupa Aspire (Variants: Gold+ / Diamond+ / Platinum+ / Titanium+),18,65.0,300000|500000|750000|1000000|1500000|2000000|2500000|5000000|10000000,Both,36,9.0,Both,8000.0,18000.0,15000.0,30000.0,28000.0,55000.0,,true
+30,Care Health Insurance,Care Advantage,5,99.0,2500000|60000000,Both,36,4.0,Both,6620.0,8000.0,7200.0,12792.0,12792.0,,50+ band shows single value with + (12792+); no upper bound specified in source,true
+31,Care Health Insurance,Care Freedom (Plan 1: 3L/5L | Plan 2: 7L/10L),18,99.0,300000|1000000,Both,24,6.0,Both,6000.0,12000.0,12000.0,22000.0,20000.0,45000.0,,true
+32,HDFC ERGO,my:health Suraksha (Silver Smart / Gold Smart / Platinum Smart / Gold Essential / Diamond / Global Smart variants),18,99.0,300000|7500000,Both,48,14.0,Both,5500.0,9500.0,9000.0,15000.0,16000.0,26000.0,,true
+33,HDFC ERGO,HDFC ERGO Energy Gold,18,65.0,200000|5000000,Both,0,1.0,Individual,15000.0,20000.0,17000.0,25000.0,27000.0,50000.0,PED waiting is 0 months for Diabetes/Hypertension only; 24 months for all other PEDs,true
+34,Aditya Birla Health Insurance,Aditya Birla Activ Fit (Plus / Preferred variants),18,45.0,500000|10000000,Both,48,6.0,Both,6863.0,15000.0,12000.0,28000.0,,,50+ band not applicable: max entry age is 45 years,true
+35,Aditya Birla Health Insurance,Activ Health Platinum Enhanced,18,99.0,200000|20000000,Both,36,9.0,Both,5000.0,10000.0,10000.0,20000.0,20000.0,40000.0,,true
+36,Bajaj Allianz General Insurance,Bajaj Allianz Health Guard Gold,18,65.0,300000|5000000,Both,36,,Both,4500.0,8000.0,8000.0,16000.0,16000.0,35000.0,max_dependents ambiguous: source says 2 Adults + Children max under Family Floater with no explicit numeric cap on children,true
+37,Bajaj Allianz General Insurance Co. Ltd. (now Bajaj General Insurance Co. Ltd.),Bajaj Allianz Tax Gain,18,55.0,100000|300000,Both,48,2.0,Family Floater,4999.0,14999.0,4999.0,14999.0,19999.0,19999.0,Flat premium plan: mapped Plans A-C (18-55 yrs) to 20-35 and 36-50 bands; Plan D (56-75 yrs) to 50+ band,true
+38,ManipalCigna,ManipalCigna Lifetime Health Global,18,65.0,5000000|30000000,Both,24,5.0,Both,15000.0,35000.0,35000.0,80000.0,80000.0,200000.0,,true
+39,Star Health,Star Health Assure Insurance Policy,18,75.0,500000|20000000,Both,36,9.0,Both,8000.0,15000.0,15000.0,28000.0,28000.0,55000.0,,true
+40,ACKO General Insurance,ACKO Standard Health Insurance Plan (ACKO Platinum Lite),18,99.0,1000000|10000000,Both,36,6.0,Both,8000.0,15000.0,15000.0,30000.0,40000.0,80000.0,,true
+41,Generali Central Insurance Company Limited (formerly Future Generali India Insurance Company Limited),Health Total (Vital / Superior / Premiere),18,99.0,300000|10000000,Both,24,,Both,4500.0,7500.0,9000.0,16000.0,18000.0,27000.0,max_dependents ambiguous: Vital plan 1 Adult+5 max; Superior/Premiere up to 15 members extended family,true
+42,New India Assurance Co. Ltd.,New India Mediclaim Policy,18,65.0,100000|1500000,Both,36,,Individual,7000.0,9000.0,9000.0,14000.0,14000.0,21000.0,max_dependents unparseable: individual policy with no explicit cap on number of members; policy_type is Individual Only (each person gets separate SI),true
