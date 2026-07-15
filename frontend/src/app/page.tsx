@@ -227,27 +227,12 @@ export default function Home() {
     setResult(null);
     setError(null);
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-    if (!backendUrl) {
-      setError("The backend URL is not configured yet. A sample explanation will appear when the connection is ready.");
-      const demoResult: ExplanationResult = {
-        title: "Sample explanation",
-        reference_id: null,
-        explanation: "The platform can present plain-language guidance for terms and prescription notes without diagnosing or predicting outcomes.",
-        why_not: "This example is intentionally broad so the layout can be reviewed without a connected API response.",
-        alternatives: "You can compare this explanation with a broader glossary entry or a plan-specific note.",
-        trade_offs: "The trade-off here is clarity over detail, which keeps the experience grounded and non-diagnostic.",
-        confidence_level: "high",
-        confidence_note: "Confidence is high because the content is a placeholder for layout review.",
-      };
-      setResult(demoResult);
-      return;
-    }
+    const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
 
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${backendUrl.replace(/\/$/, "")}/api/term-explainer`, {
+      const response = await fetch(`${backendBaseUrl}/api/term-explainer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ context, input }),
