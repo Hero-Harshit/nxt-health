@@ -1,0 +1,65 @@
+# NxtHealth — Frontend Status (as of latest build)
+
+Reference doc for the coding agent. Treat "Frozen constraints" as non-negotiable unless the human explicitly says otherwise in-session. Treat "Open questions" as blocking — resolve with the human before building further on top of them, don't silently assume an answer.
+
+---
+
+## ✅ Done / Working
+
+- Next.js 16 + React 19 app, running locally (frontend on :3000, backend on :5000).
+- Fixed left sidebar shell, Warm Harbor theme applied (cream bg, teal primary, amber accent, Fraunces + Inter).
+- Module switching happens inline in main content area — no page routes per module, confirmed working as designed.
+- Insurance Advisor shows with a distinct priority treatment in the sidebar.
+- Header shows module title + non-diagnostic posture message.
+- **Term/Prescription Explainer — fully live end-to-end:**
+  - Form for `context` (term/prescription) + free-text `input`
+  - Live POST to `/api/term-explainer` on the real backend
+  - Renders `explanation`, `why_not`, `alternatives`, `trade_offs`, `confidence_note`
+  - Loading + error states handled
+- Profile builder form exists and captures: age, budget band, city, gender, family history, existing conditions (+ an unreviewed `plan preference` field — see open questions).
+- `ChecklistField` component: multi-select with "None of the above" mutual-exclusion logic, reusable.
+- `SectionCard` and `Badge` reusable components exist.
+
+## 🟡 Partial / Static Placeholder (not real yet)
+
+- **Insurance Advisor** — UI shell only, static content, not backend-driven.
+- **Preventive Health Planner** — static planning snapshot, not backend-driven.
+- **Generic Medicine Alternatives** — static comparison content, not backend-driven.
+- **Recovery Guidance** — static content, shell-integrated but not functional (no real add-medicine/add-test/add-reminder flows, no persisted `recovery_items` yet).
+- **Settings** — placeholder only.
+- **Profile** — form captures a subset of fields (see gap below), stored in local React state only (not persisted to Supabase yet).
+
+## ❌ Not Started
+
+- Supabase integration for `profiles` and `recovery_items` (with RLS scoped to `auth.uid()` — this is a frozen, non-negotiable requirement, not optional hardening).
+- Auth (Supabase Auth — required before RLS-scoped tables make sense at all).
+- Real backend wiring for Insurance Advisor, Preventive Planner, Generic Alternatives.
+- Recovery Guidance's three real entry flows (Add Medicine / Add Test / Add Reminder) feeding one unified timeline.
+- Formal type scale (headings/body/caption sizes + spacing rhythm) — current sizes across all components are provisional, chosen ad hoc during mockups, never formally frozen.
+- Error/danger visual state — no color token exists yet for genuine failures (HTTP 500, malformed AI response). Do not reuse the amber "caution" tone for this.
+- Returning-user dashboard view (profile completeness % + recovery snapshot) — was designed/frozen in architecture chat, not yet confirmed built.
+- First-time welcome panel (feature overview + "build your profile" CTA) — not yet confirmed built as designed.
+
+---
+
+## 🚩 Open Questions — resolve before continuing, do not guess
+
+1. **`plan preference` field** — this is not in the frozen 16-field profile schema (10 must-have + 6 good-to-have). Was this added deliberately by the human, or invented by the coding agent filling a perceived gap? If real, it needs to be added to the actual schema design, not just the frontend form.
+2. **Profile builder is incomplete against frozen schema.** Missing must-haves: `name`, `marital_status`, `kids_count`, `height_cm`, `weight_kg` (the last two feed BMI, which Preventive Planner depends on). Missing all 5 lifestyle good-to-haves: smoking, alcohol, exercise frequency, dietary preference, sleep hours.
+3. **Recovery Guidance sidebar placement is ambiguous.** Frozen design: Recovery Guidance sits in its own visually separated tier, below a divider, still a primary module (not grouped with Profile/Settings). Latest status summary described it grouped with "Profile, Recovery Guidance, and Settings" as if all three are equal-weight utility items — needs confirmation of what was actually built.
+4. **Accordion null-handling unverified.** Frozen rule: `why_not` / `alternatives` / `trade_offs` render as expandable sections ONLY when non-null; a null field must render no section at all, never an empty/greyed one. Term/Prescription Explainer likely returns null for several of these fields regularly — confirm this isn't silently showing empty boxes.
+5. **Profile persistence strategy** — currently local React state. Confirm this is understood as a temporary scaffold and not a fallback destination (e.g. localStorage) that quietly becomes "good enough" instead of the frozen Supabase + RLS design.
+
+---
+
+## 🔒 Frozen Constraints (do not violate without explicit human sign-off)
+
+- Free/open-source only for anything in the deployed/production path — no paid APIs, DBs, auth, OCR. (Dev-tooling AI assistance, e.g. Antigravity, is fine — production API keys are not shared/paid.)
+- No history/log feature anywhere — no per-search logs for Insurance Advisor, Preventive Planner, or Term/Prescription Explainer. Only `profiles` and `recovery_items` persist.
+- No diagnostic, predictive, or treatment-prescribing language/UI, ever.
+- Input fields mapped to real data boundaries (age, budget_band, city, gender, etc.) must be dropdown/constrained — free text only allowed for Term/Prescription Explainer's input field.
+- Checklist mutual exclusivity ("None of the above" disables the other 14, and vice versa) is shared logic across `family_history` and `existing_conditions` — one reusable component, not two.
+- Sidebar/top nav are fixed; module switching happens inline in the main content area only — no modals, no route changes for this.
+- Buttons: only one solid/primary CTA visible per screen at a time.
+- Badges: exactly 3 tones (teal-good, amber-caution, gray-neutral) — no 4th tone without deliberate design decision.
+- Warm Harbor palette + Fraunces/Inter typography, as specified in the original frontend prompt.
