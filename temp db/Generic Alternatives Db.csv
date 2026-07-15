@@ -1,5 +1,4 @@
 medicine_name,brand_manufacturer,active_ingredient,drug_class,common_use_case,generic_alternative_names,generic_manufacturers_examples,estimated_brand_price_inr,estimated_generic_price_inr,price_difference_note,dosage_form,needs_manual_verification
-
 Dolo 650,Mankind Pharma,Paracetamol 650mg,Antipyretic/Analgesic,Fever and mild to moderate pain relief,Paracip 650|Calpol 650|generic Paracetamol 650mg,Micro Labs|GSK|various Indian manufacturers,25-35 for 15 tablets,8-15 for 15 tablets,~60-70% cheaper as generic,Tablet,YES - price estimates are approximate and vary by region
 Crocin Advance,GSK,Paracetamol 500mg,Antipyretic/Analgesic,Fever and mild pain relief,Dolo 500|Calpol 500|Paracip 500|generic Paracetamol 500mg,Mankind Pharma|GSK|various,30-40 for 15 tablets,10-18 for 15 tablets,~55-65% cheaper as generic,Tablet,YES - price estimates are approximate
 Pantocid 40,Sun Pharma,Pantoprazole 40mg,Proton Pump Inhibitor,Acid reflux GERD and peptic ulcers,Pantodac 40|Nexpro 40|generic Pantoprazole 40mg,Zydus Cadila|Torrent Pharma|various,90-130 for 15 tablets,20-45 for 15 tablets,~70-75% cheaper as generic,Tablet,YES - price estimates are approximate
