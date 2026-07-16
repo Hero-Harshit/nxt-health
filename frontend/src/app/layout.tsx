@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable} h-full antialiased`}>
-      <body className="min-h-full bg-[#FBF6EE]">
+      <body className="min-h-full bg-slate-50">
         <Navbar />
         <main>{children}</main>
       </body>

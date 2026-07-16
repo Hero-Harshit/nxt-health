@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef, FormEvent } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Pill, Search, X, AlertCircle, HeartPulse, Sparkles, HelpCircle } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase Client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type Medicine = {
   id: number;
@@ -34,7 +40,13 @@ export default function MedicinesPage() {
     const fetchMedicines = async () => {
       const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
       try {
-        const response = await fetch(`${backendBaseUrl}/api/medicines`);
+        const { data: { session } } = await supabase.auth.getSession();
+        const response = await fetch(`${backendBaseUrl}/api/medicines`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token || ""}`,
+          }
+        });
         if (!response.ok) {
           throw new Error(`Failed to load medicines: ${response.status}`);
         }
@@ -87,34 +99,34 @@ export default function MedicinesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF6EE] text-[#24322F] p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <header className="mb-8 border-b border-[#D8CDBB] pb-6 flex items-center justify-between">
+        <header className="mb-8 border-b border-slate-200 pb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-[#1F5B5B] flex items-center justify-center shadow-md">
+            <div className="h-10 w-10 rounded-xl bg-[#0F2744] flex items-center justify-center shadow-md">
               <Pill className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#1F5B5B] flex items-center gap-2">
-                NxtHealth <span className="text-xs bg-[#DCEEE6] text-[#1F5B5B] px-2 py-0.5 rounded-full border border-[#1F5B5B]/20">Medicines</span>
+              <h1 className="text-2xl font-bold tracking-tight text-[#0F2744] flex items-center gap-2">
+                NxtHealth <span className="text-xs bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200/50">Medicines</span>
               </h1>
-              <p className="text-xs text-[#6E8B8B]">Explainable healthcare decision platform — non-diagnostic guidance</p>
+              <p className="text-xs text-slate-500">Explainable healthcare decision platform — non-diagnostic guidance</p>
             </div>
           </div>
         </header>
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-center animate-pulse">
-            <RefreshCw className="h-8 w-8 animate-spin text-[#1F5B5B] mb-4" />
-            <p className="text-sm font-medium text-[#6E8B8B]">Loading medicines database...</p>
+            <RefreshCw className="h-8 w-8 animate-spin text-sky-600 mb-4" />
+            <p className="text-sm font-medium text-slate-500">Loading medicines database...</p>
           </div>
         ) : errorMsg ? (
-          <div className="rounded-2xl bg-[#3A4B47] text-[#FBF6EE] p-6 shadow-sm flex items-start gap-4 mb-8">
-            <AlertCircle className="h-6 w-6 text-[#E0A458] shrink-0 mt-0.5" />
+          <div className="rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 p-6 shadow-sm flex items-start gap-4 mb-8">
+            <AlertCircle className="h-6 w-6 text-rose-700 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-lg font-semibold text-white">Database Unreachable</h3>
-              <p className="text-sm text-slate-300 mt-2 leading-relaxed">{errorMsg}</p>
+              <h3 className="text-lg font-semibold text-rose-700">Database Unreachable</h3>
+              <p className="text-sm text-rose-600 mt-2 leading-relaxed">{errorMsg}</p>
             </div>
           </div>
         ) : (
@@ -122,7 +134,7 @@ export default function MedicinesPage() {
             {/* Autocomplete Search Input */}
             <div className="relative" ref={dropdownRef}>
               <div className="relative flex items-center">
-                <Search className="absolute left-4 h-5 w-5 text-[#6E8B8B]" />
+                <Search className="absolute left-4 h-5 w-5 text-slate-400" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -132,12 +144,12 @@ export default function MedicinesPage() {
                   }}
                   onFocus={() => setShowDropdown(true)}
                   placeholder="Enter brand name or active ingredient (e.g. Paracetamol, Lipitor)..."
-                  className="w-full rounded-2xl border border-[#D8CDBB] bg-white pl-12 pr-12 py-4 text-[#24322F] focus:border-[#1F5B5B] focus:outline-none focus:ring-1 focus:ring-[#1F5B5B] shadow-sm transition-all duration-200"
+                  className="w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-12 py-4 text-slate-900 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600 shadow-sm transition-all duration-200"
                 />
                 {searchQuery && (
                   <button
                     onClick={handleClear}
-                    className="absolute right-4 p-1 rounded-full hover:bg-[#FBF6EE] text-[#6E8B8B] hover:text-[#24322F] transition-colors cursor-pointer"
+                    className="absolute right-4 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -146,25 +158,25 @@ export default function MedicinesPage() {
 
               {/* Dropdown Menu */}
               {showDropdown && searchQuery.trim() !== "" && (
-                <div className="absolute z-10 mt-2 w-full rounded-2xl border border-[#D8CDBB] bg-white shadow-lg max-h-72 overflow-y-auto animate-fadeIn">
+                <div className="absolute z-10 mt-2 w-full rounded-2xl border border-slate-200 bg-white shadow-lg max-h-72 overflow-y-auto animate-fadeIn">
                   {filteredMedicines.length > 0 ? (
                     filteredMedicines.map((med) => (
                       <button
                         key={med.id}
                         onClick={() => handleSelect(med)}
-                        className="w-full text-left px-5 py-3.5 hover:bg-[#FBF6EE] transition-colors border-b border-[#D8CDBB]/30 last:border-0 flex items-center justify-between cursor-pointer"
+                        className="w-full text-left px-5 py-3.5 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between cursor-pointer"
                       >
                         <div>
-                          <div className="font-semibold text-[#24322F]">{med.medicine_name}</div>
-                          <div className="text-xs text-[#6E8B8B] mt-0.5">{med.active_ingredient}</div>
+                          <div className="font-semibold text-slate-900">{med.medicine_name}</div>
+                          <div className="text-xs text-slate-500 mt-0.5">{med.active_ingredient}</div>
                         </div>
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[#E5E9E7] text-[#3A4B47]">
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700">
                           {med.dosage_form}
                         </span>
                       </button>
                     ))
                   ) : (
-                    <div className="px-5 py-6 text-center text-sm text-[#6E8B8B]">
+                    <div className="px-5 py-6 text-center text-sm text-slate-500">
                       Our database does not contain an alternative generic medicine for that.
                     </div>
                   )}
@@ -174,44 +186,44 @@ export default function MedicinesPage() {
 
             {/* Selected Medicine Info Card */}
             {selectedMedicine ? (
-              <div className="rounded-2xl border border-[#D8CDBB] bg-white p-6 shadow-sm space-y-6">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
                 {/* Header Section */}
-                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#D8CDBB]/40 pb-4">
+                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
                   <div>
-                    <h2 className="text-xl font-bold text-[#1F5B5B] tracking-tight">
+                    <h2 className="text-xl font-bold text-[#0F2744] tracking-tight">
                       {selectedMedicine.medicine_name}
                     </h2>
-                    <p className="text-xs text-[#6E8B8B] mt-1">Manufactured by: {selectedMedicine.brand_manufacturer}</p>
+                    <p className="text-xs text-slate-500 mt-1">Manufactured by: {selectedMedicine.brand_manufacturer}</p>
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#E5E9E7] text-[#3A4B47] uppercase tracking-wider">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 uppercase tracking-wider">
                     {selectedMedicine.dosage_form}
                   </span>
                 </div>
 
                 {/* Active Ingredient Banner */}
-                <div className="rounded-xl bg-[#FBF6EE] p-4 border border-[#D8CDBB]/30 flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-[#DCEEE6] flex items-center justify-center">
-                    <Pill className="h-4.5 w-4.5 text-[#1F5B5B]" />
+                <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/60 flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-sky-100 flex items-center justify-center">
+                    <Pill className="h-4.5 w-4.5 text-sky-700" />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wider text-[#6E8B8B] font-bold">Active Ingredient (Salt)</p>
-                    <p className="text-sm font-semibold text-[#24322F] mt-0.5">{selectedMedicine.active_ingredient}</p>
+                    <p className="text-xs uppercase tracking-wider text-slate-500 font-bold">Active Ingredient (Salt)</p>
+                    <p className="text-sm font-semibold text-slate-900 mt-0.5">{selectedMedicine.active_ingredient}</p>
                   </div>
                 </div>
 
                 {/* Price Comparison Box */}
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-xl border border-[#D8CDBB] p-4 text-center bg-[#FBF6EE]/30">
-                    <p className="text-xs text-[#6E8B8B] font-semibold">Estimated Brand Price</p>
-                    <p className="text-lg font-bold text-[#24322F] mt-1">{selectedMedicine.estimated_brand_price_inr}</p>
+                  <div className="rounded-xl border border-slate-200 p-4 text-center bg-slate-50">
+                    <p className="text-xs text-slate-500 font-semibold">Estimated Brand Price</p>
+                    <p className="text-lg font-bold text-[#0F2744] mt-1">{selectedMedicine.estimated_brand_price_inr}</p>
                   </div>
-                  <div className="rounded-xl border border-[#D8CDBB] p-4 text-center bg-[#FBF6EE]/30">
-                    <p className="text-xs text-[#6E8B8B] font-semibold">Estimated Generic Price</p>
-                    <p className="text-lg font-bold text-[#1F5B5B] mt-1">{selectedMedicine.estimated_generic_price_inr}</p>
+                  <div className="rounded-xl border border-slate-200 p-4 text-center bg-slate-50">
+                    <p className="text-xs text-slate-500 font-semibold">Estimated Generic Price</p>
+                    <p className="text-lg font-bold text-sky-600 mt-1">{selectedMedicine.estimated_generic_price_inr}</p>
                   </div>
-                  <div className="rounded-xl bg-[#DCEEE6] border border-[#1F5B5B]/10 p-4 text-center flex flex-col justify-center items-center">
-                    <span className="text-xs text-[#1F5B5B] font-bold uppercase tracking-wider">Potential Savings</span>
-                    <span className="text-xs font-semibold text-[#1F5B5B] mt-1 leading-snug">
+                  <div className="rounded-xl bg-sky-100 border border-sky-200/50 p-4 text-center flex flex-col justify-center items-center">
+                    <span className="text-xs text-sky-700 font-bold uppercase tracking-wider">Potential Savings</span>
+                    <span className="text-xs font-semibold text-sky-700 mt-1 leading-snug">
                       {selectedMedicine.price_difference_note}
                     </span>
                   </div>
@@ -220,30 +232,30 @@ export default function MedicinesPage() {
                 {/* Use Case & Drug Class Grid */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#6E8B8B]">Drug Class</h3>
-                    <p className="text-sm text-[#24322F] font-medium leading-relaxed">{selectedMedicine.drug_class}</p>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Drug Class</h3>
+                    <p className="text-sm text-slate-700 font-medium leading-relaxed">{selectedMedicine.drug_class}</p>
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#6E8B8B]">Common Use Case</h3>
-                    <p className="text-sm text-[#24322F] font-medium leading-relaxed">{selectedMedicine.common_use_case}</p>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Common Use Case</h3>
+                    <p className="text-sm text-slate-700 font-medium leading-relaxed">{selectedMedicine.common_use_case}</p>
                   </div>
                 </div>
 
                 {/* Alternatives Section */}
-                <div className="border-t border-[#D8CDBB]/40 pt-5 space-y-4">
-                  <h3 className="text-sm font-bold text-[#1F5B5B] flex items-center gap-2">
-                    <Sparkles className="h-4.5 w-4.5 text-[#E0A458]" /> Available Generic Alternatives
+                <div className="border-t border-slate-100 pt-5 space-y-4">
+                  <h3 className="text-sm font-bold text-[#0F2744] flex items-center gap-2">
+                    <Sparkles className="h-4.5 w-4.5 text-sky-600" /> Available Generic Alternatives
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-[#D8CDBB]/40 p-4 bg-[#FBF6EE]/20">
-                      <p className="text-xs text-[#6E8B8B] font-bold uppercase tracking-wider">Alternative Brands / Generics</p>
-                      <p className="text-sm text-[#24322F] font-medium mt-1 leading-relaxed">
+                    <div className="rounded-xl border border-slate-200/60 p-4 bg-slate-50">
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Alternative Brands / Generics</p>
+                      <p className="text-sm text-slate-700 font-medium mt-1 leading-relaxed">
                         {selectedMedicine.generic_alternative_names}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-[#D8CDBB]/40 p-4 bg-[#FBF6EE]/20">
-                      <p className="text-xs text-[#6E8B8B] font-bold uppercase tracking-wider">Generic Manufacturers</p>
-                      <p className="text-sm text-[#24322F] font-medium mt-1 leading-relaxed">
+                    <div className="rounded-xl border border-slate-200/60 p-4 bg-slate-50">
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Generic Manufacturers</p>
+                      <p className="text-sm text-slate-700 font-medium mt-1 leading-relaxed">
                         {selectedMedicine.generic_manufacturers_examples}
                       </p>
                     </div>
@@ -251,21 +263,21 @@ export default function MedicinesPage() {
                 </div>
 
                 {/* Verification/Disclaimer Note */}
-                <div className="rounded-xl bg-[#F3DCB0] text-[#6E4A0B] p-4 border border-[#E0A458]/20 flex gap-3">
-                  <HelpCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                <div className="rounded-xl bg-sky-50 text-sky-800 p-4 border border-sky-100 flex gap-3">
+                  <HelpCircle className="h-5 w-5 text-sky-600 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider">Verification Note & Disclaimer</h4>
-                    <p className="text-xs mt-1 leading-relaxed">
+                    <p className="text-xs mt-1 leading-relaxed text-sky-700">
                       {selectedMedicine.verification_note} Always consult with a qualified doctor or pharmacist before switching medications.
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-[#D8CDBB] bg-white/40 shadow-sm">
-                <HeartPulse className="h-12 w-12 text-[#6E8B8B] mb-4" />
-                <h3 className="text-lg font-semibold text-[#1F5B5B]">Search for Medication</h3>
-                <p className="text-sm text-[#6E8B8B] max-w-sm mt-2">
+              <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-slate-200 bg-white/40 shadow-sm">
+                <Pill className="h-12 w-12 text-slate-400 mb-4" />
+                <h3 className="text-lg font-semibold text-[#0F2744]">Search for Medication</h3>
+                <p className="text-sm text-slate-500 max-w-sm mt-2">
                   Use the lookup bar above to explore brand-name drugs, compare pricing, and find generic alternative matches.
                 </p>
               </div>

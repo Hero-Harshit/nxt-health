@@ -2,6 +2,12 @@
 
 import React, { useState, FormEvent } from "react";
 import { ShieldCheck, Sparkles, HeartPulse, ChevronDown, ChevronUp, AlertCircle, RefreshCw } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase Client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type ExplanationResult = {
   title: string;
@@ -43,11 +49,11 @@ export default function AdvisorPage() {
 
   const getConfidenceBadgeClass = (level: "high" | "medium" | "low" | null) => {
     if (level === "high") {
-      return "bg-[#DCEEE6] text-[#1F5B5B]";
+      return "bg-sky-100 text-sky-700 border border-sky-200/50";
     } else if (level === "medium" || level === "low") {
-      return "bg-[#F3DCB0] text-[#6E4A0B]";
+      return "bg-amber-50 text-amber-700 border border-amber-200/50";
     } else {
-      return "bg-[#E5E9E7] text-[#3A4B47]";
+      return "bg-slate-100 text-slate-700 border border-slate-200/50";
     }
   };
 
@@ -62,10 +68,12 @@ export default function AdvisorPage() {
     const pedVal = maxPedWaitingMonths === "Any" ? 0 : Number(maxPedWaitingMonths);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const response = await fetch(`${backendBaseUrl}/api/insurance-advisor`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token || ""}`,
         },
         body: JSON.stringify({
           age: Number(age),
@@ -104,19 +112,19 @@ export default function AdvisorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF6EE] text-[#24322F] p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <header className="mb-8 border-b border-[#D8CDBB] pb-6 flex items-center justify-between">
+        <header className="mb-8 border-b border-slate-200 pb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-[#1F5B5B] flex items-center justify-center shadow-md">
+            <div className="h-10 w-10 rounded-xl bg-[#0F2744] flex items-center justify-center shadow-md">
               <HeartPulse className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#1F5B5B] flex items-center gap-2">
-                NxtHealth <span className="text-xs bg-[#DCEEE6] text-[#1F5B5B] px-2 py-0.5 rounded-full border border-[#1F5B5B]/20">Advisor</span>
+              <h1 className="text-2xl font-bold tracking-tight text-[#0F2744] flex items-center gap-2">
+                NxtHealth <span className="text-xs bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200/50">Advisor</span>
               </h1>
-              <p className="text-xs text-[#6E8B8B]">Explainable healthcare decision platform — non-diagnostic guidance</p>
+              <p className="text-xs text-slate-500">Explainable healthcare decision platform — non-diagnostic guidance</p>
             </div>
           </div>
         </header>
@@ -125,14 +133,14 @@ export default function AdvisorPage() {
         <div className="grid gap-8 lg:grid-cols-12">
           {/* Form Sidebar */}
           <aside className="lg:col-span-4">
-            <div className="rounded-2xl border border-[#D8CDBB] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-[#1F5B5B] mb-6 flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-[#0F2744] mb-6 flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-sky-600" />
                 Find Coverage
               </h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-[#24322F] mb-2">Age</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Age</label>
                   <input
                     type="number"
                     min={18}
@@ -140,12 +148,12 @@ export default function AdvisorPage() {
                     value={age}
                     onChange={(e) => setAge(Number(e.target.value))}
                     required
-                    className="w-full rounded-xl border border-[#D8CDBB] bg-[#FBF6EE]/40 px-4 py-2.5 text-[#24322F] focus:border-[#1F5B5B] focus:outline-none focus:ring-1 focus:ring-[#1F5B5B]"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-slate-900 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#24322F] mb-2">Policy Type</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Policy Type</label>
                   <div className="grid grid-cols-2 gap-2">
                     {(["Individual", "Family Floater"] as const).map((type) => (
                       <button
@@ -154,8 +162,8 @@ export default function AdvisorPage() {
                         onClick={() => setPolicyType(type)}
                         className={`rounded-xl py-2 text-xs font-semibold border transition-all duration-200 ${
                           policyType === type
-                            ? "bg-[#1F5B5B] border-[#1F5B5B] text-white shadow-sm"
-                            : "bg-white border-[#D8CDBB] text-[#6E8B8B] hover:border-[#1F5B5B]/40 hover:text-[#24322F]"
+                            ? "bg-sky-600 border-sky-600 text-white shadow-sm"
+                            : "bg-white border-slate-200 text-slate-500 hover:border-sky-600/40 hover:text-slate-900"
                         }`}
                       >
                         {type}
@@ -165,7 +173,7 @@ export default function AdvisorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#24322F] mb-2">Dependents / Kids Count</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Dependents / Kids Count</label>
                   <input
                     type="number"
                     min={0}
@@ -173,16 +181,16 @@ export default function AdvisorPage() {
                     value={kidsCount}
                     onChange={(e) => setKidsCount(Number(e.target.value))}
                     required
-                    className="w-full rounded-xl border border-[#D8CDBB] bg-[#FBF6EE]/40 px-4 py-2.5 text-[#24322F] focus:border-[#1F5B5B] focus:outline-none focus:ring-1 focus:ring-[#1F5B5B]"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-slate-900 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#24322F] mb-2">City Tier</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">City Tier</label>
                   <select
                     value={cityTier}
                     onChange={(e) => setCityTier(e.target.value)}
-                    className="w-full rounded-xl border border-[#D8CDBB] bg-white px-4 py-2.5 text-[#24322F] focus:border-[#1F5B5B] focus:outline-none focus:ring-1 focus:ring-[#1F5B5B]"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600"
                   >
                     <option value="Tier 1 - Metro">Tier 1 - Metro</option>
                     <option value="Tier 2">Tier 2</option>
@@ -191,7 +199,7 @@ export default function AdvisorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#24322F] mb-2">Annual Premium Budget</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Annual Premium Budget</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(["Economy", "Moderate", "Premium"] as const).map((band) => (
                       <button
@@ -200,8 +208,8 @@ export default function AdvisorPage() {
                         onClick={() => setBudgetBand(band)}
                         className={`rounded-xl py-2 text-xs font-semibold border transition-all duration-200 ${
                           budgetBand === band
-                            ? "bg-[#1F5B5B] border-[#1F5B5B] text-white shadow-sm"
-                            : "bg-white border-[#D8CDBB] text-[#6E8B8B] hover:border-[#1F5B5B]/40 hover:text-[#24322F]"
+                            ? "bg-sky-600 border-sky-600 text-white shadow-sm"
+                            : "bg-white border-slate-200 text-slate-500 hover:border-sky-600/40 hover:text-slate-900"
                         }`}
                       >
                         {band}
@@ -211,11 +219,11 @@ export default function AdvisorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#24322F] mb-2">Max PED Waiting Period</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Max PED Waiting Period</label>
                   <select
                     value={maxPedWaitingMonths}
                     onChange={(e) => setMaxPedWaitingMonths(e.target.value)}
-                    className="w-full rounded-xl border border-[#D8CDBB] bg-white px-4 py-2.5 text-[#24322F] focus:border-[#1F5B5B] focus:outline-none focus:ring-1 focus:ring-[#1F5B5B]"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600"
                   >
                     <option value="Any">Any</option>
                     <option value="12">12 Months</option>
@@ -231,9 +239,9 @@ export default function AdvisorPage() {
                       type="checkbox"
                       checked={requiresMaternity}
                       onChange={(e) => setRequiresMaternity(e.target.checked)}
-                      className="h-4.5 w-4.5 rounded border-[#D8CDBB] accent-[#1F5B5B]"
+                      className="h-4.5 w-4.5 rounded border-slate-300 text-sky-600 accent-sky-600 focus:ring-sky-500"
                     />
-                    <span className="text-xs font-medium text-[#24322F]">Needs Maternity Benefits</span>
+                    <span className="text-xs font-medium text-slate-700">Needs Maternity Benefits</span>
                   </label>
 
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -241,9 +249,9 @@ export default function AdvisorPage() {
                       type="checkbox"
                       checked={requiresNoRoomRentCap}
                       onChange={(e) => setRequiresNoRoomRentCap(e.target.checked)}
-                      className="h-4.5 w-4.5 rounded border-[#D8CDBB] accent-[#1F5B5B]"
+                      className="h-4.5 w-4.5 rounded border-slate-300 text-sky-600 accent-sky-600 focus:ring-sky-500"
                     />
-                    <span className="text-xs font-medium text-[#24322F]">Requires No Room Rent Capping</span>
+                    <span className="text-xs font-medium text-slate-700">Requires No Room Rent Capping</span>
                   </label>
 
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -251,25 +259,25 @@ export default function AdvisorPage() {
                       type="checkbox"
                       checked={requiresOpd}
                       onChange={(e) => setRequiresOpd(e.target.checked)}
-                      className="h-4.5 w-4.5 rounded border-[#D8CDBB] accent-[#1F5B5B]"
+                      className="h-4.5 w-4.5 rounded border-slate-300 text-sky-600 accent-sky-600 focus:ring-sky-500"
                     />
-                    <span className="text-xs font-medium text-[#24322F]">Requires OPD / Teleconsultation Cover</span>
+                    <span className="text-xs font-medium text-slate-700">Requires OPD / Teleconsultation Cover</span>
                   </label>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full rounded-xl bg-[#1F5B5B] hover:bg-[#174646] py-3 text-sm font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full rounded-xl bg-sky-600 hover:bg-sky-700 py-3 text-sm font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isLoading ? (
                     <>
-                      <RefreshCw className="h-4 w-4 animate-spin text-[#FBF6EE]" />
+                      <RefreshCw className="h-4 w-4 animate-spin text-white" />
                       Analyzing policies...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 text-[#E0A458]" />
+                      <Sparkles className="h-4 w-4 text-white" />
                       Get AI Recommendations
                     </>
                   )}
@@ -282,17 +290,17 @@ export default function AdvisorPage() {
           <main className="lg:col-span-8">
             {isLoading && (
               <div className="space-y-6">
-                <div className="flex items-center gap-3 text-[#1F5B5B] animate-pulse mb-2">
+                <div className="flex items-center gap-3 text-sky-600 animate-pulse mb-2">
                   <RefreshCw className="h-5 w-5 animate-spin" />
                   <span className="text-sm font-semibold tracking-wide">AI analyzing policies...</span>
                 </div>
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="animate-pulse rounded-2xl border border-[#D8CDBB] bg-white p-6 space-y-4 shadow-sm">
-                    <div className="h-6 bg-[#D8CDBB]/40 rounded w-1/3"></div>
-                    <div className="h-4 bg-[#D8CDBB]/40 rounded w-1/4"></div>
+                  <div key={i} className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6 space-y-4 shadow-sm">
+                    <div className="h-6 bg-slate-200 rounded w-1/3"></div>
+                    <div className="h-4 bg-slate-200 rounded w-1/4"></div>
                     <div className="space-y-2">
-                      <div className="h-4 bg-[#D8CDBB]/40 rounded w-full"></div>
-                      <div className="h-4 bg-[#D8CDBB]/40 rounded w-5/6"></div>
+                      <div className="h-4 bg-slate-200 rounded w-full"></div>
+                      <div className="h-4 bg-slate-200 rounded w-5/6"></div>
                     </div>
                   </div>
                 ))}
@@ -300,31 +308,31 @@ export default function AdvisorPage() {
             )}
 
             {!isLoading && status === "idle" && (
-              <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-[#D8CDBB] bg-white/40 shadow-sm">
-                <HeartPulse className="h-12 w-12 text-[#6E8B8B] mb-4" />
-                <h3 className="text-lg font-semibold text-[#1F5B5B]">Ready for Analysis</h3>
-                <p className="text-sm text-[#6E8B8B] max-w-sm mt-2">
+              <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-slate-200 bg-white/40 shadow-sm">
+                <HeartPulse className="h-12 w-12 text-slate-400 mb-4" />
+                <h3 className="text-lg font-semibold text-[#0F2744]">Ready for Analysis</h3>
+                <p className="text-sm text-slate-500 max-w-sm mt-2">
                   Enter your age, preferences, and coverage parameters to compare matched policies.
                 </p>
               </div>
             )}
 
             {!isLoading && status === "no_match" && (
-              <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-[#D8CDBB] bg-white/40 shadow-sm">
-                <AlertCircle className="h-12 w-12 text-[#E0A458] mb-4" />
-                <h3 className="text-lg font-semibold text-[#24322F]">No Matching Policies</h3>
-                <p className="text-sm text-[#6E8B8B] max-w-md mt-2 px-6">
+              <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-slate-200 bg-white/40 shadow-sm">
+                <AlertCircle className="h-12 w-12 text-sky-600 mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900">No Matching Policies</h3>
+                <p className="text-sm text-slate-500 max-w-md mt-2 px-6">
                   We could not find any policies matching your criteria even after dropping constraints. Try adjusting your parameters.
                 </p>
               </div>
             )}
 
             {!isLoading && status === "error" && (
-              <div className="rounded-2xl bg-[#3A4B47] text-[#FBF6EE] p-6 shadow-sm flex items-start gap-4">
-                <AlertCircle className="h-6 w-6 text-[#E0A458] shrink-0 mt-0.5" />
+              <div className="rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 p-6 shadow-sm flex items-start gap-4">
+                <AlertCircle className="h-6 w-6 text-rose-700 shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Analysis Failed</h3>
-                  <p className="text-sm text-slate-300 mt-2 leading-relaxed">{errorMessage}</p>
+                  <h3 className="text-lg font-semibold text-rose-700">Analysis Failed</h3>
+                  <p className="text-sm text-rose-600 mt-2 leading-relaxed">{errorMessage}</p>
                 </div>
               </div>
             )}
@@ -338,27 +346,27 @@ export default function AdvisorPage() {
                   return (
                     <div
                       key={policyId}
-                      className="rounded-2xl border border-[#D8CDBB] bg-white p-6 shadow-sm hover:shadow-md transition-all duration-300"
+                      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-300"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                         <div>
-                          <h3 className="text-lg font-bold text-[#1F5B5B] tracking-tight">{policy.title}</h3>
-                          <p className="text-xs text-[#6E8B8B] mt-1">ID: {policy.reference_id}</p>
+                          <h3 className="text-lg font-bold text-[#0F2744] tracking-tight">{policy.title}</h3>
+                          <p className="text-xs text-slate-500 mt-1">ID: {policy.reference_id}</p>
                         </div>
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${getConfidenceBadgeClass(policy.confidence_level)}`}>
                           {policy.confidence_level || "neutral"} Match
                         </span>
                       </div>
 
-                      <div className="text-sm text-[#24322F] leading-relaxed mb-6">
+                      <div className="text-sm text-slate-700 leading-relaxed mb-6">
                         {policy.explanation}
                       </div>
 
                       {/* Expandable Sections */}
-                      <div className="border-t border-[#D8CDBB]/60 pt-4">
+                      <div className="border-t border-slate-100 pt-4">
                         <button
                           onClick={() => toggleExpand(policyId)}
-                          className="flex items-center gap-1 text-xs font-medium text-[#1F5B5B] hover:text-[#174646] transition-colors cursor-pointer"
+                          className="flex items-center gap-1 text-xs font-medium text-sky-600 hover:text-sky-700 transition-colors cursor-pointer"
                         >
                           {isExpanded ? (
                             <>
@@ -374,30 +382,30 @@ export default function AdvisorPage() {
                         {isExpanded && (
                           <div className="mt-4 space-y-4">
                             {policy.why_not && (
-                              <div className="rounded-xl bg-[#FBF6EE]/40 p-4 border border-[#D8CDBB]/40">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#6E4A0B] mb-2">Why not others?</h4>
-                                <p className="text-xs text-[#24322F] leading-relaxed">{policy.why_not}</p>
+                              <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-200/60">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">Why not others?</h4>
+                                <p className="text-xs text-slate-600 leading-relaxed">{policy.why_not}</p>
                               </div>
                             )}
 
                             {policy.trade_offs && (
-                              <div className="rounded-xl bg-[#FBF6EE]/40 p-4 border border-[#D8CDBB]/40">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#6E4A0B] mb-2">Trade-offs</h4>
-                                <p className="text-xs text-[#24322F] leading-relaxed">{policy.trade_offs}</p>
+                              <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-200/60">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">Trade-offs</h4>
+                                <p className="text-xs text-slate-600 leading-relaxed">{policy.trade_offs}</p>
                               </div>
                             )}
 
                             {policy.alternatives && (
-                              <div className="rounded-xl bg-[#FBF6EE]/40 p-4 border border-[#D8CDBB]/40">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#1F5B5B] mb-2">Alternatives</h4>
-                                <p className="text-xs text-[#24322F] leading-relaxed">{policy.alternatives}</p>
+                              <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-200/60">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F2744] mb-2">Alternatives</h4>
+                                <p className="text-xs text-slate-600 leading-relaxed">{policy.alternatives}</p>
                               </div>
                             )}
 
                             {policy.confidence_note && (
-                              <div className="rounded-xl bg-[#FBF6EE]/40 p-4 border border-[#D8CDBB]/40">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#3A4B47] mb-2">Confidence note</h4>
-                                <p className="text-xs text-[#24322F] leading-relaxed">{policy.confidence_note}</p>
+                              <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-200/60">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Confidence note</h4>
+                                <p className="text-xs text-slate-600 leading-relaxed">{policy.confidence_note}</p>
                               </div>
                             )}
                           </div>

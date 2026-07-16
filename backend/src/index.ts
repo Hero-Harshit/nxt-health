@@ -12,11 +12,11 @@ import { callGeminiJSON } from "./lib/geminiClient.js";
 const app = express();
 
 const supabaseUrl = process.env.SUPABASE_URL || "https://placeholder-project.supabase.co";
-const supabaseKey = process.env.SUPABASE_ANON_KEY || "placeholder-anon-key";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || "placeholder-anon-key";
 
 console.log("📂 Current Working Directory:", process.cwd());
 console.log("🔑 Available Env Keys:", Object.keys(process.env).filter(key => 
-  ['PORT', 'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'GEMINI_API_KEY'].includes(key)
+  ['PORT', 'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'GEMINI_API_KEY'].includes(key)
 ));
 
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -63,18 +63,24 @@ const calculateCompletion = (profile: any) => {
   return Math.round((filledCount / fields.length) * 100);
 };
 
-const recordUserHistory = async (userId: string, moduleName: string, queryText: string, summaryResult: string) => {
+async function recordUserHistory(userId: string, moduleName: string, queryText: string, summaryResult: string) {
   try {
-    await supabase.from("user_history").insert({
+    console.log(`⏳ [HISTORY DB INSERT]: Attempting insert for User: ${userId} (${moduleName})`);
+    const { data, error } = await supabase.from("user_history").insert({
       user_id: userId,
       module: moduleName,
-      query_text: queryText,
-      summary_result: summaryResult
+      query_text: queryText || "N/A",
+      summary_result: summaryResult || "Completed",
     });
+    if (error) {
+      console.error("❌ [HISTORY DB ERROR]:", error.message, error.details);
+    } else {
+      console.log(`✅ [HISTORY DB SUCCESS]: Module: "${moduleName}" for User: ${userId}`);
+    }
   } catch (err) {
-    // Silent fail
+    console.error("❌ [HISTORY EXCEPTION]:", err);
   }
-};
+}
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -295,9 +301,11 @@ Evaluate these candidate policies based on the user's specific inputs and prefer
     }
 
     const user = await getAuthUser(req);
-    if (user) {
+    if (!user) {
+      console.warn("⚠️ [AUTH WARNING]: API request received without Bearer token. History will NOT be saved.");
+    } else {
       const policyName = topMatches[0]?.plan_name || "Policy Match";
-      await recordUserHistory(user.id, "Policy Advisor", req.body.userQuery || policyName, "Policy guidance generated");
+      await recordUserHistory(user.id, "Policy Advisor", req.body.userQuery || policyName, "Policy analysis generated");
     }
 
     res.status(200).json(geminiResult);
@@ -307,6 +315,13 @@ Evaluate these candidate policies based on the user's specific inputs and prefer
 });
 
 app.post("/api/term-explainer", async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) {
+    console.warn("⚠️ [AUTH WARNING]: API request received without Bearer token. History will NOT be saved.");
+    res.status(401).json({ status: "error", message: "Unauthorized session for term explainer." });
+    return;
+  }
+
   const { context, input } = req.body ?? {};
 
   if (
@@ -352,10 +367,7 @@ Return exactly one result item. Set why_not, alternatives, and trade_offs to nul
     return;
   }
 
-  const user = await getAuthUser(req);
-  if (user) {
-    await recordUserHistory(user.id, "Prescription & Term Explainer", input, "Term explanation generated");
-  }
+  await recordUserHistory(user.id, "Prescription & Term Explainer", input, "Term explained");
 
   res.status(200).json(result);
 });
@@ -458,6 +470,7 @@ app.post("/api/preventive-health", async (req, res) => {
   try {
     const user = await getAuthUser(req);
     if (!user) {
+      console.warn("⚠️ [AUTH WARNING]: API request received without Bearer token. History will NOT be saved.");
       res.status(401).json({ status: "error", message: "Unauthorized user session." });
       return;
     }
@@ -553,7 +566,7 @@ Respond ONLY with valid JSON matching the following schema:
       // fallback
     }
 
-    await recordUserHistory(user.id, "Preventive Health Planner", userQuery || "General health query", "Preventive plan generated");
+    await recordUserHistory(user.id, "Preventive Health Planner", userQuery || "General health check", "Health plan generated");
 
     res.status(200).json({
       status: "ok",
@@ -579,9 +592,11 @@ app.get("/api/medicines", async (req, res) => {
     if (error) throw error;
 
     const user = await getAuthUser(req);
-    if (user) {
+    if (!user) {
+      console.warn("⚠️ [AUTH WARNING]: API request received without Bearer token. History will NOT be saved.");
+    } else {
       const medicineName = data && data[0] ? data[0].medicine_name : "";
-      await recordUserHistory(user.id, "Generic Medicine Alternative", medicineName || "Full list", "Generic alternatives generated");
+      await recordUserHistory(user.id, "Generic Medicine Alternative", medicineName || "Full list", "Alternatives found");
     }
 
     res.status(200).json({ status: "ok", medicines: data || [] });
@@ -606,9 +621,11 @@ app.get("/api/medicines/search", async (req, res) => {
     if (error) throw error;
 
     const user = await getAuthUser(req);
-    if (user) {
+    if (!user) {
+      console.warn("⚠️ [AUTH WARNING]: API request received without Bearer token. History will NOT be saved.");
+    } else {
       const medicineName = data && data[0] ? data[0].medicine_name : "";
-      await recordUserHistory(user.id, "Generic Medicine Alternative", medicineName || queryStr, "Generic alternatives generated");
+      await recordUserHistory(user.id, "Generic Medicine Alternative", medicineName || queryStr, "Alternatives found");
     }
 
     res.status(200).json({ status: "ok", results: data || [] });
@@ -621,10 +638,12 @@ app.get("/api/history", async (req, res) => {
   try {
     const user = await getAuthUser(req);
     if (!user) {
+      console.warn("⚠️ [AUTH WARNING]: API request received without Bearer token. History will NOT be saved.");
       res.status(401).json({ status: "error", message: "Unauthorized user session." });
       return;
     }
 
+    console.log(`🔍 [/api/history]: Fetching history for User ID: ${user.id}`);
     const { data: history, error } = await supabase
       .from("user_history")
       .select("*")
@@ -632,9 +651,15 @@ app.get("/api/history", async (req, res) => {
       .order("created_at", { ascending: false })
       .limit(20);
 
-    if (error) throw error;
+    if (error) {
+      console.error("❌ [/api/history DB ERROR]:", error);
+      throw error;
+    }
+
+    console.log("📊 [HISTORY FETCHED]: Found", history?.length || 0, "records for user:", user.id);
     res.status(200).json({ status: "ok", history: history || [] });
   } catch (error: any) {
+    console.error("❌ [/api/history EXCEPTION]:", error);
     res.status(500).json({ status: "error", message: error?.message || "Internal server error" });
   }
 });
