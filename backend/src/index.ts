@@ -21,6 +21,61 @@ console.log("🔑 Available Env Keys:", Object.keys(process.env).filter(key =>
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const getAuthUser = async (req: any) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+  const token = authHeader.split(" ")[1];
+  if (!token) return null;
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return null;
+  return user;
+};
+
+const calculateCompletion = (profile: any) => {
+  const fields = [
+    "full_name",
+    "age",
+    "gender",
+    "height_cm",
+    "weight_kg",
+    "pre_existing_conditions",
+    "family_history",
+    "smoking_status",
+    "activity_level",
+    "dietary_preference"
+  ];
+  let filledCount = 0;
+  fields.forEach((field) => {
+    const val = profile[field];
+    if (val === undefined || val === null) return;
+    if (Array.isArray(val)) {
+      if (val.length > 0) filledCount++;
+    } else if (typeof val === "number") {
+      if (val > 0) filledCount++;
+    } else if (typeof val === "string") {
+      if (val.trim() !== "") filledCount++;
+    } else {
+      filledCount++;
+    }
+  });
+  return Math.round((filledCount / fields.length) * 100);
+};
+
+const recordUserHistory = async (userId: string, moduleName: string, queryText: string, summaryResult: string) => {
+  try {
+    await supabase.from("user_history").insert({
+      user_id: userId,
+      module: moduleName,
+      query_text: queryText,
+      summary_result: summaryResult
+    });
+  } catch (err) {
+    // Silent fail
+  }
+};
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -239,6 +294,12 @@ Evaluate these candidate policies based on the user's specific inputs and prefer
       return;
     }
 
+    const user = await getAuthUser(req);
+    if (user) {
+      const policyName = topMatches[0]?.plan_name || "Policy Match";
+      await recordUserHistory(user.id, "Policy Advisor", req.body.userQuery || policyName, "Policy guidance generated");
+    }
+
     res.status(200).json(geminiResult);
   } catch (error: any) {
     res.status(500).json({ status: "error", message: error?.message || "Internal server error" });
@@ -291,50 +352,15 @@ Return exactly one result item. Set why_not, alternatives, and trade_offs to nul
     return;
   }
 
+  const user = await getAuthUser(req);
+  if (user) {
+    await recordUserHistory(user.id, "Prescription & Term Explainer", input, "Term explanation generated");
+  }
+
   res.status(200).json(result);
 });
 
-const getAuthUser = async (req: any) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-  const token = authHeader.split(" ")[1];
-  if (!token) return null;
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return null;
-  return user;
-};
 
-const calculateCompletion = (profile: any) => {
-  const fields = [
-    "full_name",
-    "age",
-    "gender",
-    "height_cm",
-    "weight_kg",
-    "pre_existing_conditions",
-    "family_history",
-    "smoking_status",
-    "activity_level",
-    "dietary_preference"
-  ];
-  let filledCount = 0;
-  fields.forEach((field) => {
-    const val = profile[field];
-    if (val === undefined || val === null) return;
-    if (Array.isArray(val)) {
-      if (val.length > 0) filledCount++;
-    } else if (typeof val === "number") {
-      if (val > 0) filledCount++;
-    } else if (typeof val === "string") {
-      if (val.trim() !== "") filledCount++;
-    } else {
-      filledCount++;
-    }
-  });
-  return Math.round((filledCount / fields.length) * 100);
-};
 
 app.get("/api/profile", async (req, res) => {
   try {
@@ -527,6 +553,8 @@ Respond ONLY with valid JSON matching the following schema:
       // fallback
     }
 
+    await recordUserHistory(user.id, "Preventive Health Planner", userQuery || "General health query", "Preventive plan generated");
+
     res.status(200).json({
       status: "ok",
       plan,
@@ -549,6 +577,13 @@ app.get("/api/medicines", async (req, res) => {
       .order("medicine_name", { ascending: true });
 
     if (error) throw error;
+
+    const user = await getAuthUser(req);
+    if (user) {
+      const medicineName = data && data[0] ? data[0].medicine_name : "";
+      await recordUserHistory(user.id, "Generic Medicine Alternative", medicineName || "Full list", "Generic alternatives generated");
+    }
+
     res.status(200).json({ status: "ok", medicines: data || [] });
   } catch (error: any) {
     res.status(500).json({ status: "error", message: error?.message || "Internal server error" });
@@ -569,7 +604,36 @@ app.get("/api/medicines/search", async (req, res) => {
       .or(`medicine_name.ilike.%${queryStr.trim()}%,active_ingredient.ilike.%${queryStr.trim()}%`);
 
     if (error) throw error;
+
+    const user = await getAuthUser(req);
+    if (user) {
+      const medicineName = data && data[0] ? data[0].medicine_name : "";
+      await recordUserHistory(user.id, "Generic Medicine Alternative", medicineName || queryStr, "Generic alternatives generated");
+    }
+
     res.status(200).json({ status: "ok", results: data || [] });
+  } catch (error: any) {
+    res.status(500).json({ status: "error", message: error?.message || "Internal server error" });
+  }
+});
+
+app.get("/api/history", async (req, res) => {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) {
+      res.status(401).json({ status: "error", message: "Unauthorized user session." });
+      return;
+    }
+
+    const { data: history, error } = await supabase
+      .from("user_history")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+    res.status(200).json({ status: "ok", history: history || [] });
   } catch (error: any) {
     res.status(500).json({ status: "error", message: error?.message || "Internal server error" });
   }
