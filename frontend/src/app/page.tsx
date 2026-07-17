@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle } from "lucide-react";
+import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -248,27 +248,27 @@ export default function HomePage() {
               </div>
             </Link>
 
-            {/* Module 5: Medical Resume */}
+            {/* Module 5: Personal Health Passport */}
             <Link
-              href="/medical-resume"
+              href="/health-passport"
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div className="bg-sky-100/70 p-3 rounded-xl text-sky-700 group-hover:scale-105 transition-transform">
-                    <FileText className="h-5.5 w-5.5" />
+                    <ClipboardList className="h-5.5 w-5.5" />
                   </div>
                   <span className="bg-sky-50 text-sky-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200">
                     PORTABLE
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744]">Medical Resume</h3>
+                <h3 className="font-bold text-xl text-[#0F2744]">Personal Health Passport</h3>
                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  health summary to share with doctors or first responders
+                  A portable health summary to share with doctors or first responders during visits or emergencies.
                 </p>
               </div>
               <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4">
-                Create Resume <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                Manage Passport <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
