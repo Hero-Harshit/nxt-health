@@ -123,11 +123,11 @@ export default function Navbar() {
                     💧 Hydration Tracker
                   </Link>
                   <Link
-                    href="/utilities/box-breathing"
+                    href="/utilities/breathing-exercise"
                     className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
                     onClick={() => setIsUtilitiesOpen(false)}
                   >
-                    🧘 Box Breathing Exercise
+                    🧘 Breathing Exercise
                   </Link>
                 </div>
               )}
@@ -222,11 +222,11 @@ export default function Navbar() {
             💧 Hydration Tracker
           </Link>
           <Link
-            href="/utilities/box-breathing"
+            href="/utilities/breathing-exercise"
             className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            🧘 Box Breathing Exercise
+            🧘 Breathing Exercise
           </Link>
 
           <div className="border-t border-slate-200 my-2" />
