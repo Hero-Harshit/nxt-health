@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { HeartPulse, ChevronDown, User, LogOut, Settings, Menu, X } from "lucide-react";
+import { ChevronDown, User, LogOut, Settings, Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const router = useRouter();
@@ -59,13 +60,8 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           {/* Left Side: Brand Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="h-9 w-9 rounded-lg bg-[#0F2744] flex items-center justify-center shadow-md transition-transform group-hover:scale-105">
-                <HeartPulse className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-[#0F2744] font-serif">
-                NxtHealth
-              </span>
+            <Link className="flex items-center transition-opacity hover:opacity-90" href="/">
+              <Image alt="NxtHealth Logo" className="h-9 w-auto object-contain" height={40} priority src="/logo.png" width={160}/>
             </Link>
           </div>
 
