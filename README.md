@@ -1,4 +1,4 @@
-# NxtHealth:- Guiding your next healthcare decision.
+# NxtHealth :- Guiding your next healthcare decision.
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38BDF8?style=for-the-badge&logo=tailwind-css&logoColor=white)
