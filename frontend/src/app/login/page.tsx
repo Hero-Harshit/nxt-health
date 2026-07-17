@@ -2,13 +2,8 @@
 
 import React, { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 import { Lock, Mail, User, ShieldCheck, HeartPulse, RefreshCw, AlertCircle } from "lucide-react";
-
-// Initialize Supabase Client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function LoginPage() {
   const router = useRouter();

@@ -2,12 +2,7 @@
 
 import React, { useState, FormEvent } from "react";
 import { ShieldCheck, Sparkles, HeartPulse, ChevronDown, ChevronUp, AlertCircle, RefreshCw } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
-
-// Initialize Supabase Client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from "@/lib/supabaseClient";
 
 type ExplanationResult = {
   title: string;

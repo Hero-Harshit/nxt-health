@@ -2,13 +2,8 @@
 
 import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 import { HeartPulse, Sparkles, RefreshCw, AlertCircle, HelpCircle } from "lucide-react";
-
-// Initialize Supabase Client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type Context = "term" | "prescription";
 
