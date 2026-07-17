@@ -31,7 +31,9 @@ export function TextToSpeech({ text }: TextToSpeechProps) {
 
   useEffect(() => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      setSupported(true);
+      setTimeout(() => {
+        setSupported(true);
+      }, 0);
     }
 
     return () => {
