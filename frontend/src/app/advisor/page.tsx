@@ -4,6 +4,7 @@ import React, { useState, FormEvent } from "react";
 import { ShieldCheck, Sparkles, HeartPulse, ChevronDown, ChevronUp, AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { parseJargon } from "@/components/policy-advisor/JargonTooltip";
+import { TextToSpeech } from "@/components/common/TextToSpeech";
 
 type ExplanationResult = {
   title: string;
@@ -344,14 +345,17 @@ export default function AdvisorPage() {
                       key={policyId}
                       className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-300"
                     >
-                      <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                       <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                         <div>
                           <h3 className="text-lg font-bold text-[#0F2744] tracking-tight">{policy.title}</h3>
                           <p className="text-xs text-slate-500 mt-1">ID: {policy.reference_id}</p>
                         </div>
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${getConfidenceBadgeClass(policy.confidence_level)}`}>
-                          {policy.confidence_level || "neutral"} Match
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <TextToSpeech text={policy.explanation} />
+                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${getConfidenceBadgeClass(policy.confidence_level)}`}>
+                            {policy.confidence_level || "neutral"} Match
+                          </span>
+                        </div>
                       </div>
 
                       <div className="text-sm text-slate-700 leading-relaxed mb-6">

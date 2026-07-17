@@ -4,6 +4,7 @@ import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartPulse, Sparkles, RefreshCw, AlertCircle, HelpCircle } from "lucide-react";
+import { TextToSpeech } from "@/components/common/TextToSpeech";
 
 type Context = "term" | "prescription";
 
@@ -181,9 +182,12 @@ export default function ExplainerPage() {
         {/* Success / Result Display */}
         {result && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6 animate-fadeIn">
-            <div className="flex items-center gap-2 border-b border-slate-100 pb-4 mb-2">
-              <Sparkles className="h-5.5 w-5.5 text-sky-600" />
-              <h2 className="text-lg font-bold text-[#0F2744]">{result.title}</h2>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5.5 w-5.5 text-sky-600" />
+                <h2 className="text-lg font-bold text-[#0F2744]">{result.title}</h2>
+              </div>
+              <TextToSpeech text={result.explanation} />
             </div>
 
             {/* Core Explanation */}
