@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, FormEvent } from "react";
+import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Lock, Mail, User, ShieldCheck, HeartPulse, RefreshCw, AlertCircle } from "lucide-react";
@@ -16,6 +16,22 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [successMsg, setSuccessMsg] = useState<string>("");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.push("/");
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        router.push("/");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -39,7 +55,7 @@ export default function LoginPage() {
         
         setSuccessMsg("Account created successfully! Redirecting...");
         setTimeout(() => {
-          router.push("/profile");
+          router.push("/");
         }, 1500);
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -51,7 +67,7 @@ export default function LoginPage() {
 
         setSuccessMsg("Signed in successfully! Redirecting...");
         setTimeout(() => {
-          router.push("/preventive-health");
+          router.push("/");
         }, 1500);
       }
     } catch (err: any) {
