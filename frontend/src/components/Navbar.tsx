@@ -4,17 +4,17 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { ChevronDown, User, LogOut, Settings, Menu, X } from "lucide-react";
+import { ChevronDown, User, LogOut, Settings, Menu, X, LayoutGrid } from "lucide-react";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const [session, setSession] = useState<any>(null);
-  const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const featuresRef = useRef<HTMLDivElement>(null);
+  const utilitiesRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   // Exclude navbar on login page
@@ -35,8 +35,8 @@ export default function Navbar() {
   // Close dropdowns on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (featuresRef.current && !featuresRef.current.contains(event.target as Node)) {
-        setIsFeaturesOpen(false);
+      if (utilitiesRef.current && !utilitiesRef.current.contains(event.target as Node)) {
+        setIsUtilitiesOpen(false);
       }
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
@@ -96,44 +96,38 @@ export default function Navbar() {
 
           {/* Right Side: Horizontal Navigation Items (Desktop) */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* Features Dropdown */}
-            <div className="relative" ref={featuresRef}>
+            {/* Utilities Dropdown */}
+            <div className="relative" ref={utilitiesRef}>
               <button
-                onClick={() => setIsFeaturesOpen(!isFeaturesOpen)}
-                className="flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-sky-600 focus:outline-none transition-colors cursor-pointer"
+                onClick={() => setIsUtilitiesOpen(!isUtilitiesOpen)}
+                className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-sky-600 focus:outline-none transition-colors cursor-pointer"
               >
-                Features <ChevronDown className={`h-4 w-4 transition-transform ${isFeaturesOpen ? "rotate-180" : ""}`} />
+                <LayoutGrid className="h-4.5 w-4.5 text-slate-400" />
+                Utilities <ChevronDown className={`h-4 w-4 transition-transform ${isUtilitiesOpen ? "rotate-180" : ""}`} />
               </button>
 
-              {isFeaturesOpen && (
+              {isUtilitiesOpen && (
                 <div className="absolute right-0 mt-2.5 w-60 rounded-xl bg-white border border-slate-200 shadow-lg py-2 ring-1 ring-black/5 animate-fadeIn">
                   <Link
-                    href="/advisor"
+                    href="/utilities/calorie-calculator"
                     className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
-                    onClick={() => setIsFeaturesOpen(false)}
+                    onClick={() => setIsUtilitiesOpen(false)}
                   >
-                    📜 Policy Advisor
+                    🔥 Calorie Calculator
                   </Link>
                   <Link
-                    href="/preventive-health"
+                    href="/utilities/hydration-tracker"
                     className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
-                    onClick={() => setIsFeaturesOpen(false)}
+                    onClick={() => setIsUtilitiesOpen(false)}
                   >
-                    🩺 Preventive Health Planner
+                    💧 Hydration Tracker
                   </Link>
                   <Link
-                    href="/medicines"
+                    href="/utilities/box-breathing"
                     className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
-                    onClick={() => setIsFeaturesOpen(false)}
+                    onClick={() => setIsUtilitiesOpen(false)}
                   >
-                    💊 Generic Medicine Alternative
-                  </Link>
-                  <Link
-                    href="/explainer"
-                    className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
-                    onClick={() => setIsFeaturesOpen(false)}
-                  >
-                    📝 Prescription & Term Explainer
+                    🧘 Box Breathing Exercise
                   </Link>
                 </div>
               )}
@@ -211,35 +205,28 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-slate-50 px-4 py-3 space-y-2">
           <div className="font-bold text-xs uppercase tracking-wider text-slate-400 px-3 pt-2">
-            Features
+            Utilities
           </div>
           <Link
-            href="/advisor"
+            href="/utilities/calorie-calculator"
             className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            📜 Policy Advisor
+            🔥 Calorie Calculator
           </Link>
           <Link
-            href="/preventive-health"
+            href="/utilities/hydration-tracker"
             className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            🩺 Preventive Health Planner
+            💧 Hydration Tracker
           </Link>
           <Link
-            href="/medicines"
+            href="/utilities/box-breathing"
             className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            💊 Generic Medicine Alternative
-          </Link>
-          <Link
-            href="/explainer"
-            className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            📝 Prescription & Term Explainer
+            🧘 Box Breathing Exercise
           </Link>
 
           <div className="border-t border-slate-200 my-2" />
