@@ -3,6 +3,7 @@
 import React, { useState, FormEvent } from "react";
 import { ShieldCheck, Sparkles, HeartPulse, ChevronDown, ChevronUp, AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { parseJargon } from "@/components/policy-advisor/JargonTooltip";
 
 type ExplanationResult = {
   title: string;
@@ -354,7 +355,7 @@ export default function AdvisorPage() {
                       </div>
 
                       <div className="text-sm text-slate-700 leading-relaxed mb-6">
-                        {policy.explanation}
+                        {parseJargon(policy.explanation)}
                       </div>
 
                       {/* Expandable Sections */}
@@ -379,28 +380,28 @@ export default function AdvisorPage() {
                             {policy.why_not && (
                               <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-200/60">
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">Why not others?</h4>
-                                <p className="text-xs text-slate-600 leading-relaxed">{policy.why_not}</p>
+                                <p className="text-xs text-slate-600 leading-relaxed">{parseJargon(policy.why_not)}</p>
                               </div>
                             )}
 
                             {policy.trade_offs && (
                               <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-200/60">
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">Trade-offs</h4>
-                                <p className="text-xs text-slate-600 leading-relaxed">{policy.trade_offs}</p>
+                                <p className="text-xs text-slate-600 leading-relaxed">{parseJargon(policy.trade_offs)}</p>
                               </div>
                             )}
 
                             {policy.alternatives && (
                               <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-200/60">
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F2744] mb-2">Alternatives</h4>
-                                <p className="text-xs text-slate-600 leading-relaxed">{policy.alternatives}</p>
+                                <p className="text-xs text-slate-600 leading-relaxed">{parseJargon(policy.alternatives)}</p>
                               </div>
                             )}
 
                             {policy.confidence_note && (
                               <div className="rounded-xl bg-slate-50/50 p-4 border border-slate-200/60">
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Confidence note</h4>
-                                <p className="text-xs text-slate-600 leading-relaxed">{policy.confidence_note}</p>
+                                <p className="text-xs text-slate-600 leading-relaxed">{parseJargon(policy.confidence_note)}</p>
                               </div>
                             )}
                           </div>
