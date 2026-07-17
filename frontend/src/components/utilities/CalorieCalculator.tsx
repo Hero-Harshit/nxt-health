@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { 
   Sparkles, 
   Flame, 
@@ -33,29 +33,6 @@ interface GoalOption {
 }
 
 export default function CalorieCalculator() {
-  // State variables
-  const [unitSystem, setUnitSystem] = useState<UnitSystem>("metric");
-  const [gender, setGender] = useState<Gender>("male");
-  const [age, setAge] = useState<number>(25);
-  
-  // Weights (Metric: kg, Imperial: lbs)
-  const [weight, setWeight] = useState<number>(70); 
-  
-  // Height Metric (cm)
-  const [heightCm, setHeightCm] = useState<number>(175);
-  // Height Imperial (feet and inches)
-  const [heightFt, setHeightFt] = useState<number>(5);
-  const [heightIn, setHeightIn] = useState<number>(9);
-
-  const [activity, setActivity] = useState<number>(1.2);
-  const [goal, setGoal] = useState<number>(0);
-
-  // Result metrics
-  const [bmr, setBmr] = useState<number>(0);
-  const [tdee, setTdee] = useState<number>(0);
-  const [targetCalories, setTargetCalories] = useState<number>(0);
-  const [isCapped, setIsCapped] = useState<boolean>(false);
-
   // Activity descriptions and multipliers
   const activityOptions: ActivityOption[] = [
     {
@@ -136,6 +113,52 @@ export default function CalorieCalculator() {
     }
   ];
 
+  // State variables
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>("metric");
+  const [gender, setGender] = useState<Gender>("male");
+  const [age, setAge] = useState<number>(25);
+  
+  // Weights (Metric: kg, Imperial: lbs)
+  const [weight, setWeight] = useState<number>(70); 
+  
+  // Height Metric (cm)
+  const [heightCm, setHeightCm] = useState<number>(175);
+  // Height Imperial (feet and inches)
+  const [heightFt, setHeightFt] = useState<number>(5);
+  const [heightIn, setHeightIn] = useState<number>(9);
+
+  const [activity, setActivity] = useState<number>(1.2);
+  const [goal, setGoal] = useState<number>(0);
+
+  // 1. Get weight in kg
+  const weightKg = unitSystem === "metric" ? weight : weight / 2.20462;
+
+  // 2. Get height in cm
+  const hCm = unitSystem === "metric" ? heightCm : (heightFt * 12 + heightIn) * 2.54;
+
+  // 3. Mifflin-St Jeor formula
+  let bmr = 0;
+  if (weightKg && hCm && age) {
+    if (gender === "male") {
+      bmr = Math.round(10 * weightKg + 6.25 * hCm - 5 * age + 5);
+    } else {
+      bmr = Math.round(10 * weightKg + 6.25 * hCm - 5 * age - 161);
+    }
+  }
+
+  // 4. TDEE
+  const tdee = Math.round(bmr * activity);
+
+  // 5. Target Calories with deficit/surplus and safety cap
+  let targetCalories = tdee + goal;
+  const safetyMin = gender === "male" ? 1500 : 1200;
+  let isCapped = false;
+
+  if (targetCalories < safetyMin) {
+    targetCalories = safetyMin;
+    isCapped = true;
+  }
+
   // Convert unit system values
   const handleUnitToggle = (system: UnitSystem) => {
     if (system === unitSystem) return;
@@ -160,42 +183,6 @@ export default function CalorieCalculator() {
       setHeightCm(Math.round(totalIn * 2.54));
     }
   };
-
-  // Run calculation when states change
-  useEffect(() => {
-    // 1. Get weight in kg
-    const weightKg = unitSystem === "metric" ? weight : weight / 2.20462;
-
-    // 2. Get height in cm
-    const hCm = unitSystem === "metric" ? heightCm : (heightFt * 12 + heightIn) * 2.54;
-
-    if (!weightKg || !hCm || !age) return;
-
-    // 3. Mifflin-St Jeor formula
-    let calculatedBmr = 0;
-    if (gender === "male") {
-      calculatedBmr = 10 * weightKg + 6.25 * hCm - 5 * age + 5;
-    } else {
-      calculatedBmr = 10 * weightKg + 6.25 * hCm - 5 * age - 161;
-    }
-    setBmr(Math.round(calculatedBmr));
-
-    // 4. TDEE
-    const calculatedTdee = calculatedBmr * activity;
-    setTdee(Math.round(calculatedTdee));
-
-    // 5. Target Calories with deficit/surplus and safety cap
-    let target = calculatedTdee + goal;
-    const safetyMin = gender === "male" ? 1500 : 1200;
-
-    if (target < safetyMin) {
-      target = safetyMin;
-      setIsCapped(true);
-    } else {
-      setIsCapped(false);
-    }
-    setTargetCalories(Math.round(target));
-  }, [unitSystem, gender, age, weight, heightCm, heightFt, heightIn, activity, goal]);
 
   // Macro Splits (Balanced High-Protein Default: 30% Protein, 40% Carbs, 30% Fats)
   const proteinCals = targetCalories * 0.30;
