@@ -52,7 +52,7 @@ If you want to pull the code and run NxtHealth on your machine, follow these ste
 
 ### 3. Create .env.local configuration file
 
-* NEXT_PUBLIC_SUPABASE_URL=/your-supabase-project.supabase.co (link)
+* NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-link.supabase.co
 * NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 ### 4. Start local development server
