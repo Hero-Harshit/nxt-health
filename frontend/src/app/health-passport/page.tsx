@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Printer, RefreshCw, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Printer, RefreshCw } from "lucide-react";
 import { HealthPassportData } from "@/types/passport";
+import { User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 import PassportForm from "@/components/health-passport/PassportForm";
 import PassportPreview from "@/components/health-passport/PassportPreview";
 
@@ -32,44 +34,111 @@ const DEFAULT_PASSPORT_DATA: HealthPassportData = {
 export default function HealthPassportPage() {
   const [data, setData] = useState<HealthPassportData>(DEFAULT_PASSPORT_DATA);
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [isSaved, setIsSaved] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [syncStatus, setSyncStatus] = useState<"synced" | "saving" | "local">("local");
 
-  // Load from localStorage on mount
+  // Load user status and data on mount
   useEffect(() => {
     const cached = localStorage.getItem("nxt_health_passport");
-    const mountTimer = setTimeout(() => {
+    
+    const mountTimer = setTimeout(async () => {
       setIsMounted(true);
+      
+      // Load local cache as first render fallback
       if (cached) {
         try {
           setData(JSON.parse(cached));
         } catch (e) {
-          console.error("Error reading passport cache:", e);
+          console.error("Error reading local passport cache:", e);
         }
       }
+
+      // Check if user is logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user || null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        setSyncStatus("saving");
+        try {
+          const { data: cloudData, error } = await supabase
+            .from("health_passports")
+            .select("passport_data")
+            .eq("user_id", currentUser.id)
+            .maybeSingle();
+
+          if (error) throw error;
+
+          if (cloudData && cloudData.passport_data) {
+            setData(cloudData.passport_data);
+            localStorage.setItem("nxt_health_passport", JSON.stringify(cloudData.passport_data));
+            setSyncStatus("synced");
+          } else {
+            // If no cloud data, sync current data (local or default) up to the cloud
+            await supabase
+              .from("health_passports")
+              .upsert({
+                user_id: currentUser.id,
+                passport_data: cached ? JSON.parse(cached) : DEFAULT_PASSPORT_DATA,
+                updated_at: new Date().toISOString()
+              }, { onConflict: "user_id" });
+            setSyncStatus("synced");
+          }
+        } catch (err) {
+          console.error("Error syncing with cloud on mount:", err);
+          setSyncStatus("local");
+        }
+      } else {
+        setSyncStatus("local");
+      }
     }, 0);
+
     return () => clearTimeout(mountTimer);
   }, []);
 
-  // Save to localStorage when data changes
+  // Save changes to LocalStorage and Cloud
   useEffect(() => {
     if (!isMounted) return;
+
     const saveTimer = setTimeout(() => {
-      setIsSaved(false);
+      setSyncStatus("saving");
     }, 0);
-    const handler = setTimeout(() => {
+
+    const handler = setTimeout(async () => {
+      // 1. Save to LocalStorage
       localStorage.setItem("nxt_health_passport", JSON.stringify(data));
-      setIsSaved(true);
+
+      // 2. Save to Cloud if logged in
+      if (user) {
+        try {
+          const { error } = await supabase
+            .from("health_passports")
+            .upsert({
+              user_id: user.id,
+              passport_data: data,
+              updated_at: new Date().toISOString()
+            }, { onConflict: "user_id" });
+
+          if (error) throw error;
+          setSyncStatus("synced");
+        } catch (err) {
+          console.error("Cloud upsert failed:", err);
+          setSyncStatus("local");
+        }
+      } else {
+        setSyncStatus("local");
+      }
     }, 400);
 
     return () => {
       clearTimeout(saveTimer);
       clearTimeout(handler);
     };
-  }, [data, isMounted]);
+  }, [data, isMounted, user]);
 
-  const handleClearData = () => {
-    if (window.confirm("Are you sure you want to reset your passport? This will erase all local edits.")) {
-      setData({
+  const handleClearData = async () => {
+    if (window.confirm("Are you sure you want to reset your passport? This will erase all local and cloud edits.")) {
+      const clearedData: HealthPassportData = {
         fullName: "",
         dob: "",
         bloodGroup: "A+",
@@ -85,8 +154,29 @@ export default function HealthPassportPage() {
         primaryDoctorPhone: "",
         insuranceProvider: "",
         insurancePolicyNum: ""
-      });
+      };
+
+      setData(clearedData);
       localStorage.removeItem("nxt_health_passport");
+
+      if (user) {
+        setSyncStatus("saving");
+        try {
+          await supabase
+            .from("health_passports")
+            .upsert({
+              user_id: user.id,
+              passport_data: clearedData,
+              updated_at: new Date().toISOString()
+            }, { onConflict: "user_id" });
+          setSyncStatus("synced");
+        } catch (err) {
+          console.error("Error clearing cloud database record:", err);
+          setSyncStatus("local");
+        }
+      } else {
+        setSyncStatus("local");
+      }
     }
   };
 
@@ -151,11 +241,23 @@ export default function HealthPassportPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            {/* Auto-save Badge */}
-            <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1 bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-sm">
-              <CheckCircle2 className={`h-4 w-4 ${isSaved ? 'text-emerald-500' : 'text-slate-300 animate-pulse'}`} />
-              {isSaved ? "Saved to Browser" : "Saving..."}
-            </span>
+            
+            {/* Status indicator */}
+            {syncStatus === "synced" && (
+              <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl shadow-sm">
+                ☁️ Saved to Cloud &amp; Browser
+              </span>
+            )}
+            {syncStatus === "saving" && (
+              <span className="text-[10px] font-bold text-sky-600 flex items-center gap-1.5 bg-sky-50 border border-sky-200 px-3 py-2 rounded-xl shadow-sm animate-pulse">
+                🔄 Syncing...
+              </span>
+            )}
+            {syncStatus === "local" && (
+              <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl shadow-sm">
+                💾 Saved Locally
+              </span>
+            )}
 
             {/* Reset Button */}
             <button
