@@ -29,7 +29,7 @@ export default function PassportPreview({ data }: PassportPreviewProps) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <HeartPulse className="h-6 w-6 text-[#0F2744] print:text-[#0F2744]" />
-              <span className="text-xs font-black tracking-wider text-slate-500 uppercase">NxtHealth Platform</span>
+              <span className="text-xs font-black tracking-wider text-slate-500 uppercase">NxtHealth</span>
             </div>
             <h2 className="text-lg font-black text-[#0F2744] tracking-tight uppercase">
               Personal Health Passport
