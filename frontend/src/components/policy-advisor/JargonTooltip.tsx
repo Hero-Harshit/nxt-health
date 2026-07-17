@@ -11,14 +11,24 @@ interface JargonTooltipProps {
 const JARGON_DICT: Record<string, string> = {
   "co-pay": "The fixed percentage of the medical bill you pay out of pocket, while the insurance company pays the rest. E.g., a 10% co-pay on a ₹10,000 bill means you pay ₹1,000.",
   "co-payment": "The fixed percentage of the medical bill you pay out of pocket, while the insurance company pays the rest. E.g., a 10% co-pay on a ₹10,000 bill means you pay ₹1,000.",
+  "copay": "The fixed percentage of the medical bill you pay out of pocket, while the insurance company pays the rest. E.g., a 10% co-pay on a ₹10,000 bill means you pay ₹1,000.",
+  "copayment": "The fixed percentage of the medical bill you pay out of pocket, while the insurance company pays the rest. E.g., a 10% co-pay on a ₹10,000 bill means you pay ₹1,000.",
   "ped waiting period": "The time (usually 1 to 4 years) you must wait before the insurance company covers illness/conditions you had prior to buying the policy.",
+  "waiting period": "The time (usually 1 to 4 years) you must wait before the insurance company covers illness/conditions you had prior to buying the policy.",
   "room rent cap": "The maximum daily hospital room charge covered by the policy. Exceeding this limit often reduces coverage for associated doctor fees and nursing charges.",
+  "room rent capping": "The maximum daily hospital room charge covered by the policy. Exceeding this limit often reduces coverage for associated doctor fees and nursing charges.",
   "restoration benefit": "Automatically refills your total coverage sum if you exhaust your insurance limit during a policy year due to hospitalization.",
+  "restoration": "Automatically refills your total coverage sum if you exhaust your insurance limit during a policy year due to hospitalization.",
   "no claim bonus": "A reward (usually an increased sum insured at no extra cost) given for every year you don't file an insurance claim.",
   "ncb": "A reward (usually an increased sum insured at no extra cost) given for every year you don't file an insurance claim.",
   "sub-limit": "A specific cap on how much the insurer will pay for a particular surgery, treatment, or hospital charge (e.g., Cataract surgery capped at ₹30,000).",
+  "sub-limits": "A specific cap on how much the insurer will pay for a particular surgery, treatment, or hospital charge (e.g., Cataract surgery capped at ₹30,000).",
+  "sublimit": "A specific cap on how much the insurer will pay for a particular surgery, treatment, or hospital charge (e.g., Cataract surgery capped at ₹30,000).",
+  "sublimits": "A specific cap on how much the insurer will pay for a particular surgery, treatment, or hospital charge (e.g., Cataract surgery capped at ₹30,000).",
   "cashless hospitalization": "Treatment at a network hospital where the insurance company settles the bill directly, requiring no upfront payment from you.",
-  "daycare procedure": "Surgeries or medical treatments (like cataract or chemotherapy) that take less than 24 hours of hospitalization due to advanced medical technology."
+  "cashless": "Treatment at a network hospital where the insurance company settles the bill directly, requiring no upfront payment from you.",
+  "daycare procedure": "Surgeries or medical treatments (like cataract or chemotherapy) that take less than 24 hours of hospitalization due to advanced medical technology.",
+  "daycare procedures": "Surgeries or medical treatments (like cataract or chemotherapy) that take less than 24 hours of hospitalization due to advanced medical technology."
 };
 
 export default function JargonTooltip({ term, customDefinition }: JargonTooltipProps) {
