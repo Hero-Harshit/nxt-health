@@ -203,7 +203,7 @@ export default function CalorieCalculator() {
         <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6">
           <div>
             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              Calorie & Macro Estimator
+              Calorie Calculator
             </h2>
             <p className="text-xs text-slate-500 mt-1">
               Precision calorie configuration utilizing the MSJ equation.
