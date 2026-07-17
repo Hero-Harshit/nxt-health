@@ -194,7 +194,6 @@ export default function CalorieCalculator() {
   const fatGrams = Math.round(fatCals / 9);
 
   // Daily Hydration (liters)
-  const weightKg = unitSystem === "metric" ? weight : weight / 2.20462;
   const hydrationLiters = (weightKg * 0.033) + (activity > 1.2 ? (activity - 1.2) * 1.5 : 0);
 
   return (
