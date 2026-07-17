@@ -10,25 +10,21 @@ import PassportForm from "@/components/health-passport/PassportForm";
 import PassportPreview from "@/components/health-passport/PassportPreview";
 
 const DEFAULT_PASSPORT_DATA: HealthPassportData = {
-  fullName: "Alexander Sterling",
-  dob: "1988-11-14",
-  bloodGroup: "O+",
-  gender: "Male",
-  emergencyContactName: "Eleanor Sterling",
-  emergencyContactRelation: "Spouse",
-  emergencyContactPhone: "+1 (555) 438-9021",
-  allergies: ["Penicillin", "Latex", "Tree Nuts"],
-  chronicConditions: ["Asthma", "Mild Hypertension"],
-  pastSurgeries: "Appendectomy in 2012, Right Knee Meniscus Repair in 2019.",
-  activeMedications: [
-    { name: "Albuterol Inhaler", dosage: "90 mcg", frequency: "As needed for wheezing" },
-    { name: "Lisinopril", dosage: "10 mg", frequency: "1x daily in morning" },
-    { name: "Vitamin D3", dosage: "2000 IU", frequency: "1x daily with meal" }
-  ],
-  primaryDoctorName: "Dr. Clara Mendoza, MD",
-  primaryDoctorPhone: "+1 (555) 892-4411",
-  insuranceProvider: "Blue Shield Lifecare",
-  insurancePolicyNum: "BS-89304-X99"
+  fullName: "",
+  dob: "",
+  bloodGroup: "",
+  gender: "",
+  emergencyContactName: "",
+  emergencyContactRelation: "",
+  emergencyContactPhone: "",
+  allergies: [],
+  chronicConditions: [],
+  pastSurgeries: "",
+  activeMedications: [],
+  primaryDoctorName: "",
+  primaryDoctorPhone: "",
+  insuranceProvider: "",
+  insurancePolicyNum: ""
 };
 
 export default function HealthPassportPage() {
@@ -47,7 +43,24 @@ export default function HealthPassportPage() {
       // Load local cache as first render fallback
       if (cached) {
         try {
-          setData(JSON.parse(cached));
+          const p = JSON.parse(cached);
+          setData({
+            fullName: p?.fullName ?? "",
+            dob: p?.dob ?? "",
+            bloodGroup: p?.bloodGroup ?? "",
+            gender: p?.gender ?? "",
+            emergencyContactName: p?.emergencyContactName ?? "",
+            emergencyContactRelation: p?.emergencyContactRelation ?? "",
+            emergencyContactPhone: p?.emergencyContactPhone ?? "",
+            allergies: Array.isArray(p?.allergies) ? p.allergies : [],
+            chronicConditions: Array.isArray(p?.chronicConditions) ? p.chronicConditions : [],
+            pastSurgeries: p?.pastSurgeries ?? "",
+            activeMedications: Array.isArray(p?.activeMedications) ? p.activeMedications : [],
+            primaryDoctorName: p?.primaryDoctorName ?? "",
+            primaryDoctorPhone: p?.primaryDoctorPhone ?? "",
+            insuranceProvider: p?.insuranceProvider ?? "",
+            insurancePolicyNum: p?.insurancePolicyNum ?? ""
+          });
         } catch (e) {
           console.error("Error reading local passport cache:", e);
         }
@@ -61,29 +74,62 @@ export default function HealthPassportPage() {
       if (currentUser) {
         setSyncStatus("saving");
         try {
-          const { data: cloudData, error } = await supabase
+          const { data: cloudData } = await supabase
             .from("health_passports")
             .select("passport_data")
             .eq("user_id", currentUser.id)
             .maybeSingle();
 
-          if (error) throw error;
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", currentUser.id)
+            .maybeSingle();
+
+          let mergedData: HealthPassportData = { ...DEFAULT_PASSPORT_DATA };
 
           if (cloudData && cloudData.passport_data) {
-            setData(cloudData.passport_data);
-            localStorage.setItem("nxt_health_passport", JSON.stringify(cloudData.passport_data));
-            setSyncStatus("synced");
-          } else {
-            // If no cloud data, sync current data (local or default) up to the cloud
-            await supabase
-              .from("health_passports")
-              .upsert({
-                user_id: currentUser.id,
-                passport_data: cached ? JSON.parse(cached) : DEFAULT_PASSPORT_DATA,
-                updated_at: new Date().toISOString()
-              }, { onConflict: "user_id" });
-            setSyncStatus("synced");
+            const p = cloudData.passport_data;
+            mergedData = {
+              fullName: p?.fullName ?? profile?.full_name ?? "",
+              dob: p?.dob ?? profile?.dob ?? "",
+              bloodGroup: p?.bloodGroup ?? profile?.blood_group ?? "",
+              gender: p?.gender ?? profile?.gender ?? "",
+              emergencyContactName: p?.emergencyContactName ?? profile?.emergency_contact_name ?? "",
+              emergencyContactRelation: p?.emergencyContactRelation ?? profile?.emergency_contact_relation ?? "",
+              emergencyContactPhone: p?.emergencyContactPhone ?? profile?.emergency_contact_phone ?? "",
+              allergies: Array.isArray(p?.allergies) ? p.allergies : (Array.isArray(profile?.allergies) ? profile.allergies : []),
+              chronicConditions: Array.isArray(p?.chronicConditions) ? p.chronicConditions : (Array.isArray(profile?.chronic_conditions) ? profile.chronic_conditions : []),
+              pastSurgeries: p?.pastSurgeries ?? profile?.past_surgeries ?? "",
+              activeMedications: Array.isArray(p?.activeMedications) ? p.activeMedications : (Array.isArray(profile?.active_medications) ? profile.active_medications : []),
+              primaryDoctorName: p?.primaryDoctorName ?? profile?.primary_doctor_name ?? "",
+              primaryDoctorPhone: p?.primaryDoctorPhone ?? profile?.primary_doctor_phone ?? "",
+              insuranceProvider: p?.insuranceProvider ?? profile?.insurance_provider ?? "",
+              insurancePolicyNum: p?.insurancePolicyNum ?? profile?.insurance_policy_num ?? ""
+            };
+          } else if (profile) {
+            mergedData = {
+              fullName: profile?.full_name ?? "",
+              dob: profile?.dob ?? "",
+              bloodGroup: profile?.blood_group ?? "",
+              gender: profile?.gender ?? "",
+              emergencyContactName: profile?.emergency_contact_name ?? "",
+              emergencyContactRelation: profile?.emergency_contact_relation ?? "",
+              emergencyContactPhone: profile?.emergency_contact_phone ?? "",
+              allergies: Array.isArray(profile?.allergies) ? profile.allergies : [],
+              chronicConditions: Array.isArray(profile?.chronic_conditions) ? profile.chronic_conditions : [],
+              pastSurgeries: profile?.past_surgeries ?? "",
+              activeMedications: Array.isArray(profile?.active_medications) ? profile.active_medications : [],
+              primaryDoctorName: profile?.primary_doctor_name ?? "",
+              primaryDoctorPhone: profile?.primary_doctor_phone ?? "",
+              insuranceProvider: profile?.insurance_provider ?? "",
+              insurancePolicyNum: profile?.insurance_policy_num ?? ""
+            };
           }
+
+          setData(mergedData);
+          localStorage.setItem("nxt_health_passport", JSON.stringify(mergedData));
+          setSyncStatus("synced");
         } catch (err) {
           console.error("Error syncing with cloud on mount:", err);
           setSyncStatus("local");
@@ -141,7 +187,7 @@ export default function HealthPassportPage() {
       const clearedData: HealthPassportData = {
         fullName: "",
         dob: "",
-        bloodGroup: "A+",
+        bloodGroup: "",
         gender: "",
         emergencyContactName: "",
         emergencyContactRelation: "",
