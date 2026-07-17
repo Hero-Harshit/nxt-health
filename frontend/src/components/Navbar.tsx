@@ -113,7 +113,7 @@ export default function Navbar() {
                     className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
                     onClick={() => setIsUtilitiesOpen(false)}
                   >
-                    🔥 Calorie Calculator
+                    🔥 Calorie & Macro Calculator
                   </Link>
                   <Link
                     href="/utilities/hydration-tracker"
@@ -212,7 +212,7 @@ export default function Navbar() {
             className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            🔥 Calorie Calculator
+            🔥 Calorie & Macro Calculator
           </Link>
           <Link
             href="/utilities/hydration-tracker"
