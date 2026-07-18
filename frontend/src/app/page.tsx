@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList } from "lucide-react";
+import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -170,6 +170,37 @@ export default function HomePage() {
         <section className="space-y-4">
           <h2 className="text-lg font-bold text-[#0F2744]">Health Intelligence Modules</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+
+            {/* Premium Smart SOS Hero Module - Spanning all columns */}
+            <Link
+              href="/smart-sos"
+              className="col-span-1 md:col-span-2 lg:col-span-3 bg-gradient-to-r from-blue-50/70 via-sky-50/60 to-slate-50/40 rounded-2xl p-6 md:p-8 border border-sky-200/80 shadow-md shadow-blue-100/50 hover:shadow-lg hover:border-sky-400 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group cursor-pointer"
+            >
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <div className="h-14 w-14 rounded-full bg-sky-100/80 text-sky-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-inner">
+                  <ShieldAlert className="h-7 w-7 text-sky-700" />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-extrabold text-2xl text-[#0F2744]">Smart SOS Command Center</h3>
+                  </div>
+                  <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
+                    Real-time clinical AI triage, localized specialized hospital routing, and dual-channel emergency network broadcast.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-start md:items-end justify-between h-full gap-4 shrink-0">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-200 shadow-sm">
+                  <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
+                  🚨 EMERGENCY ONLY
+                </span>
+                
+                <div className="text-sky-600 font-bold text-sm flex items-center gap-1.5 group-hover:text-sky-700 transition-colors">
+                  Launch Emergency Console <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
 
             {/* Module 1: Policy Advisor */}
             <Link
