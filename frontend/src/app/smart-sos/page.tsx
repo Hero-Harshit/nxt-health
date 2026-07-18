@@ -297,7 +297,7 @@ export default function SmartSOSPage() {
         emergencyContactName: passportData.emergencyContactName || ""
       } : null) : null;
 
-      const res = await fetch("http://localhost:5000/api/smart-sos", {
+      const res = await fetch("https://nxt-health.onrender.com/api/smart-sos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

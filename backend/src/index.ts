@@ -82,24 +82,7 @@ async function recordUserHistory(userId: string, moduleName: string, queryText: 
   }
 }
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  process.env.CORS_ORIGIN,
-].filter((origin): origin is string => Boolean(origin));
-
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-
-      callback(new Error("Origin not allowed by CORS"));
-    },
-  }),
-);
+app.use(cors());
 app.use(express.json());
 
 app.get("/api/ping", (_, res) => {
