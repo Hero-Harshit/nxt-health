@@ -174,7 +174,7 @@ export default function HomePage() {
             {/* Premium Smart SOS Hero Module - Spanning all columns */}
             <Link
               href="/smart-sos"
-              className="col-span-1 md:col-span-2 lg:col-span-3 bg-gradient-to-r from-blue-50/70 via-sky-50/60 to-slate-50/40 rounded-2xl p-6 md:p-8 border border-sky-200/80 shadow-md shadow-blue-100/50 hover:shadow-lg hover:border-sky-400 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group cursor-pointer"
+              className="col-span-1 md:col-span-2 lg:col-span-3 bg-gradient-to-r from-blue-50/70 via-sky-50/60 to-slate-50/40 rounded-2xl p-6 md:p-8 border border-blue-400 shadow-lg shadow-blue-900/10 hover:shadow-xl hover:border-blue-500 hover:shadow-blue-900/15 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group cursor-pointer"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                 <div className="h-14 w-14 rounded-full bg-sky-100/80 text-sky-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-inner">
