@@ -207,11 +207,6 @@ export default function SmartSOSPage() {
         emergencyContactName: passportData.emergencyContactName || ""
       } : null;
 
-      // In case we don't have a contact email but profile email exists
-      if (passportPayload && !passportPayload.emergencyContactEmail && profile?.email) {
-        // Fallback or use standard contact info
-      }
-
       const res = await fetch("/api/smart-sos", {
         method: "POST",
         headers: {
@@ -252,14 +247,14 @@ export default function SmartSOSPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF6EE] text-[#24322F] p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans">
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between">
           <Link 
             href="/"
-            className="flex items-center gap-2 text-xs font-semibold text-[#1F5B5B] hover:underline"
+            className="flex items-center gap-2 text-xs font-semibold text-teal-850 hover:text-teal-900 hover:underline"
           >
             <ArrowLeft className="h-4 w-4" /> Back to Dashboard
           </Link>
@@ -276,31 +271,31 @@ export default function SmartSOSPage() {
             
             {/* Header Description */}
             <div className="space-y-2">
-              <h1 className="text-3xl font-extrabold text-[#1F5B5B] tracking-tight font-serif">Smart SOS Console</h1>
+              <h1 className="text-3xl font-extrabold text-teal-900 tracking-tight font-serif">Smart SOS Console</h1>
               <p className="text-sm text-slate-600 max-w-2xl">
                 Deploy immediate crisis guidance, identify critical trauma routing, and auto-dispatch digital handover briefs to emergency response contacts.
               </p>
             </div>
 
             {errorMessage && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-rose-700" />
+              <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-xl text-xs font-semibold flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-rose-600" />
                 <span>Error: {errorMessage}</span>
               </div>
             )}
 
             {/* Input Card Container */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white rounded-2xl p-6 md:p-8 border border-blue-100 shadow-md shadow-blue-900/5 space-y-6">
               
               {/* Context Selector */}
               <div>
-                <label className="block text-xs font-extrabold text-[#1F5B5B] uppercase tracking-wider mb-2">Emergency Subject</label>
+                <label className="block text-xs font-extrabold text-teal-900 uppercase tracking-wider mb-2">Emergency Subject</label>
                 <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200/80 w-fit">
                   <button
                     onClick={() => setSosTarget("myself")}
                     className={`px-6 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 ${
                       sosTarget === "myself"
-                        ? "bg-[#1F5B5B] text-white shadow-sm"
+                        ? "bg-teal-800 text-white shadow-sm"
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                   >
@@ -310,7 +305,7 @@ export default function SmartSOSPage() {
                     onClick={() => setSosTarget("someone_else")}
                     className={`px-6 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 ${
                       sosTarget === "someone_else"
-                        ? "bg-[#1F5B5B] text-white shadow-sm"
+                        ? "bg-teal-800 text-white shadow-sm"
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                   >
@@ -321,13 +316,13 @@ export default function SmartSOSPage() {
 
               {/* Smooth Bystander Input Transition */}
               {sosTarget === "someone_else" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50/50 rounded-xl border border-slate-200/60 animate-fadeIn">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50/20 rounded-xl border border-blue-100/80 animate-fadeIn">
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1.5">Estimated Age Band</label>
                     <select
                       value={estimatedAge}
                       onChange={(e) => setEstimatedAge(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#1F5B5B]"
+                      className="w-full rounded-xl border border-blue-100 bg-white px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-teal-800"
                     >
                       <option value="Infant / Child">Infant / Child</option>
                       <option value="Teenager">Teenager</option>
@@ -349,8 +344,8 @@ export default function SmartSOSPage() {
                           onClick={() => setGender(g)}
                           className={`rounded-xl py-2.5 text-xs font-bold border transition-all ${
                             gender === g
-                              ? "bg-[#1F5B5B] border-[#1F5B5B] text-white shadow-sm"
-                              : "bg-white border-slate-200 text-slate-500 hover:text-slate-800"
+                              ? "bg-teal-800 border-teal-800 text-white shadow-sm"
+                              : "bg-white border-blue-100 text-slate-500 hover:text-slate-800"
                           }`}
                         >
                           {g}
@@ -364,7 +359,7 @@ export default function SmartSOSPage() {
               {/* Triage Scenario Text Input */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label className="block text-xs font-extrabold text-[#1F5B5B] uppercase tracking-wider">Describe Symptoms & Situation</label>
+                  <label className="block text-xs font-extrabold text-teal-900 uppercase tracking-wider">Describe Symptoms & Situation</label>
                   <span className="text-[10px] text-slate-400">Stream input or type manually</span>
                 </div>
                 <div className="relative">
@@ -373,18 +368,18 @@ export default function SmartSOSPage() {
                     value={symptomsText}
                     onChange={(e) => setSymptomsText(e.target.value)}
                     placeholder="Describe the medical situation (e.g., severe chest tightness radiating down the left arm, cold sweats)..."
-                    className="w-full bg-slate-50/50 text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl p-4 pr-12 focus:outline-none focus:ring-1 focus:ring-[#1F5B5B] text-sm leading-relaxed"
+                    className="w-full bg-white text-slate-900 placeholder-slate-400 border border-blue-100 rounded-xl p-4 pr-12 focus:outline-none focus:ring-1 focus:ring-teal-800 text-sm leading-relaxed"
                   />
                   <button
                     type="button"
                     onClick={toggleListening}
-                    className="absolute right-3 bottom-3 p-2.5 rounded-full bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors border border-sky-100 shadow-sm"
+                    className="absolute right-3 bottom-3 p-2.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-100/50 shadow-sm"
                     title="Speak emergency scenario"
                   >
                     <div className="relative">
-                      <Mic className={`h-4.5 w-4.5 ${isListening ? "text-red-600" : "text-[#1F5B5B]"}`} />
+                      <Mic className={`h-4.5 w-4.5 ${isListening ? "text-rose-600" : "text-blue-600"}`} />
                       {isListening && (
-                        <span className="absolute -inset-1 rounded-full border border-red-500 animate-ping" />
+                        <span className="absolute -inset-1 rounded-full border border-rose-500 animate-ping" />
                       )}
                     </div>
                   </button>
@@ -394,7 +389,7 @@ export default function SmartSOSPage() {
               {/* Trigger Button */}
               <button
                 onClick={handleActivateTriage}
-                className="w-full bg-[#1F5B5B] hover:bg-[#153e3e] text-white font-extrabold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 text-sm tracking-wide cursor-pointer"
+                className="w-full bg-teal-800 hover:bg-teal-900 text-white font-extrabold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 text-sm tracking-wide cursor-pointer"
               >
                 <ShieldAlert className="h-5 w-5 animate-pulse" />
                 Activate Crisis Triage
@@ -406,32 +401,32 @@ export default function SmartSOSPage() {
         )}
 
         {uiState === "scanning" && (
-          <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[350px] text-center space-y-6">
+          <div className="bg-white rounded-2xl p-8 border border-blue-100 shadow-md shadow-blue-900/5 flex flex-col items-center justify-center min-h-[350px] text-center space-y-6">
             <div className="relative">
-              <div className="h-16 w-16 rounded-full bg-[#1F5B5B]/10 flex items-center justify-center text-[#1F5B5B] border border-[#1F5B5B]/20">
+              <div className="h-16 w-16 rounded-full bg-blue-50/80 flex items-center justify-center text-teal-800 border border-blue-100">
                 <RefreshCw className="h-8 w-8 animate-spin" />
               </div>
-              <span className="absolute -inset-2 rounded-full border border-[#1F5B5B]/10 animate-ping" />
+              <span className="absolute -inset-2 rounded-full border border-blue-100/20 animate-ping" />
             </div>
 
             <div className="space-y-4 max-w-sm w-full">
-              <h3 className="text-lg font-bold text-[#1F5B5B] font-serif">Smart SOS Triage Engine Operating</h3>
-              <div className="space-y-2 text-left bg-slate-50 p-4 rounded-xl border border-slate-200/60 text-xs">
+              <h3 className="text-lg font-bold text-teal-900 font-serif">Smart SOS Triage Engine Operating</h3>
+              <div className="space-y-2 text-left bg-blue-50/20 p-4 rounded-xl border border-blue-100/80 text-xs">
                 <div className="flex items-center gap-2.5">
-                  <span className={scanStep >= 0 ? "text-[#1F5B5B]" : "text-slate-400"}>●</span>
-                  <span className={scanStep === 0 ? "font-extrabold text-slate-800" : scanStep > 0 ? "text-slate-400" : "text-slate-600"}>
+                  <span className={scanStep >= 0 ? "text-teal-800" : "text-slate-400"}>●</span>
+                  <span className={scanStep === 0 ? "font-extrabold text-slate-800" : scanStep > 0 ? "text-slate-400" : "text-slate-650"}>
                     {scanStep > 0 ? "✓ 🛰️ Captured local sensor coordinates" : "🛰️ Capturing local sensor coordinates..."}
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <span className={scanStep >= 1 ? "text-[#1F5B5B]" : "text-slate-400"}>●</span>
-                  <span className={scanStep === 1 ? "font-extrabold text-slate-800" : scanStep > 1 ? "text-slate-400" : "text-slate-600"}>
+                  <span className={scanStep >= 1 ? "text-teal-800" : "text-slate-400"}>●</span>
+                  <span className={scanStep === 1 ? "font-extrabold text-slate-800" : scanStep > 1 ? "text-slate-400" : "text-slate-650"}>
                     {scanStep > 1 ? "✓ 📑 Accessing saved Personal Health Passport data" : "📑 Accessing saved Personal Health Passport data..."}
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <span className={scanStep >= 2 ? "text-[#1F5B5B]" : "text-slate-400"}>●</span>
-                  <span className={scanStep === 2 ? "font-extrabold text-slate-800" : "text-slate-600"}>
+                  <span className={scanStep >= 2 ? "text-teal-800" : "text-slate-400"}>●</span>
+                  <span className={scanStep === 2 ? "font-extrabold text-slate-800" : "text-slate-655"}>
                     🧠 Analyzing emergency payload via Gemini Live Search...
                   </span>
                 </div>
@@ -444,12 +439,12 @@ export default function SmartSOSPage() {
           <div className="space-y-6">
             
             {/* Header info */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-100 pb-4">
               <div>
-                <span className="text-[10px] font-extrabold tracking-wider uppercase px-2.5 py-1 rounded bg-[#1F5B5B]/10 text-[#1F5B5B] border border-[#1F5B5B]/20">
+                <span className="text-[10px] font-extrabold tracking-wider uppercase px-2.5 py-1 rounded bg-blue-50 text-teal-900 border border-blue-100">
                   Triage Analysis Result
                 </span>
-                <h2 className="text-2xl font-bold text-[#1F5B5B] font-serif mt-1.5">Smart SOS Command Center</h2>
+                <h2 className="text-2xl font-bold text-teal-900 font-serif mt-1.5">Smart SOS Command Center</h2>
               </div>
               <button
                 onClick={() => {
@@ -457,7 +452,7 @@ export default function SmartSOSPage() {
                   setSymptomsText("");
                   setApiResponse(null);
                 }}
-                className="text-xs font-semibold px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition-colors shadow-sm w-fit"
+                className="text-xs font-semibold px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-350 text-slate-700 transition-colors shadow-sm w-fit"
               >
                 Reset Triage Console
               </button>
@@ -470,34 +465,28 @@ export default function SmartSOSPage() {
               <div className="space-y-6">
                 
                 {/* Severity & Condition Card */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+                <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-md shadow-blue-900/5 space-y-3">
                   <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Clinical Diagnosis Tier</h4>
                   <div className="flex items-center justify-between gap-4">
-                    <span className="font-extrabold text-lg text-slate-800 leading-tight">
+                    <span className="font-extrabold text-lg text-teal-900 leading-tight">
                       {apiResponse.suspectedCondition}
                     </span>
-                    <span className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold tracking-wide uppercase ${
-                      apiResponse.severity === "CRITICAL"
-                        ? "bg-red-50 text-red-700 border border-red-200"
-                        : apiResponse.severity === "MODERATE"
-                        ? "bg-amber-50 text-amber-700 border border-amber-200"
-                        : "bg-green-50 text-green-700 border border-green-200"
-                    }`}>
+                    <span className="px-3.5 py-1.5 rounded-full text-xs font-extrabold tracking-wide uppercase bg-rose-50 text-rose-600 border border-rose-100">
                       {apiResponse.severity}
                     </span>
                   </div>
                 </div>
 
                 {/* Bystander Actionable Steps */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-                  <h4 className="text-xs font-extrabold text-[#1F5B5B] uppercase tracking-wider">Immediate Bystander First-Aid Action</h4>
+                <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-md shadow-blue-900/5 space-y-4">
+                  <h4 className="text-xs font-extrabold text-teal-900 uppercase tracking-wider">Immediate Bystander First-Aid Action</h4>
                   <div className="space-y-3">
                     {apiResponse.immediateFirstAid?.map((step: string, index: number) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-slate-50/50 rounded-xl border border-slate-200/50">
+                      <div key={index} className="flex items-start gap-3 p-3 bg-blue-50/10 rounded-xl border border-blue-100/60">
                         <input 
                           type="checkbox" 
                           id={`step-${index}`} 
-                          className="mt-0.5 rounded border-slate-350 text-[#1F5B5B] focus:ring-0 cursor-pointer" 
+                          className="mt-0.5 rounded border-slate-300 text-teal-800 focus:ring-teal-700 cursor-pointer" 
                         />
                         <label 
                           htmlFor={`step-${index}`} 
@@ -511,27 +500,27 @@ export default function SmartSOSPage() {
                 </div>
 
                 {/* Handover brief Card */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3 relative">
+                <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-md shadow-blue-900/5 space-y-3 relative">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-xs font-extrabold text-[#1F5B5B] uppercase tracking-wider">Digital ER Handover Brief</h4>
+                    <h4 className="text-xs font-extrabold text-teal-900 uppercase tracking-wider">Digital ER Handover Brief</h4>
                     <button
                       onClick={handleCopyBrief}
-                      className="text-[10px] font-bold px-2 py-1 rounded bg-[#1F5B5B]/10 hover:bg-[#1F5B5B]/20 text-[#1F5B5B] border border-[#1F5B5B]/15 transition-colors flex items-center gap-1 cursor-pointer"
+                      className="text-[10px] font-bold px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-teal-900 border border-blue-100 transition-colors flex items-center gap-1 cursor-pointer"
                     >
                       <Copy className="h-3 w-3" />
                       {copied ? "Copied!" : "Copy"}
                     </button>
                   </div>
-                  <pre className="text-xs font-mono text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200/80 whitespace-pre-wrap leading-relaxed max-h-[180px] overflow-y-auto">
+                  <pre className="text-xs font-mono text-slate-650 bg-blue-50/20 p-4 rounded-xl border border-blue-100/80 whitespace-pre-wrap leading-relaxed max-h-[180px] overflow-y-auto">
                     {apiResponse.erHandoverBrief}
                   </pre>
                 </div>
 
                 {/* Fail Safe Resend notification tag */}
                 {sosTarget === "myself" && passportData?.emergencyContactPhone && (
-                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl text-xs font-semibold flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-emerald-700" />
-                    <span>📧 Automated fail-safe emergency email alert dispatched to ${passportData?.emergencyContactName || "Emergency Contact"}.</span>
+                  <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-xl text-xs font-semibold flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-rose-600" />
+                    <span>📧 Automated fail-safe emergency email alert dispatched to {passportData?.emergencyContactName || "Emergency Contact"}.</span>
                   </div>
                 )}
 
@@ -541,14 +530,14 @@ export default function SmartSOSPage() {
               <div className="space-y-6">
                 
                 {/* Hospital List Matrix */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-md shadow-blue-900/5 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-extrabold text-[#1F5B5B] uppercase tracking-wider">Nearest Specialized Facilities</h4>
+                    <h4 className="text-xs font-extrabold text-teal-900 uppercase tracking-wider">Nearest Specialized Facilities</h4>
                     <span className="text-[10px] text-slate-400 flex items-center gap-1"><MapPin className="h-3 w-3" /> Live GPS Grounding</span>
                   </div>
 
                   {/* Mock Map graphics */}
-                  <div className="h-28 w-full bg-slate-50 rounded-xl border border-slate-200/60 relative overflow-hidden flex items-center justify-center shadow-inner">
+                  <div className="h-28 w-full bg-blue-50/30 rounded-xl border border-blue-100/60 relative overflow-hidden flex items-center justify-center shadow-inner">
                     <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#1f5b5b_1px,transparent_1px)] [background-size:16px_16px]" />
                     <div className="absolute h-4 w-4 rounded-full bg-red-500 animate-ping opacity-75" />
                     <div className="absolute h-2 w-2 rounded-full bg-red-600" />
@@ -557,12 +546,12 @@ export default function SmartSOSPage() {
 
                   <div className="space-y-3">
                     {apiResponse.specializedHospitals?.map((hosp: any, idx: number) => (
-                      <div key={idx} className="p-3.5 rounded-xl border border-slate-200/70 hover:border-slate-350 bg-slate-50/50 flex justify-between items-center gap-4 transition-all shadow-sm">
+                      <div key={idx} className="p-3.5 rounded-xl border border-blue-100/60 hover:border-blue-200 bg-blue-50/10 flex justify-between items-center gap-4 transition-all shadow-sm">
                         <div className="space-y-1">
                           <div className="text-xs font-extrabold text-slate-800">{idx + 1}. {hosp.name}</div>
                           <div className="text-[10px] text-slate-500 leading-relaxed font-semibold">{hosp.specialtyMatch}</div>
                         </div>
-                        <span className="text-[10px] font-extrabold px-2.5 py-1 rounded bg-[#1F5B5B]/10 text-[#1F5B5B] border border-[#1F5B5B]/20 shrink-0">
+                        <span className="text-[10px] font-extrabold px-2.5 py-1 rounded bg-blue-50 text-teal-900 border border-blue-100 shrink-0">
                           {hosp.distance || "1.2 km"}
                         </span>
                       </div>
@@ -575,7 +564,7 @@ export default function SmartSOSPage() {
                   href={`https://wa.me/${passportData?.emergencyContactPhone || ""}?text=${encodeURIComponent(apiResponse.whatsappTemplate)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white font-extrabold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md text-center text-sm tracking-wide active:scale-95"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-extrabold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md text-center text-sm tracking-wide active:scale-95"
                 >
                   <Share2 className="h-5 w-5" />
                   Open WhatsApp Alert
