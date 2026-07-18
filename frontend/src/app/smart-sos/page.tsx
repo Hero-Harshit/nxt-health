@@ -50,12 +50,46 @@ export default function SmartSOSPage() {
   // Copy to clipboard status
   const [copied, setCopied] = useState<boolean>(false);
 
+  const fetchHealthPassport = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("health_passports")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data && data.passport_data) {
+        const rawPassport = data.passport_data;
+        const mappedPassport = {
+          fullName: rawPassport.fullName || rawPassport.user_name || rawPassport.userName || "",
+          userName: rawPassport.userName || rawPassport.user_name || rawPassport.fullName || "",
+          dob: rawPassport.dob || "",
+          bloodGroup: rawPassport.bloodGroup || "",
+          gender: rawPassport.gender || "",
+          emergencyContactName: rawPassport.emergencyContactName || "",
+          emergencyContactRelation: rawPassport.emergencyContactRelation || "",
+          emergencyContactPhone: rawPassport.emergencyContactPhone || "",
+          emergencyContactEmail: rawPassport.emergencyContactEmail || rawPassport.emergency_contact_email || "",
+          allergies: rawPassport.allergies || [],
+          chronicConditions: rawPassport.chronicConditions || rawPassport.chronic_conditions || []
+        };
+        setPassportData(mappedPassport);
+        localStorage.setItem("nxt_health_passport", JSON.stringify(mappedPassport));
+      }
+    } catch (e) {
+      console.error("Error retrieving health passport database record:", e);
+    }
+  };
+
   // Check Supabase Session & Fetch Profile on Mount
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
         fetchProfile(session.access_token);
+        fetchHealthPassport(session.user.id);
       }
     });
 
@@ -63,6 +97,7 @@ export default function SmartSOSPage() {
       setSession(session);
       if (session) {
         fetchProfile(session.access_token);
+        fetchHealthPassport(session.user.id);
       }
     });
 
@@ -198,14 +233,14 @@ export default function SmartSOSPage() {
   const executeSOSPipeline = async (lat: number, lon: number) => {
     try {
       // Build health passport payload matching route spec
-      const passportPayload = passportData ? {
-        userName: passportData.fullName || profile?.full_name || "NxtHealth User",
+      const passportPayload = sosTarget === "myself" ? (passportData ? {
+        userName: passportData.userName || passportData.fullName || profile?.full_name || "NxtHealth User",
         bloodType: passportData.bloodGroup || "",
         chronicConditions: passportData.chronicConditions || [],
         allergies: passportData.allergies || [],
-        emergencyContactEmail: passportData.emergencyContactPhone ? (passportData.emergencyContactEmail || "") : "",
+        emergencyContactEmail: passportData.emergencyContactEmail || "",
         emergencyContactName: passportData.emergencyContactName || ""
-      } : null;
+      } : null) : null;
 
       const res = await fetch("/api/smart-sos", {
         method: "POST",
