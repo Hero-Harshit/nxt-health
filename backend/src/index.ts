@@ -401,6 +401,10 @@ app.get("/api/profile", async (req, res) => {
       throw error;
     }
 
+    if (profile) {
+      profile.current_policy_details = profile.current_policy_details || "Not Available";
+    }
+
     const completion = calculateCompletion(profile || {});
     res.status(200).json({
       status: "ok",
@@ -431,7 +435,8 @@ app.post("/api/profile", async (req, res) => {
       family_history,
       smoking_status,
       activity_level,
-      dietary_preference
+      dietary_preference,
+      current_policy_details
     } = req.body ?? {};
 
     const { data: profile, error } = await supabase
@@ -448,6 +453,7 @@ app.post("/api/profile", async (req, res) => {
         smoking_status,
         activity_level,
         dietary_preference,
+        current_policy_details: current_policy_details || "Not Available",
         updated_at: new Date().toISOString()
       })
       .select()

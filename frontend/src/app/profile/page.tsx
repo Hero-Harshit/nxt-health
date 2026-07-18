@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const [smokingStatus, setSmokingStatus] = useState<string>("");
   const [activityLevel, setActivityLevel] = useState<string>("");
   const [dietaryPreference, setDietaryPreference] = useState<string>("");
+  const [currentPolicyDetails, setCurrentPolicyDetails] = useState<string>("");
 
   const [completionPercentage, setCompletionPercentage] = useState<number>(0);
 
@@ -84,6 +85,7 @@ export default function ProfilePage() {
           setSmokingStatus(p.smoking_status || "");
           setActivityLevel(p.activity_level || "");
           setDietaryPreference(p.dietary_preference || "");
+          setCurrentPolicyDetails(p.current_policy_details || "Not Available");
           setCompletionPercentage(data.completion_percentage || 0);
         }
       } catch (err: any) {
@@ -175,6 +177,7 @@ export default function ProfilePage() {
           smoking_status: smokingStatus,
           activity_level: activityLevel,
           dietary_preference: dietaryPreference,
+          current_policy_details: currentPolicyDetails,
         }),
       });
 
@@ -487,6 +490,23 @@ export default function ProfilePage() {
                   <option value="Eggetarian">Eggetarian</option>
                 </select>
               </div>
+            </div>
+          </div>
+ 
+          {/* Section 5: Current Policy Details */}
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#0F2744] border-b border-slate-100 pb-2 mb-4">
+              Current Health Insurance / Policy Details
+            </h3>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Policy Details</label>
+              <textarea
+                value={currentPolicyDetails}
+                onChange={(e) => setCurrentPolicyDetails(e.target.value)}
+                placeholder="e.g., Blue Cross Silver Plan #12345 (Not Available)"
+                rows={3}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600 transition-all"
+              />
             </div>
           </div>
 
