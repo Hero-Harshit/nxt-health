@@ -12,7 +12,6 @@ export interface HealthPassportData {
   emergencyContactName: string;
   emergencyContactRelation: string;
   emergencyContactPhone: string;
-  emergencyContactEmail: string;
   allergies: string[];
   chronicConditions: string[];
   pastSurgeries: string;
