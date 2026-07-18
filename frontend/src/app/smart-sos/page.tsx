@@ -152,6 +152,11 @@ export default function SmartSOSPage() {
 
   // Speech Recognition hook
   const [recognition, setRecognition] = useState<any>(null);
+  const uiStateRef = React.useRef(uiState);
+
+  useEffect(() => {
+    uiStateRef.current = uiState;
+  }, [uiState]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -174,16 +179,66 @@ export default function SmartSOSPage() {
         rec.onerror = (event: any) => {
           console.error("Speech recognition error:", event.error);
           setIsListening(false);
+          // Restart listener loop automatically if still on input page
+          if (uiStateRef.current === "input") {
+            setTimeout(() => {
+              try {
+                rec.start();
+              } catch (e) {
+                // Ignore already started errors
+              }
+            }, 1000);
+          }
         };
         
         rec.onend = () => {
           setIsListening(false);
+          // Restart listener loop automatically if still on input page
+          if (uiStateRef.current === "input") {
+            try {
+              rec.start();
+            } catch (e) {
+              // Ignore already started errors
+            }
+          }
         };
         
         setRecognition(rec);
       }
     }
   }, []);
+
+  // Control speech lifecycle based on state transitions
+  useEffect(() => {
+    if (recognition) {
+      if (uiState === "input") {
+        try {
+          recognition.start();
+        } catch (e) {
+          // Already started
+        }
+      } else {
+        try {
+          recognition.stop();
+        } catch (e) {
+          // Already stopped
+        }
+      }
+    }
+  }, [uiState, recognition]);
+
+  // Stop recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch (e) {
+          // Already stopped
+        }
+      }
+    };
+  }, [recognition]);
 
   const toggleListening = () => {
     if (!recognition) {
@@ -408,16 +463,23 @@ export default function SmartSOSPage() {
                   <button
                     type="button"
                     onClick={toggleListening}
-                    className="absolute right-3 bottom-3 p-2.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-100/50 shadow-sm animate-pulse"
+                    className={`absolute right-3 bottom-3 p-2.5 rounded-full border border-blue-100/50 shadow-sm transition-all ${
+                      isListening 
+                        ? "bg-blue-50 text-blue-600 animate-pulse" 
+                        : "bg-slate-50 text-slate-400"
+                    }`}
                     title="Speak emergency scenario"
                   >
                     <div className="relative">
-                      <Mic className={`h-4.5 w-4.5 ${isListening ? "text-rose-600" : "text-blue-600"}`} />
+                      <Mic className={`h-4.5 w-4.5 ${isListening ? "text-rose-600" : "text-slate-400"}`} />
                       {isListening && (
                         <span className="absolute -inset-1 rounded-full border border-rose-500 animate-ping" />
                       )}
                     </div>
                   </button>
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1.5 flex items-center gap-1.5">
+                  <span>🎙️ Listening automatically... start speaking your symptoms.</span>
                 </div>
               </div>
 

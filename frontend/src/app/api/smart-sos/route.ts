@@ -77,9 +77,14 @@ ${passportContext}
     console.log("📦 [Smart SOS API Raw AI Response]:", rawText);
     const parsedData = JSON.parse(rawText.trim());
 
-    // 5. Send automated fail-safe email via Resend if isMyself is true and email exists
-    const emergencyEmail = healthPassport?.emergencyContactEmail;
-    if (isMyself && emergencyEmail) {
+    // 5. Send automated fail-safe email via Resend if isMyself is exactly true and healthPassport contains a valid email
+    if (
+      isMyself === true && 
+      healthPassport && 
+      typeof healthPassport.emergencyContactEmail === "string" && 
+      healthPassport.emergencyContactEmail.trim() !== ""
+    ) {
+      const emergencyEmail = healthPassport.emergencyContactEmail.trim();
       const resendApiKey = process.env.RESEND_API_KEY;
       if (!resendApiKey) {
         console.warn("⚠️ [Smart SOS API Warning]: RESEND_API_KEY is not set. Skipping emergency email dispatch.");
