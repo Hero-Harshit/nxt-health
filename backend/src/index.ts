@@ -664,6 +664,94 @@ app.get("/api/history", async (req, res) => {
   }
 });
 
+app.post("/api/smart-sos", async (req, res) => {
+  try {
+    const { symptoms } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      console.error("❌ [Smart SOS] GEMINI_API_KEY is missing from environment variables.");
+      res.status(500).json({ success: false, message: "Internal Server Error: AI Gateway unavailable." });
+      return;
+    }
+
+    const systemInstruction = `You are a professional crisis triage router. Analyze the user's symptoms and return an exact structured crisis layout. Generate realistic static hospital names and assign hardcoded close proximity distances.`;
+
+    const apiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: `Clinical Symptoms: "${symptoms || "Unknown"}"` }]
+            }
+          ],
+          systemInstruction: {
+            parts: [{ text: systemInstruction }]
+          },
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                suspectedCondition: { type: "STRING" },
+                severity: { type: "STRING" },
+                immediateFirstAid: {
+                  type: "ARRAY",
+                  items: { type: "STRING" }
+                },
+                erHandoverBrief: { type: "STRING" },
+                specializedHospitals: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    properties: {
+                      name: { type: "STRING" },
+                      specialtyMatch: { type: "STRING" },
+                      distance: { type: "STRING" }
+                    },
+                    required: ["name", "specialtyMatch", "distance"]
+                  }
+                },
+                whatsappTemplate: { type: "STRING" }
+              },
+              required: ["suspectedCondition", "severity", "immediateFirstAid", "erHandoverBrief", "specializedHospitals", "whatsappTemplate"]
+            }
+          }
+        })
+      }
+    );
+
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      console.error("❌ [Smart SOS] Gemini Gateway response anomaly:", apiResponse.status, errorText);
+      res.status(502).json({ success: false, message: "AI Gateway response anomaly." });
+      return;
+    }
+
+    const payloadResult = await apiResponse.json();
+    const cleanRawText = payloadResult.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!cleanRawText) {
+      console.error("❌ [Smart SOS] Empty body stream returned from generation candidates.");
+      res.status(502).json({ success: false, message: "Empty AI response stream." });
+      return;
+    }
+
+    const compiledData = JSON.parse(cleanRawText.trim());
+
+    res.status(200).json({
+      success: true,
+      data: compiledData
+    });
+  } catch (error: any) {
+    console.error("❌ [Smart SOS] Pipeline Intercept Error:", error);
+    res.status(500).json({ success: false, message: "Internal server error during triage processing." });
+  }
+});
+
 const PORT = process.env.PORT ?? 5000;
 
 app.listen(PORT, () => {
