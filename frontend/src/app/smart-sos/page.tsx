@@ -4,19 +4,22 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { ArrowLeft, ShieldAlert, CheckCircle, Mail, User, Shield, Info, Volume2, HeartPulse, Activity, Phone } from "lucide-react";
+import { ArrowLeft, ShieldAlert, CheckCircle, Mail, User, Shield, Info, Volume2, HeartPulse, Activity, Phone, ClipboardList } from "lucide-react";
 
 export default function SmartSOSPage() {
   const router = useRouter();
   const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
-  // Aggregated data states
+  // Aggregated data states exactly matching Supabase and Passport structures
   const [userName, setUserName] = useState<string>("Patient");
+  const [age, setAge] = useState<string>("Not Configured");
+  const [gender, setGender] = useState<string>("Not Configured");
   const [weightKg, setWeightKg] = useState<string>("Not Configured");
   const [heightCm, setHeightCm] = useState<string>("Not Configured");
   const [allergies, setAllergies] = useState<string>("None Listed");
   const [chronicConditions, setChronicConditions] = useState<string>("None Listed");
+  const [familyHistory, setFamilyHistory] = useState<string>("None Listed");
   const [policyDetails, setPolicyDetails] = useState<string>("Not Available");
   const [doctorName, setDoctorName] = useState<string>("Not Configured");
   const [doctorNumber, setDoctorNumber] = useState<string>("Not Configured");
@@ -58,10 +61,10 @@ export default function SmartSOSPage() {
 
   const loadUserData = async (userId: string) => {
     try {
-      // 1. Fetch User Profiles table details
+      // 1. Fetch User Profiles table details with exact target columns
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("*")
+        .select("full_name, age, gender, height_cm, weight_kg, pre_existing_conditions, family_history, current_policy_details, emergency_contact_email, emergency_contact_name, emergency_contact_relation")
         .eq("id", userId)
         .maybeSingle();
 
@@ -87,18 +90,24 @@ export default function SmartSOSPage() {
         passportData = cloudPassport.passport_data;
       }
 
-      // Map values resiliently with alternative keys
-      const resolvedName = profile?.full_name || profile?.name || profile?.userName || passportData?.fullName || passportData?.name || passportData?.userName || "Patient";
-      const rawWeight = profile?.weight_kg || profile?.weight || passportData?.weight || passportData?.weight_kg || "";
+      // Map values resiliently with fallbacks
+      const resolvedName = profile?.full_name || (profile as any)?.name || (profile as any)?.userName || passportData?.fullName || passportData?.name || passportData?.userName || "Patient";
+      const resolvedAge = profile?.age || passportData?.age || "Not Configured";
+      const resolvedGender = profile?.gender || passportData?.gender || "Not Configured";
+      const rawWeight = profile?.weight_kg || (profile as any)?.weight || passportData?.weight || passportData?.weight_kg || "";
       const resolvedWeight = rawWeight ? (String(rawWeight).includes("kg") ? String(rawWeight) : `${rawWeight} kg`) : "Not Configured";
-      const rawHeight = profile?.height_cm || profile?.height || passportData?.height || passportData?.height_cm || "";
+      const rawHeight = profile?.height_cm || (profile as any)?.height || passportData?.height || passportData?.height_cm || "";
       const resolvedHeight = rawHeight ? (String(rawHeight).includes("cm") ? String(rawHeight) : `${rawHeight} cm`) : "Not Configured";
-      const resolvedPolicy = profile?.current_policy_details || profile?.policy_details || profile?.policy || passportData?.currentPolicyDetails || passportData?.policyDetails || passportData?.policy_details || passportData?.policy || "Not Available";
+      const resolvedPolicy = profile?.current_policy_details || (profile as any)?.policy_details || (profile as any)?.policy || passportData?.currentPolicyDetails || passportData?.policyDetails || passportData?.policy_details || passportData?.policy || "Not Available";
+      const resolvedFamilyHistory = profile?.family_history || passportData?.familyHistory || passportData?.family_history || "None Listed";
 
       setUserName(resolvedName);
+      setAge(String(resolvedAge));
+      setGender(resolvedGender);
       setWeightKg(resolvedWeight);
       setHeightCm(resolvedHeight);
       setPolicyDetails(resolvedPolicy);
+      setFamilyHistory(resolvedFamilyHistory);
 
       // Emergency contact resolution
       const resolvedContactName = passportData?.emergencyContactName || profile?.emergency_contact_name || "Not Configured";
@@ -109,7 +118,7 @@ export default function SmartSOSPage() {
       setRelation(resolvedRelation);
       setContactEmail(resolvedContactEmail);
 
-      // Medical Profile
+      // Medical Profile Conditions mapping
       if (profile && Array.isArray(profile.pre_existing_conditions) && profile.pre_existing_conditions.length > 0) {
         setChronicConditions(profile.pre_existing_conditions.join(", "));
       }
@@ -222,6 +231,7 @@ export default function SmartSOSPage() {
     try {
       const activeTranscript = transcriptRef.current.trim() || "No spoken scenario recorded.";
 
+      // Dispatch EXACT body mappings matching database variables and destructuring specs
       const res = await fetch("/api/smart-sos", {
         method: "POST",
         headers: {
@@ -229,15 +239,18 @@ export default function SmartSOSPage() {
         },
         body: JSON.stringify({
           toEmail: contactEmail,
-          userName: userName,
-          transcript: activeTranscript,
-          weight: weightKg,
-          height: heightCm,
-          policyDetails: policyDetails,
-          allergies: allergies,
-          chronicConditions: chronicConditions,
+          full_name: userName,
+          age: age,
+          gender: gender,
+          height_cm: heightCm,
+          weight_kg: weightKg,
+          pre_existing_conditions: chronicConditions,
+          family_history: familyHistory,
+          current_policy_details: policyDetails,
           doctorName: doctorName,
-          doctorNumber: doctorNumber
+          doctorNumber: doctorNumber,
+          transcript: activeTranscript,
+          allergies: allergies
         })
       });
 
@@ -407,6 +420,16 @@ export default function SmartSOSPage() {
                   <span className="font-black text-slate-800">{heightCm}</span>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-2">
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider mb-0.5">Age</span>
+                  <span className="font-black text-slate-800">{age}</span>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider mb-0.5">Gender</span>
+                  <span className="font-black text-slate-800 capitalize">{gender}</span>
+                </div>
+              </div>
               <div className="border-t border-slate-100 pt-2 text-xs">
                 <span className="block font-bold text-slate-400 uppercase tracking-wider mb-0.5">Known Allergies</span>
                 <span className="font-black text-rose-600">{allergies}</span>
@@ -418,9 +441,9 @@ export default function SmartSOSPage() {
             </div>
           </div>
 
-          {/* Primary Doctor & Insurance */}
+          {/* Primary Doctor, Family History, & Insurance */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 md:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-3">
                 <h3 className="text-xs font-bold text-[#0F2744] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
                   <Phone className="h-4 w-4 text-sky-600" />
@@ -433,6 +456,17 @@ export default function SmartSOSPage() {
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-slate-400 uppercase tracking-wider">Doctor Contact</span>
                   <span className="font-black text-slate-800">{doctorNumber}</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-[#0F2744] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                  <ClipboardList className="h-4 w-4 text-sky-600" />
+                  Family Medical History
+                </h3>
+                <div>
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">History Summary</span>
+                  <span className="text-xs font-black text-slate-800 line-clamp-2 leading-relaxed">{familyHistory}</span>
                 </div>
               </div>
 

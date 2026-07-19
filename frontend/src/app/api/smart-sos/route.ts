@@ -8,15 +8,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { 
       toEmail, 
-      userName, 
-      transcript, 
-      weight, 
-      height, 
-      policyDetails, 
-      allergies, 
-      chronicConditions, 
+      full_name, 
+      age, 
+      gender, 
+      height_cm, 
+      weight_kg, 
+      pre_existing_conditions, 
+      family_history, 
+      current_policy_details, 
       doctorName, 
-      doctorNumber 
+      doctorNumber, 
+      transcript, 
+      allergies 
     } = body;
 
     if (!toEmail || typeof toEmail !== "string" || !toEmail.trim()) {
@@ -39,17 +42,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const displayUserName = userName || "Unknown Patient";
-    const displayWeight = weight || "Not Configured";
-    const displayHeight = height || "Not Configured";
-    const displayPolicyDetails = policyDetails || "Not Available";
-    const displayAllergies = allergies || "None Listed";
-    const displayChronicConditions = chronicConditions || "None Listed";
+    // Destructure with strong default fallbacks
+    const displayUserName = full_name || "Unknown Patient";
+    const displayAge = age || "Not Configured";
+    const displayGender = gender || "Not Configured";
+    const displayWeight = weight_kg ? (String(weight_kg).includes("kg") ? String(weight_kg) : `${weight_kg} kg`) : "Not Configured";
+    const displayHeight = height_cm ? (String(height_cm).includes("cm") ? String(height_cm) : `${height_cm} cm`) : "Not Configured";
+    const displayChronicConditions = pre_existing_conditions || "None Listed";
+    const displayFamilyHistory = family_history || "None Listed";
+    const displayPolicyDetails = current_policy_details || "Not Available";
     const displayDoctorName = doctorName || "Not Configured";
     const displayDoctorNumber = doctorNumber || "Not Configured";
     const displayTranscript = transcript || "No spoken scenario recorded.";
+    const displayAllergies = allergies || "None Listed";
 
-    const emailSubject = `🚨 EMERGENCY: NxtHealth Smart SOS Alert for ${displayUserName}`;
+    const emailSubject = `🚨 NXTHEALTH EMERGENCY SOS - ${displayUserName}`;
 
     const emailHtml = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
@@ -60,10 +67,23 @@ export async function POST(req: NextRequest) {
           <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9; font-weight: 500;">High-priority medical dispatch summary issued automatically.</p>
         </div>
         
-        <!-- Table Section for Patient Identity -->
+        <!-- Patient Identity -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
           <h3 style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">Patient Identity</h3>
-          <p style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 800;">${displayUserName}</p>
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 120px;">Full Name:</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700; font-size: 16px;">${displayUserName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Age:</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${displayAge}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Gender:</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700; text-transform: capitalize;">${displayGender}</td>
+            </tr>
+          </table>
         </div>
 
         <!-- Core Vitals & Demographics -->
@@ -94,6 +114,14 @@ export async function POST(req: NextRequest) {
               <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${displayChronicConditions}</td>
             </tr>
           </table>
+        </div>
+
+        <!-- History & Records -->
+        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+          <h3 style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">History & Records</h3>
+          <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.5; font-weight: 600;">
+            ${displayFamilyHistory}
+          </p>
         </div>
 
         <!-- Primary Care Contact -->
