@@ -1,21 +1,37 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { ArrowLeft, ShieldAlert, CheckCircle, Mail, User, Shield, Info } from "lucide-react";
+import { ArrowLeft, ShieldAlert, CheckCircle, Mail, User, Shield, Info, Volume2 } from "lucide-react";
 
 export default function SmartSOSPage() {
   const router = useRouter();
   const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  // Aggregated data states
+  const [userName, setUserName] = useState<string>("Patient");
+  const [weightKg, setWeightKg] = useState<string>("Not Configured");
+  const [allergies, setAllergies] = useState<string>("None Listed");
+  const [chronicConditions, setChronicConditions] = useState<string>("None Listed");
+  const [policyDetails, setPolicyDetails] = useState<string>("Not Available");
+  
+  // Emergency target fields
   const [contactName, setContactName] = useState<string>("Not Configured");
   const [relation, setRelation] = useState<string>("Not Configured");
-  const [contactEmail, setContactEmail] = useState<string>("Not Configured");
-  const [alertStatus, setAlertStatus] = useState<"idle" | "sending" | "sent">("idle");
+  const [contactEmail, setContactEmail] = useState<string>("");
 
-  // Get Session and Load Emergency Contact Info
+  // System states
+  const [transcript, setTranscript] = useState<string>("");
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const [isSent, setIsSent] = useState<boolean>(false);
+  const [isSending, setIsSending] = useState<boolean>(false);
+
+  const recognitionRef = useRef<any>(null);
+
+  // Load User Data & Passport Details
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -23,7 +39,7 @@ export default function SmartSOSPage() {
         router.push("/login");
         return;
       }
-      fetchEmergencyContact(session.user.id);
+      loadUserData(session.user.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -36,50 +52,174 @@ export default function SmartSOSPage() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const fetchEmergencyContact = async (userId: string) => {
+  const loadUserData = async (userId: string) => {
     try {
-      // Try to load from health_passports table first
-      const { data: passport } = await supabase
+      // 1. Fetch User Profiles table details
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("full_name, weight_kg, pre_existing_conditions, current_policy_details, emergency_contact_email, emergency_contact_name, emergency_contact_relation")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profile) {
+        setUserName(profile.full_name || "Patient");
+        setWeightKg(profile.weight_kg ? `${profile.weight_kg} kg` : "Not Configured");
+        setPolicyDetails(profile.current_policy_details || "Not Available");
+        setContactEmail(profile.emergency_contact_email || "");
+        if (Array.isArray(profile.pre_existing_conditions) && profile.pre_existing_conditions.length > 0) {
+          setChronicConditions(profile.pre_existing_conditions.join(", "));
+        }
+      }
+
+      // 2. Fetch Health Passport local storage + cloud details
+      const cached = localStorage.getItem("nxt_health_passport");
+      let passportData: any = null;
+
+      if (cached) {
+        try {
+          passportData = JSON.parse(cached);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const { data: cloudPassport } = await supabase
         .from("health_passports")
         .select("passport_data")
         .eq("user_id", userId)
         .maybeSingle();
 
-      if (passport && passport.passport_data) {
-        const pd = passport.passport_data;
-        if (pd.emergencyContactName || pd.emergencyContactEmail) {
-          setContactName(pd.emergencyContactName || "Not Configured");
-          setRelation(pd.emergencyContactRelation || "Not Configured");
-          setContactEmail(pd.emergencyContactEmail || "Not Configured");
-          setIsLoading(false);
-          return;
+      if (cloudPassport && cloudPassport.passport_data) {
+        passportData = cloudPassport.passport_data;
+      }
+
+      if (passportData) {
+        setContactName(passportData.emergencyContactName || profile?.emergency_contact_name || "Not Configured");
+        setRelation(passportData.emergencyContactRelation || profile?.emergency_contact_relation || "Not Configured");
+        if (passportData.emergencyContactEmail) {
+          setContactEmail(passportData.emergencyContactEmail);
+        }
+        if (Array.isArray(passportData.allergies) && passportData.allergies.length > 0) {
+          setAllergies(passportData.allergies.join(", "));
+        }
+        if (Array.isArray(passportData.chronicConditions) && passportData.chronicConditions.length > 0) {
+          setChronicConditions(passportData.chronicConditions.join(", "));
         }
       }
-
-      // Fallback to profiles table
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("emergency_contact_name, emergency_contact_relation, emergency_contact_email")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (profile) {
-        setContactName(profile.emergency_contact_name || "Not Configured");
-        setRelation(profile.emergency_contact_relation || "Not Configured");
-        setContactEmail(profile.emergency_contact_email || "Not Configured");
-      }
-    } catch (error) {
-      console.error("Error loading emergency contact metadata:", error);
+    } catch (err) {
+      console.error("Error aggregating profile details:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleTriggerAlert = () => {
-    setAlertStatus("sending");
-    setTimeout(() => {
-      setAlertStatus("sent");
-    }, 1200);
+  // Auto-recording Voice capture hook
+  useEffect(() => {
+    if (isLoading || isSent || isSending) return;
+
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        try {
+          const rec = new SpeechRecognition();
+          rec.continuous = true;
+          rec.interimResults = false;
+          rec.lang = "en-US";
+
+          rec.onstart = () => {
+            setIsListening(true);
+            console.log("🎤 Hands-free mic capture activated automatically.");
+          };
+
+          rec.onresult = (event: any) => {
+            const currentResultIndex = event.resultIndex;
+            const text = event.results[currentResultIndex][0].transcript;
+            setTranscript((prev) => (prev ? prev + " " + text.trim() : text.trim()));
+          };
+
+          rec.onerror = (event: any) => {
+            console.error("Speech recognition error:", event.error);
+          };
+
+          rec.onend = () => {
+            // Automatically restart if alert is not sent
+            if (!isSent && !isSending) {
+              try {
+                rec.start();
+              } catch (e) {
+                // Already running
+              }
+            } else {
+              setIsListening(false);
+            }
+          };
+
+          rec.start();
+          recognitionRef.current = rec;
+        } catch (e) {
+          console.warn("Speech recognition initialization safely deferred until interaction:", e);
+        }
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // Already stopped
+        }
+      }
+    };
+  }, [isLoading, isSent, isSending]);
+
+  const handleTriggerAlert = async () => {
+    if (!contactEmail || !contactEmail.trim()) {
+      alert("Designated Emergency Contact Email is missing! Please configure a contact email inside your Health Passport first.");
+      return;
+    }
+
+    setIsSending(true);
+    // Stop recording when alert is triggered
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        // Already stopped
+      }
+    }
+
+    try {
+      const demographicsStr = `Weight: ${weightKg}`;
+      const allergiesStr = allergies;
+
+      const res = await fetch("/api/smart-sos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          toEmail: contactEmail,
+          userName: userName,
+          transcript: transcript || "No spoken scenario recorded (triggered silently).",
+          policyDetails: policyDetails,
+          allergies: allergiesStr,
+          demographics: demographicsStr
+        })
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        setIsSent(true);
+      } else {
+        alert(`Dispatch failed: ${result.error || "Server error"}`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(`Network error dispatching alert: ${err.message || err}`);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   if (isLoading) {
@@ -91,8 +231,13 @@ export default function SmartSOSPage() {
     );
   }
 
+  // Dynamic layout theme swap: tranquilSage-blue if alert was successfully dispatched
+  const wrapperClass = isSent 
+    ? "min-h-screen bg-[#F0F4F8] text-slate-900 p-4 md:p-8 font-sans transition-all duration-700" 
+    : "min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans transition-all duration-700";
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans">
+    <div className={wrapperClass}>
       <div className="max-w-3xl mx-auto space-y-8">
         
         {/* Navigation Breadcrumb */}
@@ -108,8 +253,10 @@ export default function SmartSOSPage() {
         {/* Header Section */}
         <div className="space-y-2">
           <div className="flex items-center gap-2.5">
-            <span className="h-2 w-2 rounded-full bg-rose-600 animate-pulse" />
-            <span className="text-[10px] uppercase font-bold tracking-wider text-rose-600">Secure Dispatch Active</span>
+            <span className={`h-2 w-2 rounded-full ${isSent ? 'bg-emerald-500' : 'bg-rose-600 animate-pulse'}`} />
+            <span className={`text-[10px] uppercase font-bold tracking-wider ${isSent ? 'text-emerald-600' : 'text-rose-600'}`}>
+              {isSent ? 'Alert Logged & Broadcasted' : 'Secure Dispatch Active'}
+            </span>
           </div>
           <h1 className="text-3xl font-black text-[#0F2744] tracking-tight">Smart SOS Console</h1>
           <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
@@ -117,59 +264,59 @@ export default function SmartSOSPage() {
           </p>
         </div>
 
-        {/* Central Action Area (Tactile panic trigger mechanism) */}
+        {/* Central Action Area */}
         <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm flex flex-col items-center justify-center text-center space-y-6 min-h-[320px] transition-all">
-          {alertStatus === "idle" && (
-            <>
-              <div className="relative group shrink-0">
-                {/* Visual tactile pulse effect */}
-                <div className="absolute -inset-4 bg-rose-500/20 rounded-full blur-md group-hover:scale-110 transition-transform duration-500 animate-ping" />
-                <button
-                  onClick={handleTriggerAlert}
-                  className="relative h-44 w-44 rounded-full bg-gradient-to-tr from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600 border-4 border-white text-white font-extrabold text-lg flex flex-col items-center justify-center gap-1.5 shadow-lg shadow-rose-900/30 active:scale-95 transition-all duration-150 cursor-pointer select-none"
-                >
-                  <ShieldAlert className="h-10 w-10 animate-bounce" />
-                  <span>TRIGGER<br />ALERT</span>
-                </button>
-              </div>
-              <div className="space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tactile Panic Mechanism</span>
-                <p className="text-[11px] text-slate-500 max-w-xs leading-normal">
-                  Pressing this button activates a local simulation of the emergency broadcast.
-                </p>
-              </div>
-            </>
-          )}
-
-          {alertStatus === "sending" && (
-            <div className="space-y-4 animate-pulse">
-              <div className="h-20 w-20 rounded-full bg-amber-50 text-amber-500 border-2 border-amber-200 flex items-center justify-center mx-auto shadow-inner">
-                <Shield className="h-10 w-10 animate-spin" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-[#0F2744]">Encrypting Broadcast Payload</h3>
-                <p className="text-xs text-slate-500">Contacting secure local networks...</p>
-              </div>
+          
+          {/* Active Listening Indicators */}
+          {isListening && !isSent && !isSending && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 shadow-sm animate-pulse">
+              <Volume2 className="h-3.5 w-3.5" />
+              <span>LIVE VOICE MONITOR ACTIVE</span>
             </div>
           )}
 
-          {alertStatus === "sent" && (
-            <div className="space-y-5 animate-fade-in">
-              <div className="h-20 w-20 rounded-full bg-emerald-50 text-emerald-600 border-2 border-emerald-200 flex items-center justify-center mx-auto shadow-inner">
-                <CheckCircle className="h-10 w-10" />
+          {!isSent && (
+            <>
+              <div className="relative group shrink-0">
+                <div className={`absolute -inset-4 ${isSending ? 'bg-amber-500/20' : 'bg-rose-500/20'} rounded-full blur-md group-hover:scale-110 transition-transform duration-500 animate-ping`} />
+                <button
+                  onClick={handleTriggerAlert}
+                  disabled={isSending}
+                  className={`relative h-44 w-44 rounded-full bg-gradient-to-tr ${isSending ? 'from-amber-500 to-yellow-400' : 'from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600'} border-4 border-white text-white font-extrabold text-lg flex flex-col items-center justify-center gap-1.5 shadow-lg shadow-rose-900/30 active:scale-95 transition-all duration-150 cursor-pointer select-none`}
+                >
+                  <ShieldAlert className="h-10 w-10" />
+                  <span>{isSending ? 'SENDING...' : 'TRIGGER ALERT'}</span>
+                </button>
               </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-black text-emerald-700">Emergency Alert Dispatched</h3>
-                <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
-                  A high-priority emergency summary has been successfully routed to <strong className="text-slate-800">{contactEmail}</strong>.
+
+              {transcript && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-w-md text-left space-y-1">
+                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Real-time Transcript</h4>
+                  <p className="text-xs text-slate-700 italic font-medium leading-relaxed">&ldquo;{transcript}&rdquo;</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {isSent && (
+            <div className="space-y-6 flex flex-col items-center">
+              <div className="relative shrink-0">
+                {/* Reassuring green button state */}
+                <button
+                  disabled
+                  className="relative h-44 w-44 rounded-full bg-emerald-600 border-4 border-white text-white font-extrabold text-sm flex flex-col items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/20 transition-all select-none"
+                >
+                  <CheckCircle className="h-10 w-10" />
+                  <span>Relax, help is arriving.</span>
+                </button>
+              </div>
+              
+              <div className="space-y-1.5">
+                <p className="text-sm font-extrabold text-emerald-800">Your emergency contact has been notified</p>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                  An encrypted copy of the health passport details and your live speech transcript has been safely routed to <strong className="text-slate-800">{contactEmail}</strong>.
                 </p>
               </div>
-              <button
-                onClick={() => setAlertStatus("idle")}
-                className="px-5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
-              >
-                Reset Trigger Button
-              </button>
             </div>
           )}
         </section>
@@ -196,7 +343,7 @@ export default function SmartSOSPage() {
               <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Live Dispatch Email</span>
               <span className="text-xs font-black text-slate-800 flex items-center gap-1.5 truncate">
                 <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                {contactEmail}
+                {contactEmail || "Not Configured"}
               </span>
             </div>
           </div>
