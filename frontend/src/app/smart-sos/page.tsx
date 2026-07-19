@@ -70,7 +70,7 @@ export default function SmartSOSPage() {
       // 1. Fetch User Profiles table details with exact target columns
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("full_name, age, gender, height_cm, weight_kg, pre_existing_conditions, family_history, current_policy_details, emergency_contact_email, emergency_contact_name, emergency_contact_relation")
+        .select("full_name, age, gender, height_cm, weight_kg, pre_existing_conditions, family_history, current_policy_details")
         .eq("id", userId)
         .maybeSingle();
 
@@ -116,9 +116,9 @@ export default function SmartSOSPage() {
       setFamilyHistory(resolvedFamilyHistory);
 
       // Emergency contact resolution
-      const resolvedContactName = passportData?.emergencyContactName || profile?.emergency_contact_name || "Not Configured";
-      const resolvedRelation = passportData?.emergencyContactRelation || profile?.emergency_contact_relation || "Not Configured";
-      const resolvedContactEmail = passportData?.emergencyContactEmail || profile?.emergency_contact_email || "";
+      const resolvedContactName = passportData?.emergencyContactName || (profile as any)?.emergency_contact_name || "Not Configured";
+      const resolvedRelation = passportData?.emergencyContactRelation || (profile as any)?.emergency_contact_relation || "Not Configured";
+      const resolvedContactEmail = passportData?.emergencyContactEmail || (profile as any)?.emergency_contact_email || "";
       
       setContactName(resolvedContactName);
       setRelation(resolvedRelation);
