@@ -61,22 +61,9 @@ export default function SmartSOSPage() {
       // 1. Fetch User Profiles table details
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("full_name, weight_kg, height_cm, pre_existing_conditions, current_policy_details, emergency_contact_email, emergency_contact_name, emergency_contact_relation")
+        .select("*")
         .eq("id", userId)
         .maybeSingle();
-
-      if (profile) {
-        setUserName(profile.full_name || "Patient");
-        setWeightKg(profile.weight_kg ? `${profile.weight_kg} kg` : "Not Configured");
-        setHeightCm(profile.height_cm ? `${profile.height_cm} cm` : "Not Configured");
-        setPolicyDetails(profile.current_policy_details || "Not Available");
-        setContactEmail(profile.emergency_contact_email || "");
-        setContactName(profile.emergency_contact_name || "Not Configured");
-        setRelation(profile.emergency_contact_relation || "Not Configured");
-        if (Array.isArray(profile.pre_existing_conditions) && profile.pre_existing_conditions.length > 0) {
-          setChronicConditions(profile.pre_existing_conditions.join(", "));
-        }
-      }
 
       // 2. Fetch Health Passport local storage + cloud details
       const cached = localStorage.getItem("nxt_health_passport");
@@ -100,12 +87,34 @@ export default function SmartSOSPage() {
         passportData = cloudPassport.passport_data;
       }
 
+      // Map values resiliently with alternative keys
+      const resolvedName = profile?.full_name || profile?.name || profile?.userName || passportData?.fullName || passportData?.name || passportData?.userName || "Patient";
+      const rawWeight = profile?.weight_kg || profile?.weight || passportData?.weight || passportData?.weight_kg || "";
+      const resolvedWeight = rawWeight ? (String(rawWeight).includes("kg") ? String(rawWeight) : `${rawWeight} kg`) : "Not Configured";
+      const rawHeight = profile?.height_cm || profile?.height || passportData?.height || passportData?.height_cm || "";
+      const resolvedHeight = rawHeight ? (String(rawHeight).includes("cm") ? String(rawHeight) : `${rawHeight} cm`) : "Not Configured";
+      const resolvedPolicy = profile?.current_policy_details || profile?.policy_details || profile?.policy || passportData?.currentPolicyDetails || passportData?.policyDetails || passportData?.policy_details || passportData?.policy || "Not Available";
+
+      setUserName(resolvedName);
+      setWeightKg(resolvedWeight);
+      setHeightCm(resolvedHeight);
+      setPolicyDetails(resolvedPolicy);
+
+      // Emergency contact resolution
+      const resolvedContactName = passportData?.emergencyContactName || profile?.emergency_contact_name || "Not Configured";
+      const resolvedRelation = passportData?.emergencyContactRelation || profile?.emergency_contact_relation || "Not Configured";
+      const resolvedContactEmail = passportData?.emergencyContactEmail || profile?.emergency_contact_email || "";
+      
+      setContactName(resolvedContactName);
+      setRelation(resolvedRelation);
+      setContactEmail(resolvedContactEmail);
+
+      // Medical Profile
+      if (profile && Array.isArray(profile.pre_existing_conditions) && profile.pre_existing_conditions.length > 0) {
+        setChronicConditions(profile.pre_existing_conditions.join(", "));
+      }
+
       if (passportData) {
-        setContactName(passportData.emergencyContactName || profile?.emergency_contact_name || "Not Configured");
-        setRelation(passportData.emergencyContactRelation || profile?.emergency_contact_relation || "Not Configured");
-        if (passportData.emergencyContactEmail) {
-          setContactEmail(passportData.emergencyContactEmail);
-        }
         if (Array.isArray(passportData.allergies) && passportData.allergies.length > 0) {
           setAllergies(passportData.allergies.join(", "));
         }

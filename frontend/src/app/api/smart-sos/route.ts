@@ -39,7 +39,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const emailSubject = `🚨 EMERGENCY: NxtHealth Smart SOS Alert for ${userName || "Patient"}`;
+    const displayUserName = userName || "Unknown Patient";
+    const displayWeight = weight || "Not Configured";
+    const displayHeight = height || "Not Configured";
+    const displayPolicyDetails = policyDetails || "Not Available";
+    const displayAllergies = allergies || "None Listed";
+    const displayChronicConditions = chronicConditions || "None Listed";
+    const displayDoctorName = doctorName || "Not Configured";
+    const displayDoctorNumber = doctorNumber || "Not Configured";
+    const displayTranscript = transcript || "No spoken scenario recorded.";
+
+    const emailSubject = `🚨 EMERGENCY: NxtHealth Smart SOS Alert for ${displayUserName}`;
 
     const emailHtml = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
@@ -53,7 +63,7 @@ export async function POST(req: NextRequest) {
         <!-- Table Section for Patient Identity -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
           <h3 style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">Patient Identity</h3>
-          <p style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 800;">${userName || "Unknown Patient"}</p>
+          <p style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 800;">${displayUserName}</p>
         </div>
 
         <!-- Core Vitals & Demographics -->
@@ -62,11 +72,11 @@ export async function POST(req: NextRequest) {
           <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
             <tr>
               <td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 120px;">Weight:</td>
-              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${weight || "Not Configured"}</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${displayWeight}</td>
             </tr>
             <tr>
               <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Height:</td>
-              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${height || "Not Configured"}</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${displayHeight}</td>
             </tr>
           </table>
         </div>
@@ -77,11 +87,11 @@ export async function POST(req: NextRequest) {
           <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
             <tr>
               <td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 120px; vertical-align: top;">Known Allergies:</td>
-              <td style="padding: 6px 0; color: #ef4444; font-weight: 700;">${allergies || "None Listed"}</td>
+              <td style="padding: 6px 0; color: #ef4444; font-weight: 700;">${displayAllergies}</td>
             </tr>
             <tr>
               <td style="padding: 6px 0; color: #64748b; font-weight: 600; vertical-align: top;">Chronic Conditions:</td>
-              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${chronicConditions || "None Listed"}</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${displayChronicConditions}</td>
             </tr>
           </table>
         </div>
@@ -92,11 +102,11 @@ export async function POST(req: NextRequest) {
           <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
             <tr>
               <td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 120px;">Doctor Name:</td>
-              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${doctorName || "Not Configured"}</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${displayDoctorName}</td>
             </tr>
             <tr>
               <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Doctor Contact:</td>
-              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${doctorNumber || "Not Configured"}</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${displayDoctorNumber}</td>
             </tr>
           </table>
         </div>
@@ -105,7 +115,7 @@ export async function POST(req: NextRequest) {
         <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
           <h3 style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">Insurance Verification</h3>
           <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.5; font-weight: 600;">
-            ${policyDetails || "Not Available"}
+            ${displayPolicyDetails}
           </p>
         </div>
 
@@ -113,7 +123,7 @@ export async function POST(req: NextRequest) {
         <div style="background-color: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);">
           <h4 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #be123c; text-transform: uppercase; letter-spacing: 0.8px;">🔴 Live Scenario Transcript</h4>
           <p style="margin: 0; font-size: 15px; color: #881337; font-style: italic; line-height: 1.6; font-weight: 600;">
-            &ldquo;${transcript || "No spoken scenario recorded."}&rdquo;
+            &ldquo;${displayTranscript}&rdquo;
           </p>
         </div>
 
