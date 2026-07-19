@@ -34,6 +34,7 @@ export default function SmartSOSPage() {
   const [isSending, setIsSending] = useState<boolean>(false);
   const [buttonState, setButtonState] = useState<'idle' | 'sending' | 'success'>('idle');
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [showEmailAlert, setShowEmailAlert] = useState<boolean>(false);
 
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef<string>("");
@@ -212,7 +213,7 @@ export default function SmartSOSPage() {
 
   const handleTriggerAlert = async () => {
     if (!contactEmail || !contactEmail.trim()) {
-      alert("Designated Emergency Contact Email is missing! Please configure a contact email inside your Health Passport first.");
+      setShowEmailAlert(true);
       return;
     }
 
@@ -425,6 +426,30 @@ export default function SmartSOSPage() {
 
 
       </div>
+      
+      {showEmailAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-sm overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-850 rounded-2xl shadow-xl p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-red-100 dark:bg-red-950/50 rounded-full text-red-600">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Missing Configuration</h3>
+            </div>
+            <p className="mt-3 text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">
+              Designated Emergency Contact Email is missing! Please configure a contact email inside your Health Passport first.
+            </p>
+            <div className="mt-6 flex justify-end">
+              <button 
+                onClick={() => setShowEmailAlert(false)}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-650 hover:bg-red-700 active:scale-98 rounded-xl transition-all shadow-sm cursor-pointer"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
