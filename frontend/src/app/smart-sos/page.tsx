@@ -255,9 +255,9 @@ export default function SmartSOSPage() {
           },
           (error) => {
             console.error("Location error:", error);
-            resolve(null); // Proceed gracefully even if blocked
+            resolve(null);
           },
-          { enableHighAccuracy: true, timeout: 2000 }
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
         );
       } else {
         resolve(null);
