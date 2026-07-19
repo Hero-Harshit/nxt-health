@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
       longitude
     } = body;
 
-    const mapsUrl = latitude && longitude ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}` : null;
+    const hasLocation = latitude !== undefined && latitude !== null && longitude !== undefined && longitude !== null;
+    const mapsUrl = hasLocation ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}` : null;
 
     if (!toEmail || typeof toEmail !== "string" || !toEmail.trim()) {
       return NextResponse.json({ success: false, error: "Missing destination email (toEmail)" }, { status: 400 });

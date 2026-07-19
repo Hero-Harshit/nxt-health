@@ -243,7 +243,32 @@ export default function SmartSOSPage() {
       }
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+    const startTime = Date.now();
+
+    await new Promise((resolve) => {
+      if (typeof window !== "undefined" && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            latRef.current = position.coords.latitude;
+            lngRef.current = position.coords.longitude;
+            resolve(null);
+          },
+          (error) => {
+            console.error("Location error:", error);
+            resolve(null); // Proceed gracefully even if blocked
+          },
+          { enableHighAccuracy: true, timeout: 2000 }
+        );
+      } else {
+        resolve(null);
+      }
+    });
+
+    const elapsed = Date.now() - startTime;
+    const remainingDelay = 2500 - elapsed;
+    if (remainingDelay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, remainingDelay));
+    }
 
     try {
       // 1. Resolve transcription with DOM extraction fallback
