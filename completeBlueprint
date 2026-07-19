@@ -12,7 +12,8 @@ Healthcare is too sensitive for unverified AI advice or unguided predictions. AI
 
 Instead, NxtHealth acts purely as a healthcare decision-support platform. It gives users clarity, literacy, and structured recommendations without ever replacing a real clinical diagnosis.
 
-WHAT OUR PLATFORM EXPLAINS
+WHAT OUR PLATFORM EXPLAINS :-
+
 Every single recommendation on NxtHealth answers four key questions:
 
 1. Why a specific option was suggested (and why other options were not).
@@ -22,20 +23,25 @@ Every single recommendation on NxtHealth answers four key questions:
 
 PLATFORM MODULES :-
 
-* AI Insurance Advisor: Analyzes policy terms, co-pays, and coverage limits to suggest tailored health plans based on budget and family size without agent bias.
+* Smart SOS Command Center :- A fast, voice-activated emergency tool for high-stress situations. It captures live spoken distress in real time and uses a built-in timing cushion to ensure it records the full message before instantly emailing the transcript and medical profile straight to an emergency contact.
 
-* Preventive Health Planner: Creates customized check-up schedules based on age, lifestyle, and personal health profiles.
+* AI Insurance Advisor :- Analyzes complex policy terms, co-pays, and coverage limits to suggest matching health plans based on a user's budget and family size. It removes middleman bias and provides direct, clickable external links to the actual official policy websites.
 
-* Generic Medicine Alternatives: Matches expensive branded medicines with safe, verified generic options. If an exact match is not in our database, it strictly avoids giving false or unverified info.
+* Preventive Health Planner :- Creates customized health check-up schedules and milestone tracking based on a user's age, lifestyle habits, and personal medical profile.
 
-* Prescription & Term Explainer: Translates complex clinical jargon, lab test results, and doctor notes into simple, everyday language.
+* Generic Medicine Alternatives :- Matches expensive branded medicines with safe, verified generic options to save patients money. If an exact match is missing from the database, it strictly avoids giving false or unverified information.
+
+* Prescription & Term Explainer :- Translates confusing clinical jargon, complex lab test results, and doctor notes into simple, everyday language that anyone can read.
+
+* Health Passport :- A comprehensive medical resume for the patient that organizes core details like age, vitals, chronic conditions, severe allergies, and primary doctor contacts. This profile data automatically packs and syncs with the Smart SOS module during a crisis.
 
 COMPETITIVE ADVANTAGE :-
+
 Our biggest strength is Explainable Healthcare. While other tools give black-box answers, NxtHealth shows the full thought process behind every suggestion so the user stays in complete control.
 
 PRODUCT GUIDING PRINCIPLES :-
 
-* Simplicity and clear user experience
+* Simplicity and clear, zero-distraction user experience
 * Zero-hallucination guardrails for maximum reliability
 * Fast development and long-term maintainability
 * Scalable, low-to-zero cost infrastructure
