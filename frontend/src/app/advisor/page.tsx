@@ -15,6 +15,7 @@ type ExplanationResult = {
   trade_offs: string | null;
   confidence_level: "high" | "medium" | "low" | null;
   confidence_note: string | null;
+  policy_link?: string | null;
 };
 
 type ApiResponse = {
@@ -347,7 +348,21 @@ export default function AdvisorPage() {
                     >
                        <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                         <div>
-                          <h3 className="text-lg font-bold text-[#0F2744] tracking-tight">{policy.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-[#0F2744] tracking-tight">{policy.title}</h3>
+                            {policy.policy_link && (
+                              <a 
+                                href={policy.policy_link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center p-1 text-gray-400 hover:text-blue-600 transition-colors rounded-md hover:bg-gray-100"
+                                title="View official policy page"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                              </a>
+                            )}
+                          </div>
                           <p className="text-xs text-slate-500 mt-1">ID: {policy.reference_id}</p>
                         </div>
                         <div className="flex items-center gap-2">
