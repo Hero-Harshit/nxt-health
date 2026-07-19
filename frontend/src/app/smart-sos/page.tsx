@@ -208,6 +208,8 @@ export default function SmartSOSPage() {
   }, [isLoading, isSent, isSending]);
 
   const handleTriggerAlert = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+
     if (!contactEmail || !contactEmail.trim()) {
       alert("Designated Emergency Contact Email is missing! Please configure a contact email inside your Health Passport first.");
       return;
