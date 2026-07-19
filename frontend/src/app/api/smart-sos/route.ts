@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     console.log("📩 [BACKEND RECEIVED PAYLOAD]:", body);
+    
     const { 
       toEmail, 
       full_name, 
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Sanitization with strong visual defaults and fallbacks
+    // Destructure with strong default fallbacks
     const displayUserName = full_name || "Unknown Patient";
     const displayAge = age || "Not Configured";
     const displayGender = gender || "Not Configured";
@@ -54,10 +55,8 @@ export async function POST(req: NextRequest) {
     const displayPolicyDetails = current_policy_details || "Not Available";
     const displayDoctorName = doctorName || "Not Configured";
     const displayDoctorNumber = doctorNumber || "Not Configured";
+    const displayTranscript = transcript || "No spoken scenario recorded.";
     const displayAllergies = allergies || "None Listed";
-    
-    // Explicit transcript fallback mapping
-    const finalTranscript = transcript && transcript.trim() !== "" ? transcript : "No spoken scenario recorded.";
 
     const emailSubject = `🚨 EMERGENCY: NxtHealth Smart SOS Alert for ${displayUserName}`;
 
@@ -154,7 +153,7 @@ export async function POST(req: NextRequest) {
         <div style="background-color: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);">
           <h4 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #be123c; text-transform: uppercase; letter-spacing: 0.8px;">🔴 Live Scenario Transcript</h4>
           <p style="margin: 0; font-size: 15px; color: #881337; font-style: italic; line-height: 1.6; font-weight: 600;">
-            &ldquo;${finalTranscript}&rdquo;
+            &ldquo;${displayTranscript}&rdquo;
           </p>
         </div>
 
