@@ -32,6 +32,8 @@ export default function SmartSOSPage() {
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isSent, setIsSent] = useState<boolean>(false);
   const [isSending, setIsSending] = useState<boolean>(false);
+  const [buttonState, setButtonState] = useState<'idle' | 'sending' | 'success'>('idle');
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef<string>("");
@@ -208,14 +210,14 @@ export default function SmartSOSPage() {
   }, [isLoading, isSent, isSending]);
 
   const handleTriggerAlert = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-
     if (!contactEmail || !contactEmail.trim()) {
       alert("Designated Emergency Contact Email is missing! Please configure a contact email inside your Health Passport first.");
       return;
     }
 
+    setButtonState('sending');
     setIsSending(true);
+
     // Stop recording when alert is triggered
     if (recognitionRef.current) {
       try {
@@ -224,6 +226,8 @@ export default function SmartSOSPage() {
         // Already stopped
       }
     }
+
+    await new Promise((resolve) => setTimeout(resolve, 2500));
 
     try {
       // 1. Resolve transcription with DOM extraction fallback
@@ -267,18 +271,53 @@ export default function SmartSOSPage() {
       });
 
       const result = await res.json();
+      
+      // Pause for an additional 1 second to allow the network request to resolve completely while remaining in yellow state
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       if (result.success) {
+        setButtonState('success');
         setIsSent(true);
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        setShowConfirmation(true);
       } else {
+        setButtonState('idle');
         alert(`Dispatch failed: ${result.error || "Server error"}`);
       }
     } catch (err: any) {
+      setButtonState('idle');
       console.error(err);
       alert(`Network error dispatching alert: ${err.message || err}`);
     } finally {
       setIsSending(false);
     }
   };
+
+  const getButtonConfig = () => {
+    switch (buttonState) {
+      case 'sending':
+        return {
+          btnClass: 'from-amber-500 to-yellow-400 bg-yellow-500 hover:bg-yellow-500 text-black animate-pulse',
+          text: 'PROCESSING & SENDING...',
+          pingClass: 'bg-amber-500/20 animate-ping',
+        };
+      case 'success':
+        return {
+          btnClass: 'from-green-600 to-emerald-500 bg-green-600 hover:bg-green-600 text-white',
+          text: 'PASSPORT DISPATCHED!',
+          pingClass: 'bg-green-500/20',
+        };
+      case 'idle':
+      default:
+        return {
+          btnClass: 'from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600 bg-red-600 hover:bg-red-700 text-white',
+          text: 'TRIGGER EMERGENCY SOS',
+          pingClass: 'bg-rose-500/20',
+        };
+    }
+  };
+
+  const { btnClass, text: buttonText, pingClass } = getButtonConfig();
 
   if (isLoading) {
     return (
@@ -290,7 +329,7 @@ export default function SmartSOSPage() {
   }
 
   // Dynamic layout theme swap: tranquil slate-blue if alert was successfully dispatched
-  const wrapperClass = isSent 
+  const wrapperClass = showConfirmation 
     ? "min-h-screen bg-[#F0F4F8] text-slate-900 p-4 md:p-8 font-sans transition-all duration-700" 
     : "min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans transition-all duration-700";
 
@@ -311,9 +350,9 @@ export default function SmartSOSPage() {
         {/* Header Section */}
         <div className="space-y-2">
           <div className="flex items-center gap-2.5">
-            <span className={`h-2 w-2 rounded-full ${isSent ? 'bg-emerald-500' : 'bg-rose-600 animate-pulse'}`} />
-            <span className={`text-[10px] uppercase font-bold tracking-wider ${isSent ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {isSent ? 'Alert Logged & Broadcasted' : 'Secure Dispatch Active'}
+            <span className={`h-2 w-2 rounded-full ${showConfirmation ? 'bg-emerald-500' : 'bg-rose-600 animate-pulse'}`} />
+            <span className={`text-[10px] uppercase font-bold tracking-wider ${showConfirmation ? 'text-emerald-600' : 'text-rose-600'}`}>
+              {showConfirmation ? 'Alert Logged & Broadcasted' : 'Secure Dispatch Active'}
             </span>
           </div>
           <h1 className="text-3xl font-black text-[#0F2744] tracking-tight">Smart SOS Console</h1>
@@ -326,24 +365,28 @@ export default function SmartSOSPage() {
         <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm flex flex-col items-center justify-center text-center space-y-6 min-h-[320px] transition-all">
           
           {/* Active Listening Indicators */}
-          {isListening && !isSent && !isSending && (
+          {isListening && !showConfirmation && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 shadow-sm animate-pulse">
               <Volume2 className="h-3.5 w-3.5" />
               <span>LIVE VOICE MONITOR ACTIVE</span>
             </div>
           )}
 
-          {!isSent && (
+          {!showConfirmation && (
             <>
               <div className="relative group shrink-0">
-                <div className={`absolute -inset-4 ${isSending ? 'bg-amber-500/20' : 'bg-rose-500/20'} rounded-full blur-md group-hover:scale-110 transition-transform duration-500 animate-ping`} />
+                <div className={`absolute -inset-4 ${pingClass} rounded-full blur-md group-hover:scale-110 transition-transform duration-500`} />
                 <button
                   onClick={handleTriggerAlert}
-                  disabled={isSending}
-                  className={`relative h-44 w-44 rounded-full bg-gradient-to-tr ${isSending ? 'from-amber-500 to-yellow-400' : 'from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600'} border-4 border-white text-white font-extrabold text-lg flex flex-col items-center justify-center gap-1.5 shadow-lg shadow-rose-900/30 active:scale-95 transition-all duration-150 cursor-pointer select-none`}
+                  disabled={buttonState !== 'idle'}
+                  className={`relative h-44 w-44 rounded-full bg-gradient-to-tr ${btnClass} border-4 border-white font-extrabold text-xs flex flex-col items-center justify-center gap-1.5 shadow-lg shadow-rose-900/30 active:scale-95 transition-all duration-150 cursor-pointer select-none`}
                 >
-                  <ShieldAlert className="h-10 w-10" />
-                  <span>{isSending ? 'SENDING...' : 'TRIGGER ALERT'}</span>
+                  {buttonState === 'success' ? (
+                    <CheckCircle className="h-10 w-10" />
+                  ) : (
+                    <ShieldAlert className="h-10 w-10" />
+                  )}
+                  <span className="text-center px-2 uppercase tracking-wide leading-tight">{buttonText}</span>
                 </button>
               </div>
 
@@ -356,7 +399,7 @@ export default function SmartSOSPage() {
             </>
           )}
 
-          {isSent && (
+          {showConfirmation && (
             <div className="space-y-6 flex flex-col items-center">
               <div className="relative shrink-0">
                 {/* Reassuring green button state */}
