@@ -37,6 +37,22 @@ export default function SmartSOSPage() {
 
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef<string>("");
+  const latRef = useRef<number | null>(null);
+  const lngRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          latRef.current = position.coords.latitude;
+          lngRef.current = position.coords.longitude;
+        },
+        (error) => {
+          console.error("Silent background geolocation capture error:", error);
+        }
+      );
+    }
+  }, []);
 
   // Load User Data & Passport Details
   useEffect(() => {
@@ -256,7 +272,9 @@ export default function SmartSOSPage() {
         doctorName: doctorName,
         doctorNumber: doctorNumber,
         transcript: activeTranscript,
-        allergies: allergies
+        allergies: allergies,
+        latitude: latRef.current,
+        longitude: lngRef.current
       };
 
       // 3. Print highly visible frontend diagnostics log
