@@ -370,7 +370,7 @@ export default function SmartSOSPage() {
               <div className="space-y-1.5">
                 <p className="text-sm font-extrabold text-emerald-800">Your emergency contact has been notified</p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                  An encrypted copy of the health passport details and your live speech transcript has been safely routed to <strong className="text-slate-800">{contactEmail}</strong>.
+                  A copy of the health passport details, profile and your live speech transcript has also been attached to <strong className="text-slate-800">{contactEmail}</strong>.
                 </p>
               </div>
             </div>
