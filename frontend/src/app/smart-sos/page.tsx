@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { ArrowLeft, ShieldAlert, CheckCircle, Mail, User, Shield, Info, Volume2 } from "lucide-react";
+import { ArrowLeft, ShieldAlert, CheckCircle, Mail, User, Shield, Info, Volume2, HeartPulse, Activity, Phone } from "lucide-react";
 
 export default function SmartSOSPage() {
   const router = useRouter();
@@ -14,9 +14,12 @@ export default function SmartSOSPage() {
   // Aggregated data states
   const [userName, setUserName] = useState<string>("Patient");
   const [weightKg, setWeightKg] = useState<string>("Not Configured");
+  const [heightCm, setHeightCm] = useState<string>("Not Configured");
   const [allergies, setAllergies] = useState<string>("None Listed");
   const [chronicConditions, setChronicConditions] = useState<string>("None Listed");
   const [policyDetails, setPolicyDetails] = useState<string>("Not Available");
+  const [doctorName, setDoctorName] = useState<string>("Not Configured");
+  const [doctorNumber, setDoctorNumber] = useState<string>("Not Configured");
   
   // Emergency target fields
   const [contactName, setContactName] = useState<string>("Not Configured");
@@ -30,6 +33,7 @@ export default function SmartSOSPage() {
   const [isSending, setIsSending] = useState<boolean>(false);
 
   const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef<string>("");
 
   // Load User Data & Passport Details
   useEffect(() => {
@@ -57,15 +61,18 @@ export default function SmartSOSPage() {
       // 1. Fetch User Profiles table details
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("full_name, weight_kg, pre_existing_conditions, current_policy_details, emergency_contact_email, emergency_contact_name, emergency_contact_relation")
+        .select("full_name, weight_kg, height_cm, pre_existing_conditions, current_policy_details, emergency_contact_email, emergency_contact_name, emergency_contact_relation")
         .eq("id", userId)
         .maybeSingle();
 
       if (profile) {
         setUserName(profile.full_name || "Patient");
         setWeightKg(profile.weight_kg ? `${profile.weight_kg} kg` : "Not Configured");
+        setHeightCm(profile.height_cm ? `${profile.height_cm} cm` : "Not Configured");
         setPolicyDetails(profile.current_policy_details || "Not Available");
         setContactEmail(profile.emergency_contact_email || "");
+        setContactName(profile.emergency_contact_name || "Not Configured");
+        setRelation(profile.emergency_contact_relation || "Not Configured");
         if (Array.isArray(profile.pre_existing_conditions) && profile.pre_existing_conditions.length > 0) {
           setChronicConditions(profile.pre_existing_conditions.join(", "));
         }
@@ -105,6 +112,12 @@ export default function SmartSOSPage() {
         if (Array.isArray(passportData.chronicConditions) && passportData.chronicConditions.length > 0) {
           setChronicConditions(passportData.chronicConditions.join(", "));
         }
+        
+        // Extract primary doctor details from passport
+        const docName = passportData.primaryDoctorName || passportData.doctor_name || "";
+        const docPhone = passportData.primaryDoctorPhone || passportData.doctor_number || passportData.doctor_phone || "";
+        if (docName) setDoctorName(docName);
+        if (docPhone) setDoctorNumber(docPhone);
       }
     } catch (err) {
       console.error("Error aggregating profile details:", err);
@@ -134,7 +147,15 @@ export default function SmartSOSPage() {
           rec.onresult = (event: any) => {
             const currentResultIndex = event.resultIndex;
             const text = event.results[currentResultIndex][0].transcript;
-            setTranscript((prev) => (prev ? prev + " " + text.trim() : text.trim()));
+            
+            // Append and update both Ref and State
+            const updatedSegment = text.trim();
+            const fullTranscript = transcriptRef.current 
+              ? transcriptRef.current + " " + updatedSegment 
+              : updatedSegment;
+              
+            transcriptRef.current = fullTranscript;
+            setTranscript(fullTranscript);
           };
 
           rec.onerror = (event: any) => {
@@ -190,8 +211,7 @@ export default function SmartSOSPage() {
     }
 
     try {
-      const demographicsStr = `Weight: ${weightKg}`;
-      const allergiesStr = allergies;
+      const activeTranscript = transcriptRef.current.trim() || "No spoken scenario recorded.";
 
       const res = await fetch("/api/smart-sos", {
         method: "POST",
@@ -201,10 +221,14 @@ export default function SmartSOSPage() {
         body: JSON.stringify({
           toEmail: contactEmail,
           userName: userName,
-          transcript: transcript || "No spoken scenario recorded (triggered silently).",
+          transcript: activeTranscript,
+          weight: weightKg,
+          height: heightCm,
           policyDetails: policyDetails,
-          allergies: allergiesStr,
-          demographics: demographicsStr
+          allergies: allergies,
+          chronicConditions: chronicConditions,
+          doctorName: doctorName,
+          doctorNumber: doctorNumber
         })
       });
 
@@ -231,14 +255,14 @@ export default function SmartSOSPage() {
     );
   }
 
-  // Dynamic layout theme swap: tranquilSage-blue if alert was successfully dispatched
+  // Dynamic layout theme swap: tranquil slate-blue if alert was successfully dispatched
   const wrapperClass = isSent 
     ? "min-h-screen bg-[#F0F4F8] text-slate-900 p-4 md:p-8 font-sans transition-all duration-700" 
     : "min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans transition-all duration-700";
 
   return (
     <div className={wrapperClass}>
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Navigation Breadcrumb */}
         <div>
@@ -321,38 +345,99 @@ export default function SmartSOSPage() {
           )}
         </section>
 
-        {/* Status & Profile Sync Card */}
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-          <h2 className="text-sm font-bold text-[#0F2744] uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
-            <User className="h-4.5 w-4.5 text-sky-600" />
-            Designated Dispatch Target
-          </h2>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-3 bg-slate-50/70 border border-slate-200/50 rounded-xl">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Emergency Contact</span>
-              <span className="text-xs font-black text-slate-800">{contactName}</span>
-            </div>
+        {/* Info Grid - Medical Profile Snapshot */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Dispatch Target Card */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-bold text-[#0F2744] uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
+              <User className="h-4.5 w-4.5 text-sky-600" />
+              Designated Dispatch Target
+            </h2>
             
-            <div className="p-3 bg-slate-50/70 border border-slate-200/50 rounded-xl">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Relationship</span>
-              <span className="text-xs font-black text-slate-800">{relation}</span>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-slate-400 uppercase tracking-wider">Contact Name</span>
+                <span className="font-black text-slate-800">{contactName}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-slate-400 uppercase tracking-wider">Relationship</span>
+                <span className="font-black text-slate-800">{relation}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-slate-400 uppercase tracking-wider">Live Dispatch Email</span>
+                <span className="font-black text-slate-800 truncate max-w-[200px] flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5 text-slate-400" />
+                  {contactEmail || "Not Configured"}
+                </span>
+              </div>
             </div>
 
-            <div className="p-3 bg-slate-50/70 border border-slate-200/50 rounded-xl">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Live Dispatch Email</span>
-              <span className="text-xs font-black text-slate-800 flex items-center gap-1.5 truncate">
-                <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                {contactEmail || "Not Configured"}
-              </span>
+            <div className="pt-2 border-t border-slate-100 flex items-start gap-2 text-slate-500">
+              <Info className="h-4 w-4 text-sky-600 shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed">
+                Note: Update target details in your <Link href="/health-passport" className="text-sky-600 font-bold hover:underline">Health Passport</Link>.
+              </p>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 flex items-start gap-2 text-slate-500">
-            <Info className="h-4 w-4 text-sky-600 shrink-0 mt-0.5" />
-            <p className="text-[11px] leading-relaxed">
-              Note: You can update your emergency contact details at any time inside your <Link href="/health-passport" className="text-sky-600 font-bold hover:underline">Health Passport</Link>.
-            </p>
+          {/* Core Medical Details Card */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-bold text-[#0F2744] uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
+              <HeartPulse className="h-4.5 w-4.5 text-rose-500" />
+              Patient Health & Vitals
+            </h2>
+
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider mb-0.5">Weight</span>
+                  <span className="font-black text-slate-800">{weightKg}</span>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider mb-0.5">Height</span>
+                  <span className="font-black text-slate-800">{heightCm}</span>
+                </div>
+              </div>
+              <div className="border-t border-slate-100 pt-2 text-xs">
+                <span className="block font-bold text-slate-400 uppercase tracking-wider mb-0.5">Known Allergies</span>
+                <span className="font-black text-rose-600">{allergies}</span>
+              </div>
+              <div className="border-t border-slate-100 pt-2 text-xs">
+                <span className="block font-bold text-slate-400 uppercase tracking-wider mb-0.5">Chronic Conditions</span>
+                <span className="font-black text-slate-800">{chronicConditions}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Primary Doctor & Insurance */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 md:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-[#0F2744] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                  <Phone className="h-4 w-4 text-sky-600" />
+                  Primary Care Doctor
+                </h3>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-400 uppercase tracking-wider">Doctor Name</span>
+                  <span className="font-black text-slate-800">{doctorName}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-400 uppercase tracking-wider">Doctor Contact</span>
+                  <span className="font-black text-slate-800">{doctorNumber}</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-[#0F2744] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                  <Activity className="h-4 w-4 text-sky-600" />
+                  Insurance Verification
+                </h3>
+                <div>
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Policy Information</span>
+                  <span className="text-xs font-black text-slate-800 line-clamp-2 leading-relaxed">{policyDetails}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
