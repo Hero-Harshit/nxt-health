@@ -15,7 +15,9 @@ type ExplanationResult = {
   trade_offs: string | null;
   confidence_level: "high" | "medium" | "low" | null;
   confidence_note: string | null;
-  policy_link?: string | null;
+  policy_details?: {
+    policy_link?: string | null;
+  } | null;
 };
 
 type ApiResponse = {
@@ -350,9 +352,9 @@ export default function AdvisorPage() {
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="text-lg font-bold text-[#0F2744] tracking-tight">{policy.title}</h3>
-                            {policy.policy_link && (
+                            {policy.policy_details?.policy_link && (
                               <a 
-                                href={policy.policy_link} 
+                                href={policy.policy_details.policy_link} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center justify-center p-1 text-gray-400 hover:text-blue-600 transition-colors rounded-md hover:bg-gray-100"

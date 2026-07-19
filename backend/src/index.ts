@@ -300,6 +300,20 @@ Evaluate these candidate policies based on the user's specific inputs and prefer
       return;
     }
 
+    if (geminiResult.status === "ok" && Array.isArray(geminiResult.results)) {
+      geminiResult.results = geminiResult.results.map((resItem: any) => {
+        const matchedPolicy = topMatches.find(p => String(p.id) === String(resItem.reference_id));
+        const details = Array.isArray(matchedPolicy?.policy_details) ? matchedPolicy.policy_details[0] : matchedPolicy?.policy_details;
+        const policy_link = matchedPolicy?.policy_link || details?.policy_link || null;
+        return {
+          ...resItem,
+          policy_details: {
+            policy_link
+          }
+        };
+      });
+    }
+
     const user = await getAuthUser(req);
     if (!user) {
       console.warn("⚠️ [AUTH WARNING]: API request received without Bearer token. History will NOT be saved.");
