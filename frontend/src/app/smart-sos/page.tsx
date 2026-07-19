@@ -25,8 +25,6 @@ export default function SmartSOSPage() {
   const [doctorNumber, setDoctorNumber] = useState<string>("Not Configured");
   
   // Emergency target fields
-  const [contactName, setContactName] = useState<string>("Not Configured");
-  const [relation, setRelation] = useState<string>("Not Configured");
   const [contactEmail, setContactEmail] = useState<string>("");
 
   // System states
@@ -115,13 +113,8 @@ export default function SmartSOSPage() {
       setPolicyDetails(resolvedPolicy);
       setFamilyHistory(resolvedFamilyHistory);
 
-      // Emergency contact resolution
-      const resolvedContactName = passportData?.emergencyContactName || (profile as any)?.emergency_contact_name || "Not Configured";
-      const resolvedRelation = passportData?.emergencyContactRelation || (profile as any)?.emergency_contact_relation || "Not Configured";
+      // Emergency contact resolution from local storage passport (as Supabase table has no contact name/relation fields)
       const resolvedContactEmail = passportData?.emergencyContactEmail || (profile as any)?.emergency_contact_email || "";
-      
-      setContactName(resolvedContactName);
-      setRelation(resolvedRelation);
       setContactEmail(resolvedContactEmail);
 
       // Medical Profile Conditions mapping
@@ -394,14 +387,6 @@ export default function SmartSOSPage() {
             </h2>
             
             <div className="space-y-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-slate-400 uppercase tracking-wider">Contact Name</span>
-                <span className="font-black text-slate-800">{contactName}</span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-slate-400 uppercase tracking-wider">Relationship</span>
-                <span className="font-black text-slate-800">{relation}</span>
-              </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-slate-400 uppercase tracking-wider">Live Dispatch Email</span>
                 <span className="font-black text-slate-800 truncate max-w-[200px] flex items-center gap-1.5">
