@@ -247,6 +247,7 @@ export default function SmartSOSPage() {
 
     await new Promise((resolve) => {
       if (typeof window !== "undefined" && navigator.geolocation) {
+        // Stage 1: Try High Accuracy (GPS/Hardware)
         navigator.geolocation.getCurrentPosition(
           (position) => {
             latRef.current = position.coords.latitude;
@@ -254,10 +255,23 @@ export default function SmartSOSPage() {
             resolve(null);
           },
           (error) => {
-            console.error("Location error:", error);
-            resolve(null);
+            console.warn("High accuracy failed, attempting cell/wifi triangulation...", error.message);
+            
+            // Stage 2: Fallback to Low Accuracy (Wifi/IP Triangulation)
+            navigator.geolocation.getCurrentPosition(
+              (fallbackPosition) => {
+                latRef.current = fallbackPosition.coords.latitude;
+                lngRef.current = fallbackPosition.coords.longitude;
+                resolve(null);
+              },
+              (fallbackError) => {
+                console.error("Final Geolocation Failure Code:", fallbackError.code, fallbackError.message);
+                resolve(null);
+              },
+              { enableHighAccuracy: false, timeout: 2000 }
+            );
           },
-          { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          { enableHighAccuracy: true, timeout: 2000, maximumAge: 0 }
         );
       } else {
         resolve(null);
