@@ -403,6 +403,7 @@ app.get("/api/profile", async (req, res) => {
 
     if (profile) {
       profile.current_policy_details = profile.current_policy_details || "Not Available";
+      profile.emergency_contact_email = profile.emergency_contact_email || "";
     }
 
     const completion = calculateCompletion(profile || {});
@@ -436,24 +437,33 @@ app.post("/api/profile", async (req, res) => {
       smoking_status,
       activity_level,
       dietary_preference,
-      current_policy_details
+      current_policy_details,
+      emergency_contact_email
     } = req.body ?? {};
+
+    // Get existing profile to merge fields for partial updates
+    const { data: existingProfile } = await supabase
+      .from("user_profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
 
     const { data: profile, error } = await supabase
       .from("user_profiles")
       .upsert({
         id: user.id,
-        full_name,
-        age,
-        gender,
-        height_cm,
-        weight_kg,
-        pre_existing_conditions,
-        family_history,
-        smoking_status,
-        activity_level,
-        dietary_preference,
-        current_policy_details: current_policy_details || "Not Available",
+        full_name: full_name !== undefined ? full_name : existingProfile?.full_name,
+        age: age !== undefined ? age : existingProfile?.age,
+        gender: gender !== undefined ? gender : existingProfile?.gender,
+        height_cm: height_cm !== undefined ? height_cm : existingProfile?.height_cm,
+        weight_kg: weight_kg !== undefined ? weight_kg : existingProfile?.weight_kg,
+        pre_existing_conditions: pre_existing_conditions !== undefined ? pre_existing_conditions : existingProfile?.pre_existing_conditions,
+        family_history: family_history !== undefined ? family_history : existingProfile?.family_history,
+        smoking_status: smoking_status !== undefined ? smoking_status : existingProfile?.smoking_status,
+        activity_level: activity_level !== undefined ? activity_level : existingProfile?.activity_level,
+        dietary_preference: dietary_preference !== undefined ? dietary_preference : existingProfile?.dietary_preference,
+        current_policy_details: current_policy_details !== undefined ? current_policy_details : (existingProfile?.current_policy_details || "Not Available"),
+        emergency_contact_email: emergency_contact_email !== undefined ? emergency_contact_email : existingProfile?.emergency_contact_email,
         updated_at: new Date().toISOString()
       })
       .select()

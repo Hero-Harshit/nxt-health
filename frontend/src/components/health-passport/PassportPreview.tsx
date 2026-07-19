@@ -67,6 +67,7 @@ export default function PassportPreview({ data }: PassportPreviewProps) {
               <p className="text-sm font-black text-rose-700">{data.emergencyContactName || "Not Specified"}</p>
               <p className="text-xs text-slate-600 font-medium">Relation: {data.emergencyContactRelation || "Not Specified"}</p>
               <p className="text-xs font-bold text-slate-800">Phone: {data.emergencyContactPhone || "Not Specified"}</p>
+              <p className="text-xs font-bold text-slate-800">Email: {data.emergencyContactEmail || "Not Specified"}</p>
             </div>
           </div>
         </div>

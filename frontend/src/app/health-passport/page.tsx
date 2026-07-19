@@ -17,6 +17,7 @@ const DEFAULT_PASSPORT_DATA: HealthPassportData = {
   emergencyContactName: "",
   emergencyContactRelation: "",
   emergencyContactPhone: "",
+  emergencyContactEmail: "",
   allergies: [],
   chronicConditions: [],
   pastSurgeries: "",
@@ -52,6 +53,7 @@ export default function HealthPassportPage() {
             emergencyContactName: p?.emergencyContactName ?? "",
             emergencyContactRelation: p?.emergencyContactRelation ?? "",
             emergencyContactPhone: p?.emergencyContactPhone ?? "",
+            emergencyContactEmail: p?.emergencyContactEmail ?? "",
             allergies: Array.isArray(p?.allergies) ? p.allergies : [],
             chronicConditions: Array.isArray(p?.chronicConditions) ? p.chronicConditions : [],
             pastSurgeries: p?.pastSurgeries ?? "",
@@ -98,6 +100,7 @@ export default function HealthPassportPage() {
               emergencyContactName: p?.emergencyContactName ?? profile?.emergency_contact_name ?? "",
               emergencyContactRelation: p?.emergencyContactRelation ?? profile?.emergency_contact_relation ?? "",
               emergencyContactPhone: p?.emergencyContactPhone ?? profile?.emergency_contact_phone ?? "",
+              emergencyContactEmail: p?.emergencyContactEmail ?? profile?.emergency_contact_email ?? "",
               allergies: Array.isArray(p?.allergies) ? p.allergies : (Array.isArray(profile?.allergies) ? profile.allergies : []),
               chronicConditions: Array.isArray(p?.chronicConditions) ? p.chronicConditions : (Array.isArray(profile?.chronic_conditions) ? profile.chronic_conditions : []),
               pastSurgeries: p?.pastSurgeries ?? profile?.past_surgeries ?? "",
@@ -116,6 +119,7 @@ export default function HealthPassportPage() {
               emergencyContactName: profile?.emergency_contact_name ?? "",
               emergencyContactRelation: profile?.emergency_contact_relation ?? "",
               emergencyContactPhone: profile?.emergency_contact_phone ?? "",
+              emergencyContactEmail: profile?.emergency_contact_email ?? "",
               allergies: Array.isArray(profile?.allergies) ? profile.allergies : [],
               chronicConditions: Array.isArray(profile?.chronic_conditions) ? profile.chronic_conditions : [],
               pastSurgeries: profile?.past_surgeries ?? "",
@@ -166,6 +170,23 @@ export default function HealthPassportPage() {
             }, { onConflict: "user_id" });
 
           if (error) throw error;
+
+          // POST to backend API to sync emergency_contact_email
+          const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            await fetch(`${backendBaseUrl}/api/profile`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                emergency_contact_email: data.emergencyContactEmail
+              })
+            });
+          }
+
           setSyncStatus("synced");
         } catch (err) {
           console.error("Cloud upsert failed:", err);
@@ -192,6 +213,7 @@ export default function HealthPassportPage() {
         emergencyContactName: "",
         emergencyContactRelation: "",
         emergencyContactPhone: "",
+        emergencyContactEmail: "",
         allergies: [],
         chronicConditions: [],
         pastSurgeries: "",

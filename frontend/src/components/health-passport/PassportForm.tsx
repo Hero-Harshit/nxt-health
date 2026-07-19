@@ -122,7 +122,7 @@ export default function PassportForm({ data, onChange }: PassportFormProps) {
         <div className="pt-2 border-t border-slate-100 space-y-3">
           <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Emergency Contact</span>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex flex-col space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Contact Name</label>
               <input
@@ -148,6 +148,16 @@ export default function PassportForm({ data, onChange }: PassportFormProps) {
                 type="tel"
                 value={data.emergencyContactPhone}
                 onChange={(e) => updateField("emergencyContactPhone", e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Contact Email</label>
+              <input
+                type="email"
+                placeholder="e.g., contact@example.com"
+                value={data.emergencyContactEmail || ""}
+                onChange={(e) => updateField("emergencyContactEmail", e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600"
               />
             </div>
