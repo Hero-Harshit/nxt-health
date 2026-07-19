@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 export const dynamic = "force-dynamic";
 
@@ -12,30 +12,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing destination email (toEmail)" }, { status: 400 });
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      console.error("❌ Resend API Key is missing from env variables.");
-      return NextResponse.json({ success: false, error: "Email provider config error" }, { status: 500 });
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+
+    if (!gmailUser || !gmailAppPassword) {
+      console.error("❌ GMAIL_USER or GMAIL_APP_PASSWORD is missing from environment variables.");
+      return NextResponse.json({ success: false, error: "Email provider configuration error" }, { status: 500 });
     }
 
-    const resend = new Resend(apiKey);
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: gmailUser,
+        pass: gmailAppPassword,
+      },
+    });
 
     const emailSubject = `🚨 EMERGENCY: NxtHealth Smart SOS Alert for ${userName || "Patient"}`;
-
-    const emailText = `
-🚨 NXTHEALTH EMERGENCY SOS ALERT DISPATCHED
-
-Patient Name: ${userName || "Unknown"}
-Demographics: ${demographics || "Not Configured"}
-Current Policy: ${policyDetails || "Not Configured"}
-Allergies: ${allergies || "Not Configured"}
-
-=== LIVE TRANSCRIPT OF EMERGENCY SCENARIO ===
-"${transcript || "No voice transcription recorded."}"
-=============================================
-
-This alert was triggered automatically. Please contact the patient immediately.
-`;
 
     const emailHtml = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 2px solid #e11d48; border-radius: 12px; background-color: #fff;">
@@ -76,22 +69,16 @@ This alert was triggered automatically. Please contact the patient immediately.
       </div>
     `;
 
-    const { data, error } = await resend.emails.send({
-      from: "SOS Alert <onboarding@resend.dev>",
+    await transporter.sendMail({
+      from: `"NxtHealth Smart SOS" <${gmailUser}>`,
       to: toEmail,
       subject: emailSubject,
-      text: emailText,
       html: emailHtml,
     });
 
-    if (error) {
-      console.error("❌ Resend Email send failure:", error);
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error("❌ API smart-sos exception:", err);
+    console.error("❌ Nodemailer SOS Dispatch failure:", err);
     return NextResponse.json({ success: false, error: err.message || "Internal server error" }, { status: 500 });
   }
 }
