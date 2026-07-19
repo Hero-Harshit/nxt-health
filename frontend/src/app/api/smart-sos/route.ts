@@ -21,13 +21,8 @@ export async function POST(req: NextRequest) {
       doctorName, 
       doctorNumber, 
       transcript, 
-      allergies,
-      latitude,
-      longitude
+      allergies 
     } = body;
-
-    const hasLocation = latitude !== undefined && latitude !== null && longitude !== undefined && longitude !== null;
-    const mapsUrl = hasLocation ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}` : null;
 
     if (!toEmail || typeof toEmail !== "string" || !toEmail.trim()) {
       return NextResponse.json({ success: false, error: "Missing destination email (toEmail)" }, { status: 400 });
@@ -162,14 +157,7 @@ export async function POST(req: NextRequest) {
           </p>
         </div>
 
-        ${mapsUrl ? `
-        <!-- Patient Location Button -->
-        <div style="text-align: center; margin-bottom: 24px;">
-          <a href="${mapsUrl}" target="_blank" style="display: inline-block; background-color: #e11d48; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(225,29,72,0.3); border: none; text-align: center;">
-            Location of the patient
-          </a>
-        </div>
-        ` : ""}
+
 
         <div style="text-align: center; border-top: 1px solid #e2e8f0; padding-top: 16px;">
           <p style="font-size: 11px; color: #94a3b8; margin: 0; font-weight: 500;">

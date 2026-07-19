@@ -37,22 +37,7 @@ export default function SmartSOSPage() {
 
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef<string>("");
-  const latRef = useRef<number | null>(null);
-  const lngRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          latRef.current = position.coords.latitude;
-          lngRef.current = position.coords.longitude;
-        },
-        (error) => {
-          console.error("Silent background geolocation capture error:", error);
-        }
-      );
-    }
-  }, []);
 
   // Load User Data & Passport Details
   useEffect(() => {
@@ -243,46 +228,7 @@ export default function SmartSOSPage() {
       }
     }
 
-    const startTime = Date.now();
-
-    await new Promise((resolve) => {
-      if (typeof window !== "undefined" && navigator.geolocation) {
-        // Stage 1: Try High Accuracy (GPS/Hardware)
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            latRef.current = position.coords.latitude;
-            lngRef.current = position.coords.longitude;
-            resolve(null);
-          },
-          (error) => {
-            console.warn("High accuracy failed, attempting cell/wifi triangulation...", error.message);
-            
-            // Stage 2: Fallback to Low Accuracy (Wifi/IP Triangulation)
-            navigator.geolocation.getCurrentPosition(
-              (fallbackPosition) => {
-                latRef.current = fallbackPosition.coords.latitude;
-                lngRef.current = fallbackPosition.coords.longitude;
-                resolve(null);
-              },
-              (fallbackError) => {
-                console.error("Final Geolocation Failure Code:", fallbackError.code, fallbackError.message);
-                resolve(null);
-              },
-              { enableHighAccuracy: false, timeout: 2000 }
-            );
-          },
-          { enableHighAccuracy: true, timeout: 2000, maximumAge: 0 }
-        );
-      } else {
-        resolve(null);
-      }
-    });
-
-    const elapsed = Date.now() - startTime;
-    const remainingDelay = 2500 - elapsed;
-    if (remainingDelay > 0) {
-      await new Promise((resolve) => setTimeout(resolve, remainingDelay));
-    }
+    await new Promise((resolve) => setTimeout(resolve, 2500));
 
     try {
       // 1. Resolve transcription with DOM extraction fallback
@@ -311,9 +257,7 @@ export default function SmartSOSPage() {
         doctorName: doctorName,
         doctorNumber: doctorNumber,
         transcript: activeTranscript,
-        allergies: allergies,
-        latitude: latRef.current,
-        longitude: lngRef.current
+        allergies: allergies
       };
 
       // 3. Print highly visible frontend diagnostics log
