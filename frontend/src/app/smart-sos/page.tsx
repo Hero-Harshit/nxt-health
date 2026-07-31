@@ -282,19 +282,11 @@ export default function SmartSOSPage() {
 
       console.log("🚨 [FRONTEND SENDING PAYLOAD]:", payload);
 
-      const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
-
-      const { data: { session } } = await supabase.auth.getSession();
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json"
-      };
-      if (session?.access_token) {
-        headers["Authorization"] = `Bearer ${session.access_token}`;
-      }
-
-      const res = await fetch(`${backendBaseUrl}/api/sos-alert`, {
+      const res = await fetch("/api/sos-alert", {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload)
       });
 
