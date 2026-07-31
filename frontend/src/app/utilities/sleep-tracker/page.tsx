@@ -61,22 +61,7 @@ function formatDurationFromMinutes(totalMins: number): string {
 }
 
 function createInitialLogs(): SleepLog[] {
-  const logs: SleepLog[] = [];
-  const today = new Date();
-  const mockHours = [6, 6.5, 7, 5.5, 8, 2, 4];
-  const mockBedtimes = ['23:30', '00:15', '01:00', '03:00', '23:00', '01:30', '23:45'];
-
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    logs.push({
-      date: d.toISOString().split('T')[0],
-      hours: mockHours[6 - i],
-      bedTime: mockBedtimes[6 - i],
-      wakeTime: '07:30',
-    });
-  }
-  return logs;
+  return [];
 }
 
 export default function SleepTrackerPage() {
@@ -141,7 +126,7 @@ export default function SleepTrackerPage() {
   const last7Days = logs.slice(-7);
   const totalSlept7Days = last7Days.reduce((sum, log) => sum + log.hours, 0);
   const target7Days = 7 * 8;
-  const sleepBacklog = Math.max(0, target7Days - totalSlept7Days);
+  const sleepBacklog = logs.length === 0 ? 0 : Math.max(0, target7Days - totalSlept7Days);
   const avgSleep = last7Days.length > 0 ? (totalSlept7Days / last7Days.length).toFixed(1) : '0';
 
   const todayLog = logs.find((l) => l.date === selectedDate) || last7Days[last7Days.length - 1];
