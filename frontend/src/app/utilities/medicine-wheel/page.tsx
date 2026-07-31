@@ -93,6 +93,11 @@ export default function MedicineWheelPage() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [hasCelebratedToday, setHasCelebratedToday] = useState(false);
 
+  // Edit states
+  const [isEditing, setIsEditing] = useState(false);
+  const [newMedName, setNewMedName] = useState('');
+  const [editingSlot, setEditingSlot] = useState<SlotKey>('morning');
+
   useEffect(() => {
     try {
       const savedDay = localStorage.getItem(STORAGE_KEY);
@@ -113,6 +118,35 @@ export default function MedicineWheelPage() {
   useEffect(() => {
     localStorage.setItem(STREAK_KEY, JSON.stringify(streak));
   }, [streak]);
+
+  const addMedicine = useCallback(() => {
+    if (!newMedName.trim()) return;
+    setDay((prev) => {
+      if (!prev) return prev;
+      const updatedSlots = { ...prev.slots };
+      const newMed = {
+        id: `${editingSlot}-${Date.now()}`,
+        name: newMedName.trim(),
+        taken: false,
+      };
+      updatedSlots[editingSlot] = {
+        medicines: [...updatedSlots[editingSlot].medicines, newMed],
+      };
+      return { ...prev, slots: updatedSlots };
+    });
+    setNewMedName('');
+  }, [newMedName, editingSlot]);
+
+  const removeMedicine = useCallback((slotKey: SlotKey, medId: string) => {
+    setDay((prev) => {
+      if (!prev) return prev;
+      const updatedSlots = { ...prev.slots };
+      updatedSlots[slotKey] = {
+        medicines: updatedSlots[slotKey].medicines.filter((m) => m.id !== medId),
+      };
+      return { ...prev, slots: updatedSlots };
+    });
+  }, []);
 
   const toggleMedicine = useCallback((slotKey: SlotKey, medId: string) => {
     setDay((prev) => {
@@ -200,12 +234,21 @@ export default function MedicineWheelPage() {
                 Tap any quadrant to view and check off medicines
               </p>
             </div>
-            <span
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
-              style={{ backgroundColor: BLUE_LIGHT, color: BLUE }}
-            >
-              ⚡ Auto-Saved
-            </span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsEditing(!isEditing)}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition-all cursor-pointer"
+              >
+                {isEditing ? 'Done Editing' : 'Edit Medications'}
+              </button>
+              <span
+                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                style={{ backgroundColor: BLUE_LIGHT, color: BLUE }}
+              >
+                ⚡ Auto-Saved
+              </span>
+            </div>
           </div>
 
           <Wheel
@@ -224,6 +267,89 @@ export default function MedicineWheelPage() {
               onMarkComplete={() => markSlotComplete(activeSlot)}
               onClose={() => setActiveSlot(null)}
             />
+          )}
+
+          {isEditing && (
+            <div className="mt-6 border-t border-gray-200 pt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                  <span>⚙️</span> Edit Schedule
+                </h3>
+                <span className="text-xs text-gray-500">Add or remove medications per slot</span>
+              </div>
+
+              {/* Slot tab selector */}
+              <div className="grid grid-cols-4 gap-2">
+                {SLOT_ORDER.map((key) => {
+                  const config = SLOT_CONFIG[key];
+                  const isActive = editingSlot === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setEditingSlot(key)}
+                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition-all text-center cursor-pointer ${
+                        isActive
+                          ? 'border-blue-600 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span className="block text-sm">{config.icon}</span>
+                      <span className="block mt-0.5">{config.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Add medication input */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newMedName}
+                  onChange={(e) => setNewMedName(e.target.value)}
+                  placeholder="e.g., Aspirin"
+                  className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') addMedicine();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={addMedicine}
+                  className="px-4 py-2 text-sm font-bold text-white rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer"
+                >
+                  Add
+                </button>
+              </div>
+
+              {/* List of current medications for the selected slot */}
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                  Current Medications for {SLOT_CONFIG[editingSlot].label}:
+                </p>
+                {day.slots[editingSlot].medicines.length === 0 ? (
+                  <p className="text-sm text-gray-400 italic">No medications listed.</p>
+                ) : (
+                  <ul className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {day.slots[editingSlot].medicines.map((med) => (
+                      <li
+                        key={med.id}
+                        className="flex items-center justify-between bg-gray-50 border border-gray-150 rounded-xl px-4 py-2.5 text-sm"
+                      >
+                        <span className="text-gray-700 font-medium">💊 {med.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeMedicine(editingSlot, med.id)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer text-xs font-bold"
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
