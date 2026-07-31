@@ -172,6 +172,59 @@ export default function SmartSOSPage() {
     };
   }, []);
 
+  const fetchEmergencyLocation = async (): Promise<{ lat: number; lng: number; type: string; city?: string } | null> => {
+    try {
+      const nativeGPSPromise = new Promise<{ lat: number; lng: number; type: string } | null>((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation not supported"));
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              type: "Exact (Device GPS)"
+            });
+          },
+          (err) => {
+            reject(err);
+          },
+          { enableHighAccuracy: true, timeout: 4000 }
+        );
+      });
+
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error("GPS timed out")), 4000)
+      );
+
+      const exactLocation = await Promise.race([nativeGPSPromise, timeoutPromise]);
+      if (exactLocation) return exactLocation;
+    } catch (gpsError) {
+      console.warn("⚠️ Native GPS failed, switching to IP fallback:", gpsError);
+    }
+
+    // IP-Based fallback using ipapi.co
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.latitude === "number" && typeof data.longitude === "number") {
+          return {
+            lat: data.latitude,
+            lng: data.longitude,
+            type: "Approximate (IP-Based)",
+            city: data.city || "Unknown City"
+          };
+        }
+      }
+    } catch (ipError) {
+      console.error("❌ GPS and IP location fetching both failed:", ipError);
+    }
+
+    return null;
+  };
+
   const startRecording = async () => {
     if (!contactEmail || !contactEmail.trim()) {
       setShowEmailAlert(true);
@@ -183,25 +236,13 @@ export default function SmartSOSPage() {
     recordingLengthRef.current = 0;
     setRecordingTime(0);
 
-    // Asynchronously request geolocation to avoid blocking mic stream initialization
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const coords = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          console.log("📍 [GEOLOCATION SUCCESS]:", coords);
-          setLocationData(coords);
-        },
-        (error) => {
-          console.warn("⚠️ [GEOLOCATION ERROR]:", error.message);
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    } else {
-      console.warn("⚠️ [GEOLOCATION]: Geolocation is not supported by this browser.");
-    }
+    // Asynchronously resolve coordinates using fallback wrapper
+    fetchEmergencyLocation().then((coords) => {
+      if (coords) {
+        console.log("📍 [LOCATION RESOLVED]:", coords);
+        setLocationData(coords);
+      }
+    });
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
