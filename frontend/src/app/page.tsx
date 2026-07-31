@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert } from "lucide-react";
+import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -220,6 +220,30 @@ export default function HomePage() {
                 Launch Advisor <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
+
+            {/* Module: VisionPay */}
+            <div
+              onClick={() => console.log("VisionPay clicked")}
+              className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-sky-100/70 text-sky-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <Fingerprint className="h-5.5 w-5.5" />
+                  </div>
+                  <span className="bg-sky-50 text-sky-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200">
+                    BIOMETRIC SECURED
+                  </span>
+                </div>
+                <h3 className="font-bold text-xl text-[#0F2744]">VisionPay</h3>
+                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                  Scan hospital bills, auto-deduct insurance, and pay securely using device biometrics.
+                </p>
+              </div>
+              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4">
+                Pay Securely <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
 
             {/* Module 2: Preventive Planner */}
             <Link
