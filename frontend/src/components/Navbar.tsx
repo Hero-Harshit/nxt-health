@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { ChevronDown, User, LogOut, Settings, Menu, X, LayoutGrid } from "lucide-react";
 import EmergencyHelplines from "./EmergencyHelplines";
+import LocalHospitals from "./LocalHospitals";
 
 export default function Navbar() {
   const router = useRouter();
@@ -96,8 +97,9 @@ export default function Navbar() {
           </div>
 
           {/* Right Side Controls */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <EmergencyHelplines />
+            <LocalHospitals />
 
             {/* Right Side: Horizontal Navigation Items (Desktop) */}
             <div className="hidden md:flex items-center space-x-6">
