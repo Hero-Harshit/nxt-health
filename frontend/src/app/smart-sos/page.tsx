@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { ArrowLeft, ShieldAlert, CheckCircle, Mail, User, Shield, Info, Volume2, HeartPulse, Activity, Phone, ClipboardList } from "lucide-react";
+import { ArrowLeft, ShieldAlert, CheckCircle, Mail, User, Shield, Info, Volume2, HeartPulse, Activity, Phone, ClipboardList, MessageSquare } from "lucide-react";
 
 export default function SmartSOSPage() {
   const router = useRouter();
@@ -469,6 +469,47 @@ export default function SmartSOSPage() {
     }
   };
 
+  const handleOfflineSMS = async () => {
+    let message = "";
+    try {
+      const gpsPromise = new Promise<{ lat: number; lng: number } | null>((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation not supported"));
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          (err) => reject(err),
+          { enableHighAccuracy: true, timeout: 3000 }
+        );
+      });
+
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error("GPS timed out")), 3000)
+      );
+
+      const location = await Promise.race([gpsPromise, timeoutPromise]);
+      if (location) {
+        message = `EMERGENCY: I need help! My last known location: https://www.google.com/maps?q=${location.lat},${location.lng}`;
+      } else {
+        message = "EMERGENCY: I need immediate help! (Location unavailable, please call me).";
+      }
+    } catch (err) {
+      console.warn("⚠️ SMS GPS acquisition failed:", err);
+      message = "EMERGENCY: I need immediate help! (Location unavailable, please call me).";
+    }
+
+    const encodedMessage = encodeURIComponent(message);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const separator = isIOS ? '&' : '?';
+    window.location.href = `sms:${separator}body=${encodedMessage}`;
+  };
+
   const getButtonConfig = () => {
     if (isRecording) {
       return {
@@ -572,6 +613,14 @@ export default function SmartSOSPage() {
                   <span className="text-center px-2 uppercase tracking-wide leading-tight">{buttonText}</span>
                 </button>
               </div>
+
+              <button
+                onClick={handleOfflineSMS}
+                className="mt-4 px-6 py-2.5 border-2 border-slate-350 hover:border-slate-500 text-slate-700 hover:text-slate-900 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer select-none active:scale-98"
+              >
+                <MessageSquare className="h-4 w-4" />
+                <span>No Internet? Send SMS Alert</span>
+              </button>
 
               {micError && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4 max-w-md text-left space-y-1">
