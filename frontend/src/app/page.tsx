@@ -222,8 +222,8 @@ export default function HomePage() {
             </Link>
 
             {/* Module: VisionPay */}
-            <div
-              onClick={() => console.log("VisionPay clicked")}
+            <Link
+              href="/vision-pay"
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
@@ -243,7 +243,7 @@ export default function HomePage() {
               <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4">
                 Pay Securely <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
+            </Link>
 
             {/* Module 2: Preventive Planner */}
             <Link
