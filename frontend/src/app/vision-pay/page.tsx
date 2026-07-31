@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ShieldAlert, CheckCircle, Fingerprint, Loader2, Sparkles, Receipt, ShieldCheck, Camera } from "lucide-react";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import { startRegistration } from "@simplewebauthn/browser";
 
 export default function VisionPayPage() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function VisionPayPage() {
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const [isScanned, setIsScanned] = useState(false);
+  const [upiLink, setUpiLink] = useState<string | null>(null);
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
@@ -106,12 +108,65 @@ export default function VisionPayPage() {
     }, 1500);
   };
 
-  const handleAuthorizePayment = () => {
+  const handleAuthorizePayment = async () => {
     setIsAuthorizing(true);
-    setTimeout(() => {
+    try {
+      const email = "user@nxthealth.com";
+
+      // Step A: Fetch Options
+      const optionsRes = await fetch("/api/webauthn/register-options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!optionsRes.ok) {
+        throw new Error("Failed to fetch registration options from server.");
+      }
+      const options = await optionsRes.json();
+
+      // Step B: Trigger OS Hardware via startRegistration
+      const credential = await startRegistration(options);
+
+      // Step C: Verify on Backend
+      const verifyRes = await fetch("/api/webauthn/register-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, credential }),
+      });
+      if (!verifyRes.ok) {
+        throw new Error("Biometric verification failed on server.");
+      }
+      const verifyResult = await verifyRes.json();
+
+      if (verifyResult.verified) {
+        // Step D: Generate the Final Payment Link
+        const linkRes = await fetch("/api/payment/generate-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            billAmount: Number(billAmount) || 0,
+            insuranceCoverage: Number(insuranceCoverage) || 0,
+            payeeUPI: hospitalUpi,
+            hospitalName: hospitalName,
+          }),
+        });
+
+        if (!linkRes.ok) {
+          throw new Error("Failed to generate payment deep link.");
+        }
+
+        const linkData = await linkRes.json();
+        setUpiLink(linkData.upiLink);
+        setIsAuthorized(true);
+      } else {
+        alert("Verification failed. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Biometric Authentication Error:", err);
+      alert(`Authentication Error: ${err.message || err}`);
+    } finally {
       setIsAuthorizing(false);
-      setIsAuthorized(true);
-    }, 2000);
+    }
   };
 
   // Math variables
@@ -338,12 +393,27 @@ export default function VisionPayPage() {
                 )}
               </button>
             ) : (
-              <div className="p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl text-center flex flex-col items-center justify-center gap-2 animate-bounce">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-                <h4 className="font-extrabold text-sm uppercase tracking-wide">Payment Authorized Successfully!</h4>
-                <p className="text-xs text-green-700 font-medium leading-relaxed">
-                  Funds have been dispatched securely to {hospitalUpi}. Receipt reference saved.
-                </p>
+              <div className="space-y-4">
+                <div className="p-6 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-center flex flex-col items-center justify-center gap-2 shadow-sm animate-fadeIn">
+                  <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-inner">
+                    <ShieldCheck className="h-7 w-7" />
+                  </div>
+                  <h4 className="font-extrabold text-lg uppercase tracking-wide text-emerald-950">
+                    Biometrics Verified & Payment Secured
+                  </h4>
+                  <p className="text-xs text-emerald-700 font-medium leading-relaxed max-w-md">
+                    Secure handshake successful. The billing signature matches Apollo Hospitals verification keys. You can now execute the final dispatch.
+                  </p>
+                </div>
+
+                {upiLink && (
+                  <a
+                    href={upiLink}
+                    className="block w-full text-center py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-98"
+                  >
+                    Pay ₹{netPayable.toLocaleString()} via UPI ⚡
+                  </a>
+                )}
               </div>
             )}
           </section>
