@@ -27,13 +27,13 @@ export default function VisionPayPage() {
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
-    // Initialize html5-qrcode scanner if not scanned yet
+    // Initialize html5-qrcode scanner automatically on load
     if (isScanned) return;
 
     const qrRegionId = "qr-reader";
     const scanner = new Html5QrcodeScanner(
       qrRegionId,
-      { fps: 10, qrbox: { width: 220, height: 220 }, rememberLastUsedCamera: true },
+      { fps: 10, qrbox: { width: 200, height: 200 }, rememberLastUsedCamera: true },
       /* verbose= */ false
     );
     scannerRef.current = scanner;
@@ -51,7 +51,7 @@ export default function VisionPayPage() {
 
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch((err) => console.error("Failed to clear scanner:", err));
+        scannerRef.current.clear().catch((err) => console.error("Failed to clear scanner on unmount:", err));
       }
     };
   }, [isScanned]);
@@ -62,7 +62,7 @@ export default function VisionPayPage() {
       setScanMessage("QR Code Scanned Successfully!");
       setIsScanned(true);
 
-      // Stop and clear the scanner/camera immediately to save battery
+      // Stop and clear the scanner/camera immediately to unmount and stop tracks
       if (scannerRef.current) {
         scannerRef.current.clear().catch((err) => console.error("Failed to clear scanner on success:", err));
       }
@@ -114,29 +114,50 @@ export default function VisionPayPage() {
       const email = "user@nxthealth.com";
 
       // Step A: Fetch Options
-      const optionsRes = await fetch("/api/webauthn/register-options", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      if (!optionsRes.ok) {
-        throw new Error("Failed to fetch registration options from server.");
+      let options;
+      try {
+        const optionsRes = await fetch("/api/webauthn/register-options", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        if (!optionsRes.ok) {
+          throw new Error(`Server returned status ${optionsRes.status}`);
+        }
+        options = await optionsRes.json();
+      } catch (err: any) {
+        console.error("Failed to fetch biometric challenge:", err);
+        alert("Failed to fetch biometric challenge: " + err.message);
+        throw err;
       }
-      const options = await optionsRes.json();
 
       // Step B: Trigger OS Hardware via startRegistration
-      const credential = await startRegistration(options);
+      let credential;
+      try {
+        credential = await startRegistration(options);
+      } catch (err: any) {
+        console.error("Hardware auth blocked:", err);
+        alert("Hardware auth blocked: " + err.message);
+        throw err;
+      }
 
       // Step C: Verify on Backend
-      const verifyRes = await fetch("/api/webauthn/register-verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, credential }),
-      });
-      if (!verifyRes.ok) {
-        throw new Error("Biometric verification failed on server.");
+      let verifyResult;
+      try {
+        const verifyRes = await fetch("/api/webauthn/register-verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, credential }),
+        });
+        if (!verifyRes.ok) {
+          throw new Error(`Server returned status ${verifyRes.status}`);
+        }
+        verifyResult = await verifyRes.json();
+      } catch (err: any) {
+        console.error("Backend verification failed:", err);
+        alert("Backend verification failed: " + err.message);
+        throw err;
       }
-      const verifyResult = await verifyRes.json();
 
       if (verifyResult.verified) {
         // Step D: Generate the Final Payment Link
@@ -162,8 +183,7 @@ export default function VisionPayPage() {
         alert("Verification failed. Please try again.");
       }
     } catch (err: any) {
-      console.error("Biometric Authentication Error:", err);
-      alert(`Authentication Error: ${err.message || err}`);
+      console.error("Biometric Authentication Flow Stopped:", err);
     } finally {
       setIsAuthorizing(false);
     }
@@ -179,6 +199,43 @@ export default function VisionPayPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans">
+      {/* Global CSS overrides for the html5-qrcode renderer */}
+      <style>{`
+        #qr-reader {
+          border: none !important;
+          background: transparent !important;
+        }
+        #qr-reader img {
+          display: none !important;
+        }
+        #qr-reader__header_message {
+          display: none !important;
+        }
+        #qr-reader__status_span {
+          display: none !important;
+        }
+        #qr-reader button {
+          background-color: #0284c7 !important;
+          color: white !important;
+          border: none !important;
+          border-radius: 8px !important;
+          padding: 8px 16px !important;
+          font-size: 12px !important;
+          font-weight: bold !important;
+          cursor: pointer !important;
+          margin-top: 8px !important;
+          transition: all 0.2s !important;
+        }
+        #qr-reader button:hover {
+          background-color: #0369a1 !important;
+        }
+        #qr-reader video {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+        }
+      `}</style>
+
       <div className="max-w-3xl mx-auto space-y-8">
         
         {/* Navigation Link */}
@@ -224,7 +281,28 @@ export default function VisionPayPage() {
             )}
             
             {!isScanned ? (
-              <div id="qr-reader" className="w-full max-w-md bg-white rounded-lg overflow-hidden border border-slate-150" />
+              <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden shadow-md border border-slate-200 bg-black">
+                {/* HTML5 QR Code target */}
+                <div id="qr-reader" className="w-full h-full object-cover" />
+                
+                {/* Google Lens Scan Reticle Overlay */}
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                  {/* Subtle dark tint outside the scanning zone */}
+                  <div className="absolute inset-0 border-[40px] border-black/45" />
+                  
+                  {/* Center Scanning Frame */}
+                  <div className="w-[180px] h-[180px] border-2 border-white/80 rounded-xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]">
+                    {/* Corner brackets */}
+                    <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-sky-400 rounded-tl-md" />
+                    <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-sky-400 rounded-tr-md" />
+                    <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-sky-400 rounded-bl-md" />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-sky-400 rounded-br-md" />
+                    
+                    {/* Pulse Line */}
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent animate-pulse" />
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
                 <div className="h-16 w-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-inner">
