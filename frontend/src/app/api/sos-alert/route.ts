@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { audioBase64, healthPassport } = body ?? {};
+    const { audioBase64, healthPassport, location } = body ?? {};
 
     // 2. Payload Validation
     if (!audioBase64 || typeof audioBase64 !== "string") {
@@ -98,6 +98,27 @@ export async function POST(req: NextRequest) {
 
     // 4. Decode Audio Payload
     const audioBuffer = Buffer.from(audioBase64, "base64");
+
+    const mapsLink = location && typeof location.lat === "number" && typeof location.lng === "number"
+      ? `https://www.google.com/maps?q=${location.lat},${location.lng}`
+      : null;
+
+    const locationHtml = mapsLink
+      ? `<div style="background-color: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);">
+          <h4 style="margin: 0 0 10px 0; font-size: 11px; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 0.8px;">📍 PATIENT LOCATION DETECTED</h4>
+          <div style="margin-top: 10px; margin-bottom: 10px;">
+            <a href="${mapsLink}" style="display: inline-block; padding: 12px 24px; background-color: #ef4444; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);">📍 View Patient's Live Location on Google Maps</a>
+          </div>
+          <p style="margin: 5px 0 0 0; font-size: 12px; color: #78350f; font-weight: 500;">
+            Coordinates: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}
+          </p>
+         </div>`
+      : `<div style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);">
+          <h4 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.8px;">📍 PATIENT LOCATION</h4>
+          <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.6; font-weight: 600;">
+            Location data unavailable (Permission denied or signal lost).
+          </p>
+         </div>`;
 
     const emailSubject = `🚨 EMERGENCY: NxtHealth Smart SOS Alert for ${displayUserName}`;
 
@@ -189,6 +210,7 @@ export async function POST(req: NextRequest) {
             ${displayPolicyDetails}
           </p>
         </div>
+        ${locationHtml}
 
         <!-- Emergency Audio Attachment Alert -->
         <div style="background-color: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);">

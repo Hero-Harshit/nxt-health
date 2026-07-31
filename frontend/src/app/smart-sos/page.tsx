@@ -36,6 +36,7 @@ export default function SmartSOSPage() {
   const [buttonState, setButtonState] = useState<'idle' | 'sending' | 'success'>('idle');
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [showEmailAlert, setShowEmailAlert] = useState<boolean>(false);
+  const [locationData, setLocationData] = useState<{ lat: number; lng: number } | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
@@ -177,9 +178,30 @@ export default function SmartSOSPage() {
       return;
     }
     setMicError(null);
+    setLocationData(null); // Reset location data
     audioChunksRef.current = [];
     recordingLengthRef.current = 0;
     setRecordingTime(0);
+
+    // Asynchronously request geolocation to avoid blocking mic stream initialization
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          console.log("📍 [GEOLOCATION SUCCESS]:", coords);
+          setLocationData(coords);
+        },
+        (error) => {
+          console.warn("⚠️ [GEOLOCATION ERROR]:", error.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      console.warn("⚠️ [GEOLOCATION]: Geolocation is not supported by this browser.");
+    }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -369,7 +391,8 @@ export default function SmartSOSPage() {
       const payload = {
         audioBase64,
         mimeType: 'audio/wav',
-        healthPassport
+        healthPassport,
+        location: locationData
       };
 
       console.log("🚨 [FRONTEND SENDING PAYLOAD]:", payload);
