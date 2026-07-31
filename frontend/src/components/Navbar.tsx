@@ -143,6 +143,13 @@ export default function Navbar() {
                     >
                       💊 Medicine Time Wheel
                     </Link>
+                    <Link
+                      href="/utilities/family-risk-map"
+                      className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
+                      onClick={() => setIsUtilitiesOpen(false)}
+                    >
+                      🧬 Family Health Risk Map
+                    </Link>
                   </div>
                 )}
               </div>
@@ -249,6 +256,13 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(false)}
           >
             💊 Medicine Time Wheel
+          </Link>
+          <Link
+            href="/utilities/family-risk-map"
+            className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            🧬 Family Health Risk Map
           </Link>
 
           <div className="border-t border-slate-200 my-2" />
