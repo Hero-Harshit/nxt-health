@@ -470,7 +470,13 @@ export default function SmartSOSPage() {
   };
 
   const handleOfflineSMS = async () => {
-    let message = "";
+    let message = "EMERGENCY: I need immediate help!\n";
+    message += `Patient: ${userName || "N/A"}\n`;
+    message += `Age: ${age || "N/A"}\n`;
+    message += `Gender: ${gender || "N/A"}\n`;
+    message += `Allergies: ${allergies || "None"}\n`;
+    message += `Conditions: ${chronicConditions || "None"}`;
+
     try {
       const gpsPromise = new Promise<{ lat: number; lng: number } | null>((resolve, reject) => {
         if (!navigator.geolocation) {
@@ -495,13 +501,10 @@ export default function SmartSOSPage() {
 
       const location = await Promise.race([gpsPromise, timeoutPromise]);
       if (location) {
-        message = `EMERGENCY: I need help! My last known location: https://www.google.com/maps?q=${location.lat},${location.lng}`;
-      } else {
-        message = "EMERGENCY: I need immediate help! (Location unavailable, please call me).";
+        message += `\nLast Location: https://www.google.com/maps?q=${location.lat},${location.lng}`;
       }
     } catch (err) {
-      console.warn("⚠️ SMS GPS acquisition failed:", err);
-      message = "EMERGENCY: I need immediate help! (Location unavailable, please call me).";
+      console.warn("⚠️ SMS GPS acquisition failed, proceeding silently:", err);
     }
 
     const encodedMessage = encodeURIComponent(message);
