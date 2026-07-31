@@ -131,11 +131,11 @@ export default function SleepTrackerPage() {
 
   const todayLog = logs.find((l) => l.date === selectedDate) || last7Days[last7Days.length - 1];
 
-  // Detect late bedtime dynamically
-  const bedHour = todayLog ? parseInt(todayLog.bedTime.split(':')[0], 10) : 23;
-  const bedMin = todayLog ? parseInt(todayLog.bedTime.split(':')[1], 10) : 0;
-  const isLateBedtime = todayLog ? bedHour >= 1 && bedHour < 5 : false;
-  const isOversleeping = todayLog ? todayLog.hours >= 9.5 : false;
+  // Detect late bedtime dynamically from live states
+  const bedHour = bedTime ? parseInt(bedTime.split(':')[0], 10) : 23;
+  const bedMin = bedTime ? parseInt(bedTime.split(':')[1], 10) : 0;
+  const isLateBedtime = bedHour >= 0 && bedHour <= 4;
+  const isOversleeping = inputHours >= 9.5;
 
   // 1. DYNAMIC CATCH-UP EXTRA SLEEP COMPUTATION
   const dynamicExtraMins = Math.round((sleepBacklog / 7) * 60);
@@ -380,11 +380,11 @@ export default function SleepTrackerPage() {
             <p className="text-xs text-gray-700 leading-relaxed">
               {isOversleeping ? (
                 <span>
-                  <strong>Moderate Your Sleep:</strong> Logging {todayLog ? todayLog.hours : 8}h exceeds optimal recovery ranges. Keep your wake-up time consistent to prevent sleep inertia.
+                  <strong>Moderate Your Sleep:</strong> Logging {inputHours}h exceeds optimal recovery ranges. Keep your wake-up time consistent to prevent sleep inertia.
                 </span>
               ) : isLateBedtime ? (
                 <span>
-                  <strong>Schedule Drift Detected:</strong> Bedtime of {todayLog ? todayLog.bedTime : '23:00'} disrupts circadian rhythm. Shift bedtime {dynamicBedtimeShift} earlier tonight.
+                  <strong>Schedule Drift Detected:</strong> Bedtime of {bedTime} disrupts circadian rhythm. Shift bedtime {dynamicBedtimeShift} earlier tonight.
                 </span>
               ) : (
                 <span>
