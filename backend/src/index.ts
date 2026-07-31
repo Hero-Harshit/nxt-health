@@ -108,15 +108,31 @@ app.get("/api/ping", (_, res) => {
 });
 
 app.post("/api/sos-alert", async (req, res) => {
+  // 1. Environment & Config Validation
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+
+  if (!gmailUser || !gmailAppPassword) {
+    console.error(
+      "\x1b[41m\x1b[37m%s\x1b[0m",
+      "🚨🚨🚨 MASSIVE RED WARNING: GMAIL_USER or GMAIL_APP_PASSWORD is missing from environment variables! 🚨🚨🚨"
+    );
+    res.status(400).json({ success: false, error: "Email configuration missing on server." });
+    return;
+  }
+
   try {
+    // 2. Payload Validation
     const { audioBase64, healthPassport } = req.body ?? {};
 
     if (!audioBase64 || typeof audioBase64 !== "string") {
+      console.warn("⚠️ [SOS Alert API]: Rejected request - missing or invalid audioBase64 payload.");
       res.status(400).json({ success: false, error: "Missing or invalid audioBase64 string" });
       return;
     }
 
     if (!healthPassport || typeof healthPassport !== "object") {
+      console.warn("⚠️ [SOS Alert API]: Rejected request - missing healthPassport object.");
       res.status(400).json({ success: false, error: "Missing or invalid healthPassport data" });
       return;
     }
@@ -137,19 +153,12 @@ app.post("/api/sos-alert", async (req, res) => {
     } = healthPassport;
 
     if (!toEmail || typeof toEmail !== "string" || !toEmail.trim()) {
-      res.status(400).json({ success: false, error: "Missing destination email (toEmail)" });
+      console.warn("⚠️ [SOS Alert API]: Rejected request - missing emergency contact email (toEmail) inside healthPassport.");
+      res.status(400).json({ success: false, error: "Missing destination email (toEmail) inside healthPassport." });
       return;
     }
 
-    const gmailUser = process.env.GMAIL_USER;
-    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
-
-    if (!gmailUser || !gmailAppPassword) {
-      console.error("❌ GMAIL_USER or GMAIL_APP_PASSWORD is missing from environment variables.");
-      res.status(500).json({ success: false, error: "Email provider configuration error" });
-      return;
-    }
-
+    // 3. Setup Nodemailer Transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -157,6 +166,16 @@ app.post("/api/sos-alert", async (req, res) => {
         pass: gmailAppPassword,
       },
     });
+
+    // Verify SMTP connection before attempting dispatch
+    try {
+      console.log("⏳ [NODEMAILER]: Verifying SMTP connection...");
+      await transporter.verify();
+      console.log("✅ [NODEMAILER]: SMTP Connection verified successfully.");
+    } catch (verifyError: any) {
+      console.error("❌ [NODEMAILER]: SMTP Verification failed:", verifyError);
+      throw new Error(`SMTP Verification Failed: ${verifyError.message || verifyError.toString()}`);
+    }
 
     const displayUserName = full_name || "Unknown Patient";
     const displayAge = age || "Not Configured";
@@ -170,6 +189,7 @@ app.post("/api/sos-alert", async (req, res) => {
     const displayDoctorNumber = doctorNumber || "Not Configured";
     const displayAllergies = allergies || "None Listed";
 
+    // 4. Decode Audio Payload
     const audioBuffer = Buffer.from(audioBase64, "base64");
 
     const emailSubject = `🚨 EMERGENCY: NxtHealth Smart SOS Alert for ${displayUserName}`;
@@ -279,6 +299,7 @@ app.post("/api/sos-alert", async (req, res) => {
       </div>
     `;
 
+    console.log(`✉️ [NODEMAILER]: Sending emergency email alert to ${toEmail}...`);
     await transporter.sendMail({
       from: `"NxtHealth Smart SOS" <${gmailUser}>`,
       to: toEmail,
@@ -292,6 +313,7 @@ app.post("/api/sos-alert", async (req, res) => {
         },
       ],
     });
+    console.log("✅ [NODEMAILER]: Email successfully dispatched.");
 
     const user = await getAuthUser(req);
     if (user) {
@@ -299,9 +321,12 @@ app.post("/api/sos-alert", async (req, res) => {
     }
 
     res.status(200).json({ success: true });
-  } catch (err: any) {
-    console.error("❌ Nodemailer SOS Dispatch failure:", err);
-    res.status(500).json({ success: false, error: err.message || "Internal server error" });
+  } catch (error: any) {
+    console.error("❌ SOS Route Failed:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || error.toString() || "Internal server error"
+    });
   }
 });
 
