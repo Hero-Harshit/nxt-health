@@ -37,8 +37,12 @@ export default function SmartSOSPage() {
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [showEmailAlert, setShowEmailAlert] = useState<boolean>(false);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const audioChunksRef = useRef<Float32Array[]>([]);
+  const recordingLengthRef = useRef<number>(0);
+  const sampleRateRef = useRef<number>(44100);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hardCapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -155,6 +159,12 @@ export default function SmartSOSPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (hardCapTimeoutRef.current) clearTimeout(hardCapTimeoutRef.current);
+      if (scriptProcessorRef.current) {
+        scriptProcessorRef.current.onaudioprocess = null;
+        scriptProcessorRef.current.disconnect();
+      }
+      if (sourceRef.current) sourceRef.current.disconnect();
+      if (audioContextRef.current) audioContextRef.current.close();
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
@@ -168,35 +178,35 @@ export default function SmartSOSPage() {
     }
     setMicError(null);
     audioChunksRef.current = [];
+    recordingLengthRef.current = 0;
     setRecordingTime(0);
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm",
-      });
-      mediaRecorderRef.current = mediaRecorder;
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContextClass();
+      audioContextRef.current = audioContext;
+      sampleRateRef.current = audioContext.sampleRate;
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+      const source = audioContext.createMediaStreamSource(stream);
+      sourceRef.current = source;
+
+      // 4096 buffer size, 1 input channel, 1 output channel
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      scriptProcessorRef.current = processor;
+
+      processor.onaudioprocess = (e) => {
+        const inputData = e.inputBuffer.getChannelData(0);
+        // We must clone it as inputData is reused
+        audioChunksRef.current.push(new Float32Array(inputData));
+        recordingLengthRef.current += inputData.length;
       };
 
-      mediaRecorder.onstop = async () => {
-        // Clean up the media stream tracks
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
-          streamRef.current = null;
-        }
+      source.connect(processor);
+      processor.connect(audioContext.destination);
 
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        await sendAudioAlert(audioBlob);
-      };
-
-      mediaRecorder.start();
       setIsRecording(true);
 
       // Start live timer counting up to 15 seconds
@@ -233,10 +243,91 @@ export default function SmartSOSPage() {
       hardCapTimeoutRef.current = null;
     }
 
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
+    // Disconnect audio nodes
+    if (scriptProcessorRef.current) {
+      scriptProcessorRef.current.onaudioprocess = null;
+      scriptProcessorRef.current.disconnect();
+      scriptProcessorRef.current = null;
     }
+    if (sourceRef.current) {
+      sourceRef.current.disconnect();
+      sourceRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    // Clean up stream tracks
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
     setIsRecording(false);
+
+    // Merge and encode WAV
+    const mergedPCM = mergeBuffers(audioChunksRef.current, recordingLengthRef.current);
+    const wavBlob = encodeWAV(mergedPCM, sampleRateRef.current);
+    sendAudioAlert(wavBlob);
+  };
+
+  const mergeBuffers = (channelBuffer: Float32Array[], recordingLength: number): Float32Array => {
+    const result = new Float32Array(recordingLength);
+    let offset = 0;
+    for (let i = 0; i < channelBuffer.length; i++) {
+      const buffer = channelBuffer[i];
+      result.set(buffer, offset);
+      offset += buffer.length;
+    }
+    return result;
+  };
+
+  const encodeWAV = (samples: Float32Array, sampleRate: number): Blob => {
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+
+    const writeString = (view: DataView, offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    /* RIFF identifier */
+    writeString(view, 0, 'RIFF');
+    /* file length */
+    view.setUint32(4, 36 + samples.length * 2, true);
+    /* RIFF type */
+    writeString(view, 8, 'WAVE');
+    /* format chunk identifier */
+    writeString(view, 12, 'fmt ');
+    /* format chunk length */
+    view.setUint32(16, 16, true);
+    /* sample format (raw PCM) */
+    view.setUint16(20, 1, true);
+    /* channel count (mono) */
+    view.setUint16(22, 1, true);
+    /* sample rate */
+    view.setUint32(24, sampleRate, true);
+    /* byte rate (sample rate * block align) */
+    view.setUint32(28, sampleRate * 2, true);
+    /* block align (channel count * bytes per sample) */
+    view.setUint16(32, 2, true);
+    /* bits per sample */
+    view.setUint16(34, 16, true);
+    /* data chunk identifier */
+    writeString(view, 36, 'data');
+    /* data chunk length */
+    view.setUint32(40, samples.length * 2, true);
+
+    // Write samples as 16-bit signed integers
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++, offset += 2) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+
+    return new Blob([view], { type: 'audio/wav' });
   };
 
   const sendAudioAlert = async (audioBlob: Blob) => {
@@ -277,6 +368,7 @@ export default function SmartSOSPage() {
 
       const payload = {
         audioBase64,
+        mimeType: 'audio/wav',
         healthPassport
       };
 

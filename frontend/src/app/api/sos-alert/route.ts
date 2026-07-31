@@ -214,9 +214,9 @@ export async function POST(req: NextRequest) {
       html: emailHtml,
       attachments: [
         {
-          filename: "sos-emergency-audio.webm",
+          filename: "sos-emergency-audio.wav",
           content: audioBuffer,
-          contentType: "audio/webm",
+          contentType: "audio/wav",
         },
       ],
     });
