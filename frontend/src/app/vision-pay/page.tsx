@@ -230,7 +230,8 @@ export default function VisionPayPage() {
         patientName,
         hospitalName,
         payableAmount,
-        upiLink: generatedUpi
+        upiLink: generatedUpi,
+        payeeUPI: hospitalUpi
       };
 
       const res = await fetch("/api/payment/delegate", {
@@ -270,6 +271,12 @@ export default function VisionPayPage() {
         #qr-reader {
           border: none !important;
           background: transparent !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          height: 100% !important;
+          width: 100% !important;
         }
         #qr-reader img {
           display: none !important;
@@ -547,7 +554,7 @@ export default function VisionPayPage() {
                   {isDelegating ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin text-red-600" />
-                      <span>Sending SOS...</span>
+                      <span>Forwarding Payment Request...</span>
                     </>
                   ) : (
                     <>

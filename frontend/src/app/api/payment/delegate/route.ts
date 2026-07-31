@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
-    const { emergencyContactEmail, patientName, hospitalName, payableAmount, upiLink } = await req.json();
+    const { emergencyContactEmail, patientName, hospitalName, payableAmount, upiLink, payeeUPI } = await req.json();
 
     if (!emergencyContactEmail || !hospitalName || !payableAmount || !upiLink) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -58,6 +58,11 @@ export async function POST(req: Request) {
             <a href="${upiLink}" style="background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 14px 28px; font-size: 16px; font-weight: bold; border-radius: 8px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.4);">
               Authorize & Pay ₹${Number(payableAmount).toLocaleString()} via UPI ⚡
             </a>
+            <p style="margin-top: 20px; font-size: 13px; color: #64748b;">
+              Note: Email providers (like Google/Gmail) might block direct payment link clicks for security reasons.<br/>
+              If the button doesn't open your app, manually pay to this UPI ID:<br/>
+              <strong style="font-size: 15px; color: #0f172a; display: block; margin-top: 5px;">${payeeUPI || "N/A"}</strong>
+            </p>
           </div>
 
           <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
