@@ -33,7 +33,14 @@ export default function VisionPayPage() {
     const qrRegionId = "qr-reader";
     const scanner = new Html5QrcodeScanner(
       qrRegionId,
-      { fps: 10, qrbox: { width: 200, height: 200 }, rememberLastUsedCamera: true },
+      {
+        fps: 10,
+        qrbox: { width: 200, height: 200 },
+        rememberLastUsedCamera: true,
+        videoConstraints: {
+          facingMode: { exact: "environment" }
+        }
+      },
       /* verbose= */ false
     );
     scannerRef.current = scanner;
