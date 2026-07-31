@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ShieldAlert, CheckCircle, Fingerprint, Loader2, Sparkles, Receipt, DollarSign, ShieldCheck, Camera, CreditCard } from "lucide-react";
+import { ArrowLeft, ShieldAlert, CheckCircle, Fingerprint, Loader2, Sparkles, Receipt, ShieldCheck, Camera } from "lucide-react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 
 export default function VisionPayPage() {
@@ -20,11 +20,14 @@ export default function VisionPayPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
+  const [isScanned, setIsScanned] = useState(false);
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
-    // Initialize html5-qrcode scanner
+    // Initialize html5-qrcode scanner if not scanned yet
+    if (isScanned) return;
+
     const qrRegionId = "qr-reader";
     const scanner = new Html5QrcodeScanner(
       qrRegionId,
@@ -49,21 +52,32 @@ export default function VisionPayPage() {
         scannerRef.current.clear().catch((err) => console.error("Failed to clear scanner:", err));
       }
     };
-  }, []);
+  }, [isScanned]);
 
   const handleScanSuccess = (decodedText: string) => {
     try {
       console.log("📸 [QR SCANNED]:", decodedText);
       setScanMessage("QR Code Scanned Successfully!");
-      
+      setIsScanned(true);
+
+      // Stop and clear the scanner/camera immediately to save battery
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch((err) => console.error("Failed to clear scanner on success:", err));
+      }
+
       if (decodedText.startsWith("upi://pay")) {
         // Parse UPI query parameters
         const urlParams = new URLSearchParams(decodedText.substring(decodedText.indexOf("?")));
         const pa = urlParams.get("pa") || "";
         const pn = urlParams.get("pn") || "";
+        const am = urlParams.get("am") || "";
         setHospitalName(pn ? decodeURIComponent(pn) : "Hospital");
         setHospitalUpi(pa);
+        if (am) {
+          setBillAmount(Number(am));
+        }
       } else {
+        // Fallback parsing if QR is plain text
         setHospitalName(decodedText);
       }
     } catch (e) {
@@ -71,18 +85,10 @@ export default function VisionPayPage() {
     }
   };
 
-  const handleSimulateDemo = () => {
-    setHospitalName("Apollo Hospitals");
-    setHospitalUpi("apollohospitals@okaxis");
-    setBillAmount(150000);
-    setInsuranceCoverage(80);
-    setScanMessage("Demo values populated successfully.");
-  };
-
   const handleVerifyRisk = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hospitalName || !hospitalUpi || !billAmount) {
-      alert("Please fill in the Hospital Name, UPI ID, and Bill Amount.");
+    if (!hospitalName || !hospitalUpi || !billAmount || !insuranceCoverage) {
+      alert("Please fill in all details before proceeding.");
       return;
     }
     setIsVerifying(true);
@@ -113,6 +119,8 @@ export default function VisionPayPage() {
   const coveragePercent = Number(insuranceCoverage) || 0;
   const coveredVal = (originalVal * coveragePercent) / 100;
   const netPayable = originalVal - coveredVal;
+
+  const isFormComplete = hospitalName && hospitalUpi && billAmount !== "" && insuranceCoverage !== "";
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8 font-sans">
@@ -154,17 +162,26 @@ export default function VisionPayPage() {
           </div>
 
           <div className="relative rounded-xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 p-4 flex flex-col items-center">
-            {isLocatingScanner && (
+            {isLocatingScanner && !isScanned && (
               <div className="absolute inset-0 flex items-center justify-center bg-slate-50 z-10">
                 <Loader2 className="h-8 w-8 text-sky-600 animate-spin" />
               </div>
             )}
             
-            {/* Target element for html5-qrcode rendering */}
-            <div id="qr-reader" className="w-full max-w-md bg-white rounded-lg overflow-hidden border border-slate-150" />
+            {!isScanned ? (
+              <div id="qr-reader" className="w-full max-w-md bg-white rounded-lg overflow-hidden border border-slate-150" />
+            ) : (
+              <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
+                <div className="h-16 w-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-inner">
+                  <CheckCircle className="h-10 w-10" />
+                </div>
+                <h3 className="font-bold text-slate-800 text-sm">QR Code Captured</h3>
+                <p className="text-xs text-slate-500">Camera turned off to preserve battery. Review information below.</p>
+              </div>
+            )}
             
             {scanMessage && (
-              <div className="mt-4 px-4 py-2 bg-emerald-55 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-100 flex items-center gap-1.5 animate-bounce">
+              <div className="mt-4 px-4 py-2 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-100 flex items-center gap-1.5 animate-bounce">
                 <CheckCircle className="h-4 w-4 text-emerald-600" /> {scanMessage}
               </div>
             )}
@@ -180,13 +197,6 @@ export default function VisionPayPage() {
               </h2>
               <p className="text-xs text-slate-500 mt-1">Manual fields will auto-fill on successful QR scan.</p>
             </div>
-            
-            <button
-              onClick={handleSimulateDemo}
-              className="text-xs font-semibold text-sky-600 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-lg border border-sky-100 transition-all cursor-pointer"
-            >
-              ⚡ Simulate Demo Data
-            </button>
           </div>
 
           <form onSubmit={handleVerifyRisk} className="space-y-4">
@@ -196,10 +206,10 @@ export default function VisionPayPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Apollo Hospitals"
+                  readOnly
+                  placeholder="Scan QR to auto-fill"
                   value={hospitalName}
-                  onChange={(e) => setHospitalName(e.target.value)}
-                  className="w-full p-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+                  className="w-full p-3 text-sm rounded-xl border border-slate-250 bg-slate-100 text-slate-600 focus:outline-none cursor-not-allowed"
                 />
               </div>
 
@@ -208,10 +218,10 @@ export default function VisionPayPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. apollo@upi"
+                  readOnly
+                  placeholder="Scan QR to auto-fill"
                   value={hospitalUpi}
-                  onChange={(e) => setHospitalUpi(e.target.value)}
-                  className="w-full p-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+                  className="w-full p-3 text-sm rounded-xl border border-slate-250 bg-slate-100 text-slate-600 focus:outline-none cursor-not-allowed"
                 />
               </div>
 
@@ -233,6 +243,7 @@ export default function VisionPayPage() {
                   type="number"
                   min="0"
                   max="100"
+                  required
                   placeholder="e.g. 80"
                   value={insuranceCoverage}
                   onChange={(e) => setInsuranceCoverage(e.target.value === "" ? "" : Number(e.target.value))}
@@ -243,18 +254,18 @@ export default function VisionPayPage() {
 
             <button
               type="submit"
-              disabled={isVerifying}
-              className="w-full py-3.5 px-6 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2 hover:shadow active:scale-98"
+              disabled={isVerifying || !isFormComplete}
+              className="w-full py-3.5 px-6 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2 hover:shadow active:scale-98 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
             >
               {isVerifying ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>AI verifying billing history...</span>
+                  <span>Running fraud and billing analysis...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="h-5 w-5" />
-                  <span>Scan Bill & Verify Risk</span>
+                  <span>Analyze Bill & Verify Risk</span>
                 </>
               )}
             </button>
@@ -300,9 +311,9 @@ export default function VisionPayPage() {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
               <ShieldAlert className="h-6 w-6 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wide">Large Amount Alert</h4>
+                <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wide">⚠️ High Amount Alert</h4>
                 <p className="text-xs text-amber-700 font-medium leading-relaxed mt-1">
-                  Payment exceeds typical outpatient threshold. Safe dispatch protocols require device-based biometric verification to authenticate the session.
+                  Please verify the net payable amount before proceeding. Biometric authorization required.
                 </p>
               </div>
             </div>
