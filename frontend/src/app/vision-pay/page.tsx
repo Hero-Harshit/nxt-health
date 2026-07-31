@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 import { ArrowLeft, ShieldAlert, CheckCircle, Fingerprint, Loader2, Sparkles, Receipt, ShieldCheck, Camera } from "lucide-react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { startRegistration } from "@simplewebauthn/browser";
@@ -25,8 +26,64 @@ export default function VisionPayPage() {
   const [upiLink, setUpiLink] = useState<string | null>(null);
   const [isDelegating, setIsDelegating] = useState(false);
   const [delegateSuccess, setDelegateSuccess] = useState(false);
+  const [patientName, setPatientName] = useState("Patient");
+  const [emergencyContactEmail, setEmergencyContactEmail] = useState("");
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        loadUserData(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        loadUserData(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadUserData = async (userId: string) => {
+    try {
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("full_name")
+        .eq("id", userId)
+        .maybeSingle();
+
+      const cached = localStorage.getItem("nxt_health_passport");
+      let passportData: any = null;
+      if (cached) {
+        try {
+          passportData = JSON.parse(cached);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const { data: cloudPassport } = await supabase
+        .from("health_passports")
+        .select("passport_data")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (cloudPassport && cloudPassport.passport_data) {
+        passportData = cloudPassport.passport_data;
+      }
+
+      const resolvedName = profile?.full_name || passportData?.fullName || passportData?.name || "Patient";
+      const resolvedContactEmail = passportData?.emergencyContactEmail || "";
+
+      setPatientName(resolvedName);
+      setEmergencyContactEmail(resolvedContactEmail);
+    } catch (e) {
+      console.error("Error loading user profile in VisionPay:", e);
+    }
+  };
 
   useEffect(() => {
     // Initialize html5-qrcode scanner automatically on load
@@ -156,6 +213,11 @@ export default function VisionPayPage() {
   };
 
   const handleDelegatePayment = async () => {
+    if (!emergencyContactEmail) {
+      alert("No emergency contact found. Please set one up in your profile.");
+      return;
+    }
+
     setIsDelegating(true);
     setDelegateSuccess(false);
     try {
@@ -164,8 +226,8 @@ export default function VisionPayPage() {
       const generatedUpi = `upi://pay?pa=${hospitalUpi}&pn=${encodeURIComponent(hospitalName)}&am=${payableAmount}&cu=INR`;
 
       const payload = {
-        emergencyContactEmail: "user@nxthealth.com", // Dummy email for presentation/demo
-        patientName: "Alex Mercer",
+        emergencyContactEmail,
+        patientName,
         hospitalName,
         payableAmount,
         upiLink: generatedUpi
