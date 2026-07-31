@@ -28,17 +28,20 @@ export default function SmartSOSPage() {
   const [contactEmail, setContactEmail] = useState<string>("");
 
   // System states
-  const [transcript, setTranscript] = useState<string>("");
-  const [isListening, setIsListening] = useState<boolean>(false);
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [recordingTime, setRecordingTime] = useState<number>(0);
+  const [micError, setMicError] = useState<string | null>(null);
   const [isSent, setIsSent] = useState<boolean>(false);
   const [isSending, setIsSending] = useState<boolean>(false);
   const [buttonState, setButtonState] = useState<'idle' | 'sending' | 'success'>('idle');
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [showEmailAlert, setShowEmailAlert] = useState<boolean>(false);
 
-  const recognitionRef = useRef<any>(null);
-  const transcriptRef = useRef<string>("");
-
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const hardCapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   // Load User Data & Passport Details
   useEffect(() => {
@@ -147,105 +150,117 @@ export default function SmartSOSPage() {
     }
   };
 
-  // Auto-recording Voice capture hook
+  // Clean up Media Stream and timers on unmount
   useEffect(() => {
-    if (isLoading || isSent || isSending) return;
-
-    if (typeof window !== "undefined") {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        try {
-          const rec = new SpeechRecognition();
-          rec.continuous = true;
-          rec.interimResults = false;
-          rec.lang = "en-US";
-
-          rec.onstart = () => {
-            setIsListening(true);
-            console.log("🎤 Hands-free mic capture activated automatically.");
-          };
-
-          rec.onresult = (event: any) => {
-            let accumulatedText = "";
-            for (let i = 0; i < event.results.length; i++) {
-              accumulatedText += event.results[i][0].transcript;
-            }
-            const cleanText = accumulatedText.trim();
-            transcriptRef.current = cleanText;
-            setTranscript(cleanText);
-          };
-
-          rec.onerror = (event: any) => {
-            console.error("Speech recognition error:", event.error);
-          };
-
-          rec.onend = () => {
-            // Automatically restart if alert is not sent
-            if (!isSent && !isSending) {
-              try {
-                rec.start();
-              } catch (e) {
-                // Already running
-              }
-            } else {
-              setIsListening(false);
-            }
-          };
-
-          rec.start();
-          recognitionRef.current = rec;
-        } catch (e) {
-          console.warn("Speech recognition initialization safely deferred until interaction:", e);
-        }
-      }
-    }
-
     return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {
-          // Already stopped
-        }
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (hardCapTimeoutRef.current) clearTimeout(hardCapTimeoutRef.current);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [isLoading, isSent, isSending]);
+  }, []);
 
-  const handleTriggerAlert = async () => {
+  const startRecording = async () => {
     if (!contactEmail || !contactEmail.trim()) {
       setShowEmailAlert(true);
       return;
     }
+    setMicError(null);
+    audioChunksRef.current = [];
+    setRecordingTime(0);
 
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: "audio/webm",
+      });
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        // Clean up the media stream tracks
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        await sendAudioAlert(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+
+      // Start live timer counting up to 15 seconds
+      timerRef.current = setInterval(() => {
+        setRecordingTime((prev) => {
+          if (prev >= 15) {
+            clearInterval(timerRef.current!);
+            return 15;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+
+      // 15-Second Hard Cap: Automatically stop and send
+      hardCapTimeoutRef.current = setTimeout(() => {
+        stopRecording();
+      }, 15000);
+
+    } catch (err: any) {
+      console.error("Microphone access error:", err);
+      setMicError(err.message || "Microphone permission denied or not supported.");
+      alert(`Microphone error: ${err.message || "Permission denied. Please allow microphone access in your browser settings."}`);
+    }
+  };
+
+  const stopRecording = () => {
+    // Clear timeouts and intervals
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (hardCapTimeoutRef.current) {
+      clearTimeout(hardCapTimeoutRef.current);
+      hardCapTimeoutRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+  };
+
+  const sendAudioAlert = async (audioBlob: Blob) => {
     setButtonState('sending');
     setIsSending(true);
 
-    // Stop recording when alert is triggered
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        // Already stopped
-      }
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-
     try {
-      // 1. Resolve transcription with DOM extraction fallback
-      let activeTranscript = transcriptRef.current.trim();
-      if (!activeTranscript) {
-        const domContainer = document.getElementById("transcript-container");
-        if (domContainer) {
-          activeTranscript = domContainer.innerText.trim();
-        }
-      }
-      if (!activeTranscript) {
-        activeTranscript = "No spoken scenario recorded.";
-      }
+      // Convert Blob to Base64 using FileReader
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
 
-      // 2. Build aligned dispatch payload
-      const payload = {
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          // Extract base64 part only
+          const base64String = base64data.split(",")[1];
+          resolve(base64String);
+        };
+        reader.onerror = reject;
+      });
+
+      const audioBase64 = await base64Promise;
+
+      const healthPassport = {
         toEmail: contactEmail,
         full_name: userName,
         age: age,
@@ -257,24 +272,35 @@ export default function SmartSOSPage() {
         current_policy_details: policyDetails,
         doctorName: doctorName,
         doctorNumber: doctorNumber,
-        transcript: activeTranscript,
         allergies: allergies
       };
 
-      // 3. Print highly visible frontend diagnostics log
+      const payload = {
+        audioBase64,
+        healthPassport
+      };
+
       console.log("🚨 [FRONTEND SENDING PAYLOAD]:", payload);
 
-      const res = await fetch("/api/smart-sos", {
+      const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json"
+      };
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      }
+
+      const res = await fetch(`${backendBaseUrl}/api/sos-alert`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(payload)
       });
 
       const result = await res.json();
-      
-      // Pause for an additional 1 second to allow the network request to resolve completely while remaining in yellow state
+
+      // Pause to allow visual processing state
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (result.success) {
@@ -296,6 +322,13 @@ export default function SmartSOSPage() {
   };
 
   const getButtonConfig = () => {
+    if (isRecording) {
+      return {
+        btnClass: 'from-red-650 to-rose-500 bg-red-650 hover:bg-red-750 text-white animate-pulse',
+        text: 'STOP & SEND',
+        pingClass: 'bg-red-500/30 animate-ping',
+      };
+    }
     switch (buttonState) {
       case 'sending':
         return {
@@ -313,7 +346,7 @@ export default function SmartSOSPage() {
       default:
         return {
           btnClass: 'from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600 bg-red-600 hover:bg-red-700 text-white',
-          text: 'TRIGGER EMERGENCY SOS',
+          text: 'TAP TO RECORD',
           pingClass: 'bg-rose-500/20',
         };
     }
@@ -359,18 +392,18 @@ export default function SmartSOSPage() {
           </div>
           <h1 className="text-3xl font-black text-[#0F2744] tracking-tight">Smart SOS Console</h1>
           <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
-            Instantly notify your designated emergency contact in times of distress. Clicking the panic mechanism below will transmit a secure alert summary.
+            Instantly notify your designated emergency contact in times of distress. Recording an emergency audio note will automatically dispatch a secure alert summary.
           </p>
         </div>
 
         {/* Central Action Area */}
         <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm flex flex-col items-center justify-center text-center space-y-6 min-h-[320px] transition-all">
           
-          {/* Active Listening Indicators */}
-          {isListening && !showConfirmation && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 shadow-sm animate-pulse">
-              <Volume2 className="h-3.5 w-3.5" />
-              <span>LIVE VOICE MONITOR ACTIVE</span>
+          {/* Active Recording Indicators */}
+          {isRecording && !showConfirmation && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200 shadow-sm animate-pulse">
+              <span className="h-2 w-2 rounded-full bg-red-600 animate-ping" />
+              <span>RECORDING EMERGENCY AUDIO ({recordingTime}s / 15s)</span>
             </div>
           )}
 
@@ -379,8 +412,8 @@ export default function SmartSOSPage() {
               <div className="relative group shrink-0">
                 <div className={`absolute -inset-4 ${pingClass} rounded-full blur-md group-hover:scale-110 transition-transform duration-500`} />
                 <button
-                  onClick={handleTriggerAlert}
-                  disabled={buttonState !== 'idle'}
+                  onClick={isRecording ? stopRecording : startRecording}
+                  disabled={buttonState !== 'idle' && !isRecording}
                   className={`relative h-44 w-44 rounded-full bg-gradient-to-tr ${btnClass} border-4 border-white font-extrabold text-xs flex flex-col items-center justify-center gap-1.5 shadow-lg shadow-rose-900/30 active:scale-95 transition-all duration-150 cursor-pointer select-none`}
                 >
                   {buttonState === 'success' ? (
@@ -392,10 +425,10 @@ export default function SmartSOSPage() {
                 </button>
               </div>
 
-              {transcript && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-w-md text-left space-y-1">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Real-time Transcript</h4>
-                  <p id="transcript-container" className="text-xs text-slate-700 italic font-medium leading-relaxed">&ldquo;{transcript}&rdquo;</p>
+              {micError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 max-w-md text-left space-y-1">
+                  <h4 className="text-[10px] font-bold text-red-600 uppercase tracking-widest">Microphone Error</h4>
+                  <p className="text-xs text-red-700 font-medium leading-relaxed">{micError}</p>
                 </div>
               )}
             </>
@@ -417,13 +450,12 @@ export default function SmartSOSPage() {
               <div className="space-y-1.5">
                 <p className="text-sm font-extrabold text-emerald-800">Your emergency contact has been notified</p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                  A copy of the health passport details, profile and your live speech transcript has also been attached to <strong className="text-slate-800">{contactEmail}</strong>.
+                  A copy of the health passport details, profile and your 15-second emergency audio recording has also been attached to <strong className="text-slate-800">{contactEmail}</strong>.
                 </p>
               </div>
             </div>
           )}
         </section>
-
 
       </div>
       
@@ -431,7 +463,7 @@ export default function SmartSOSPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-sm overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-850 rounded-2xl shadow-xl p-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-red-100 dark:bg-red-950/50 rounded-full text-red-600">
+              <div className="flex items-center justify-center w-10 h-10 bg-red-100 dark:bg-red-950/50 rounded-full text-red-650">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Missing Configuration</h3>
@@ -442,7 +474,7 @@ export default function SmartSOSPage() {
             <div className="mt-6 flex justify-end">
               <button 
                 onClick={() => setShowEmailAlert(false)}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-650 hover:bg-red-700 active:scale-98 rounded-xl transition-all shadow-sm cursor-pointer"
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 active:scale-98 rounded-xl transition-all shadow-sm cursor-pointer"
               >
                 OK
               </button>
