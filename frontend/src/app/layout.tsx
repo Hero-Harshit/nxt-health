@@ -16,6 +16,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "NxtHealth",
   description: "Explainable healthcare decision-support guidance for everyday choices.",
+  icons: {
+    icon: "/logo.png.png",
+  },
 };
 
 export default function RootLayout({
