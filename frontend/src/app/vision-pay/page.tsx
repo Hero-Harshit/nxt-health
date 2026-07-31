@@ -23,6 +23,8 @@ export default function VisionPayPage() {
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const [isScanned, setIsScanned] = useState(false);
   const [upiLink, setUpiLink] = useState<string | null>(null);
+  const [isDelegating, setIsDelegating] = useState(false);
+  const [delegateSuccess, setDelegateSuccess] = useState(false);
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
@@ -150,6 +152,44 @@ export default function VisionPayPage() {
       alert("Biometric scan failed or canceled: " + error.message);
     } finally {
       setIsAuthorizing(false);
+    }
+  };
+
+  const handleDelegatePayment = async () => {
+    setIsDelegating(true);
+    setDelegateSuccess(false);
+    try {
+      const coverage = Number(insuranceCoverage) || 0;
+      const payableAmount = Number(billAmount) - (Number(billAmount) * coverage) / 100;
+      const generatedUpi = `upi://pay?pa=${hospitalUpi}&pn=${encodeURIComponent(hospitalName)}&am=${payableAmount}&cu=INR`;
+
+      const payload = {
+        emergencyContactEmail: "user@nxthealth.com", // Dummy email for presentation/demo
+        patientName: "Alex Mercer",
+        hospitalName,
+        payableAmount,
+        upiLink: generatedUpi
+      };
+
+      const res = await fetch("/api/payment/delegate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delegate payment email.");
+      }
+
+      setDelegateSuccess(true);
+      alert("Payment link dispatched to emergency contact.");
+    } catch (error: any) {
+      console.error("Delegation payment failed:", error);
+      alert("Delegation payment failed: " + error.message);
+    } finally {
+      setIsDelegating(false);
     }
   };
 
@@ -417,23 +457,49 @@ export default function VisionPayPage() {
 
             {/* Authorization button */}
             {!isAuthorized ? (
-              <button
-                onClick={handleAuthorizePayment}
-                disabled={isAuthorizing}
-                className="w-full py-4 bg-slate-900 hover:bg-black text-white font-extrabold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98"
-              >
-                {isAuthorizing ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>Verifying session biometrics...</span>
-                  </>
-                ) : (
-                  <>
-                    <Fingerprint className="h-5 w-5 animate-pulse text-sky-400" />
-                    <span>Authorize with Fingerprint 🔒</span>
-                  </>
+              <div className="space-y-3">
+                <button
+                  onClick={handleAuthorizePayment}
+                  disabled={isAuthorizing || isDelegating}
+                  className="w-full py-4 bg-slate-900 hover:bg-black text-white font-extrabold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
+                >
+                  {isAuthorizing ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Verifying session biometrics...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Fingerprint className="h-5 w-5 animate-pulse text-sky-400" />
+                      <span>Authorize with Fingerprint 🔒</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDelegatePayment}
+                  disabled={isAuthorizing || isDelegating}
+                  className="w-full py-3.5 border-2 border-dashed border-red-200 hover:border-red-400 bg-red-50/50 hover:bg-red-50 text-red-700 font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
+                >
+                  {isDelegating ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin text-red-600" />
+                      <span>Sending SOS...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Delegate to Emergency Contact 🆘</span>
+                    </>
+                  )}
+                </button>
+
+                {delegateSuccess && (
+                  <p className="text-center text-xs font-bold text-emerald-600 animate-pulse mt-1">
+                    ✓ Payment link successfully dispatched to emergency contact!
+                  </p>
                 )}
-              </button>
+              </div>
             ) : (
               <div className="space-y-4">
                 <div className="p-6 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-center flex flex-col items-center justify-center gap-2 shadow-sm animate-fadeIn">
