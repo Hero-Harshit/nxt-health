@@ -1,4 +1,4 @@
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, ShieldAlert } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -48,6 +48,34 @@ export const moduleDocs: DocModule[] = [
       {
         heading: 'Important Limitations',
         body: 'While PAM is highly intelligent, she is an AI assistant, not a licensed medical professional. She cannot provide official medical diagnoses, prescribe medications, or replace the advice of a human doctor. In the event of a true medical emergency, always use the SOS Emergency Command Center to contact real healthcare providers.'
+      }
+    ]
+  },
+  {
+    id: 'sos',
+    title: 'Smart SOS Command Center',
+    description: 'Instantly send emergency alerts, share your location, and contact ambulance services during critical situations.',
+    icon: ShieldAlert,
+    color: 'text-red-600',
+    bg: 'bg-red-50',
+    border: 'hover:border-red-200',
+    content: [
+      {
+        heading: 'What is the SOS Command Center?',
+        body: 'The Smart SOS Command Center is a life-saving emergency module designed to get you help as fast as possible. With a single tap, it activates an emergency workflow that alerts your loved ones and provides immediate access to emergency services.'
+      },
+      {
+        heading: 'How It Works',
+        body: 'When you trigger an SOS, the system performs several critical actions to ensure your safety:',
+        list: [
+          'Automatically detects your exact GPS location (once permission is granted) to avoid manual entry during urgent situations.',
+          'Instantly sends emergency alerts to your selected contacts, including your current location and emergency details.',
+          'Provides a dedicated emergency calling option for one-tap access to ambulance and support services without needing to search for numbers.'
+        ]
+      },
+      {
+        heading: 'Accidental Triggers',
+        body: 'We understand that panic buttons can sometimes be pressed by mistake. If you accidentally trigger an SOS, the system provides a brief window where you can cancel the alert before it is dispatched, preventing unnecessary notifications to your emergency contacts.'
       }
     ]
   }
