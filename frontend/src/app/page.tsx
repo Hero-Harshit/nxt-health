@@ -178,17 +178,6 @@ export default function HomePage() {
             {/* Status Pills Container */}
             <div className="flex flex-wrap items-center gap-2 pt-2">
               
-              {/* Vitals Pills */}
-              <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
-                Age: 19
-              </span>
-              <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
-                Gender: Male
-              </span>
-              <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
-                BMI: 22.5 (Normal)
-              </span>
-
               {/* Profile Badge */}
               <Link
                 href="/profile"
