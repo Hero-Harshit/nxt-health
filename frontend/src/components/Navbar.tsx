@@ -30,6 +30,7 @@ export default function Navbar() {
   const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
 
   const utilitiesRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -350,43 +351,72 @@ export default function Navbar() {
           {session ? (
             <>
               <div className="border-t border-slate-200 my-2" />
-              <Link
-                href="/profile"
-                className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                👤 View Profile
-              </Link>
-              <Link
-                href="/health-heatmap"
-                className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                📊 Healthy Heatmap
-              </Link>
-              <Link
-                href="/awards"
-                className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                🏆 Awards & Achievements
-              </Link>
-              <Link
-                href="/history"
-                className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                📜 My History
-              </Link>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  handleSignOut();
-                }}
-                className="w-full text-left block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
-              >
-                🚪 Sign Out
-              </button>
+              {/* Mobile "My Profile" Collapsible Menu Section */}
+              <div className="border-t border-slate-200 pt-3 mt-3">
+                {/* Dropdown Header Trigger */}
+                <button
+                  onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
+                  className="w-full flex items-center justify-between py-2.5 px-3 text-slate-700 font-semibold text-sm rounded-xl hover:bg-white hover:text-sky-600 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-sm">
+                      👤
+                    </div>
+                    <span>My Profile</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${
+                      isMobileProfileOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                {/* Sub-menu items (Appears when open) */}
+                {isMobileProfileOpen && (
+                  <div className="pl-6 space-y-1 mt-1">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-2 px-3 text-xs font-semibold text-slate-700 hover:text-sky-600 hover:bg-white rounded-lg transition-colors"
+                    >
+                      <span>👤</span> View Profile
+                    </Link>
+                    
+                    <Link
+                      href="/health-heatmap"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-2 px-3 text-xs font-semibold text-slate-700 hover:text-sky-600 hover:bg-white rounded-lg transition-colors"
+                    >
+                      <span>📊</span> Healthy Heatmap
+                    </Link>
+                    
+                    <Link
+                      href="/awards"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-2 px-3 text-xs font-semibold text-slate-700 hover:text-sky-600 hover:bg-white rounded-lg transition-colors"
+                    >
+                      <span>🏆</span> Awards & Achievements
+                    </Link>
+                    
+                    <Link
+                      href="/history"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-2 px-3 text-xs font-semibold text-slate-700 hover:text-sky-600 hover:bg-white rounded-lg transition-colors"
+                    >
+                      <span>📜</span> My History
+                    </Link>
+                    
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleSignOut();
+                      }}
+                      className="w-full flex items-center gap-3 py-2 px-3 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
+                    >
+                      <span>🚪</span> Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <Link
