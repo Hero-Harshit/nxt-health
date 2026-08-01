@@ -1,4 +1,4 @@
-import { MessageSquare, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { MessageSquare, ShieldAlert, ShieldCheck, QrCode } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -108,6 +108,34 @@ export const moduleDocs: DocModule[] = [
           'Policy Demystification: Explains your current policy terms, coverage details, and hidden benefits in clear, simple language.',
           'Treatment Coverage Check: Helps you review whether a specific medical treatment or procedure might be covered under your policy (Note: Final approval always depends on your insurance provider).'
         ]
+      }
+    ]
+  },
+  {
+    id: 'vision-pay',
+    title: 'Vision Pay',
+    description: 'Securely scan hospital UPI QR codes, calculate insurance coverage, and verify bills for potential risks before paying.',
+    icon: QrCode,
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50',
+    border: 'hover:border-emerald-200',
+    content: [
+      {
+        heading: 'What is Vision Pay?',
+        body: 'Vision Pay is a smart, secure payment assistant designed specifically for healthcare. By simply scanning a hospital\'s UPI QR code (which requires camera permission), it automatically extracts the hospital details and auto-fills your payment form, speeding up the process and reducing manual entry errors.'
+      },
+      {
+        heading: 'How to Use Vision Pay',
+        body: 'Vision Pay offers flexibility depending on your situation at the billing counter:',
+        list: [
+          'Smart QR Scanning: Scan the hospital\'s UPI QR code to instantly capture billing information.',
+          'Manual Entry: If a QR code is unavailable, you can manually enter the hospital name, UPI ID, and bill amount.',
+          'Insurance Application: Enter your insurance coverage percentage before analysis. Vision Pay will automatically estimate the covered amount and calculate your expected out-of-pocket payable balance.'
+        ]
+      },
+      {
+        heading: 'Analyze Bill & Verify Risk',
+        body: 'Before you make a payment, Vision Pay acts as a financial safeguard. The "Analyze Bill & Verify Risk" feature checks the extracted billing details for possible inconsistencies and verifies authenticity. This helps identify potential risks, ensuring you make safer and more informed payments at the hospital.'
       }
     ]
   }
