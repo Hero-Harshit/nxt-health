@@ -4,7 +4,7 @@ import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
-import { HeartPulse, ShieldCheck, RefreshCw, AlertCircle, Award, ArrowRight } from "lucide-react";
+import { HeartPulse, ShieldCheck, RefreshCw, AlertCircle, Award, ArrowRight, Lock, Trophy, Medal, Star, Shield, Calendar, Zap, Heart, Activity } from "lucide-react";
 
 // Initialize Supabase Client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
@@ -561,6 +561,70 @@ export default function ProfilePage() {
             )}
           </button>
         </form>
+
+        <AwardsSection />
+      </div>
+    </div>
+  );
+}
+
+const AWARDS_DATA = [
+  { id: 1, name: 'NxtHealth Pioneer', description: 'Successfully joined the NxtHealth platform.', unlocked: true, icon: Trophy, color: 'text-amber-500', bg: 'bg-amber-100' },
+  { id: 2, name: 'The 7-Day Sentinel', description: 'Log your daily health metrics for 7 consecutive days.', unlocked: false, icon: Zap },
+  { id: 3, name: 'Deep Sleep Scholar', description: 'Log 8+ hours of optimal sleep for 14 consecutive nights.', unlocked: false, icon: Star },
+  { id: 4, name: 'Consistency Champion', description: 'Maintain a perfect Heatmap streak for 30 days.', unlocked: false, icon: Activity },
+  { id: 5, name: 'Habit Builder', description: 'Maintain a 60-day logging streak without missing a single day.', unlocked: false, icon: Heart },
+  { id: 6, name: 'Billing Auditor', description: 'Monitor and verify healthcare expenses consistently over a 90-day period.', unlocked: false, icon: Shield },
+  { id: 7, name: 'Vault Archivist', description: 'Securely manage your health records on the platform for 6 months.', unlocked: false, icon: Lock },
+  { id: 8, name: 'Quarterly Checkup', description: 'Update your health passport for 4 consecutive quarters (1 year).', unlocked: false, icon: Calendar },
+  { id: 9, name: 'The Centenarian Club', description: 'Be an active NxtHealth member for 365 days.', unlocked: false, icon: Award },
+  { id: 10, name: 'Iron Vault', description: 'Keep your health records active and secure for 2 continuous years.', unlocked: false, icon: Medal },
+];
+
+export function AwardsSection() {
+  return (
+    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm mt-6">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5">
+        <h2 className="text-lg font-bold flex items-center gap-2 text-[#0B1E3D]">
+          <Award className="w-5 h-5 text-indigo-600" />
+          <span>Awards & Achievements</span>
+        </h2>
+        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+          1 / 10 Unlocked
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {AWARDS_DATA.map((award) => {
+          const Icon = award.icon;
+          return (
+            <div 
+              key={award.id} 
+              className={`relative p-4 rounded-2xl border transition-all ${
+                award.unlocked 
+                  ? 'border-amber-200 bg-gradient-to-b from-amber-50 to-white shadow-sm hover:shadow-md' 
+                  : 'border-gray-100 bg-gray-50/50 grayscale-[50%] opacity-80'
+              }`}
+            >
+              {!award.unlocked && (
+                <div className="absolute top-3 right-3 text-gray-400">
+                  <Lock className="w-4 h-4" />
+                </div>
+              )}
+              
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${award.unlocked ? award.bg : 'bg-gray-200'}`}>
+                <Icon className={`w-6 h-6 ${award.unlocked ? award.color : 'text-gray-400'}`} />
+              </div>
+              
+              <h3 className={`text-sm font-bold mb-1 ${award.unlocked ? 'text-gray-900' : 'text-gray-600'}`}>
+                {award.name}
+              </h3>
+              <p className="text-[10px] text-gray-500 leading-relaxed font-medium">
+                {award.description}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
