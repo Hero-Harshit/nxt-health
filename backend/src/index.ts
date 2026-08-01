@@ -756,7 +756,7 @@ app.post('/api/check-bill', async (req: any, res: any) => {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
     const prompt = `
       You are a fierce, expert Medical Billing Advocate in India. 
