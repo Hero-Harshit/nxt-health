@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Script from 'next/script';
 import {
-  ShieldCheck, HardDrive, Upload, FileText, File, ImageIcon, Trash2, 
+  HardDrive, Upload, FileText, File, ImageIcon, Trash2, 
   ExternalLink, AlertCircle, RefreshCw, LogOut, CheckCircle2, Lock
 } from 'lucide-react';
 
@@ -201,10 +201,7 @@ export default function HealthVault() {
         {/* HEADER CARD */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
           <div>
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-xl text-white font-bold" style={{ backgroundColor: NAVY }}>
-                <ShieldCheck className="w-6 h-6" />
-              </div>
+            <div>
               <h1 className="text-2xl font-bold tracking-tight" style={{ color: NAVY }}>Personal Health Vault</h1>
             </div>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
