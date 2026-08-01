@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
 import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck, Search, Plus, MessageSquare } from 'lucide-react';
 
 const HEALTH_QUOTES = [
@@ -299,7 +300,24 @@ export default function PamInterface() {
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-none' 
                     : 'bg-white border border-gray-100 text-gray-800 rounded-bl-none'
                 }`}>
-                  {msg.content}
+                  {msg.role === 'user' ? (
+                    <span className="whitespace-pre-wrap">{msg.content}</span>
+                  ) : (
+                    <div className="markdown-body">
+                      <ReactMarkdown 
+                        components={{
+                          strong: ({node, ...props}) => <span className="font-bold text-gray-900" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc pl-5 my-2 space-y-1.5" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal pl-5 my-2 space-y-1.5" {...props} />,
+                          li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
+                          p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                          a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
