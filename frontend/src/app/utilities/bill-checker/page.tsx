@@ -95,8 +95,10 @@ export default function BillCheckerPage() {
     setResult(null);
     setErrorMsg(null); // Clear previous errors
     
+    const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
+
     try {
-      const res = await fetch('/api/check-bill', {
+      const res = await fetch(`${backendBaseUrl}/api/check-bill`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ procedure: selectedProcedure, amount: Number(amount), cityTier })
