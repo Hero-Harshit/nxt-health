@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, FormEvent } from "react";
+import { addHistoryLog } from '@/utils/history';
 import { ShieldCheck, Sparkles, HeartPulse, ChevronDown, ChevronUp, AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { parseJargon } from "@/components/policy-advisor/JargonTooltip";
@@ -63,6 +64,21 @@ export default function AdvisorPage() {
     setErrorMessage("");
     setStatus("idle");
     setResults([]);
+
+    const inputSummary = `Health Policy Consultation - Inputs: ${
+      [
+        age ? `Age: ${age}` : '',
+        budgetBand ? `Budget: ${budgetBand}` : '',
+        policyType ? `Coverage: ${policyType}` : '',
+        policyType === 'Family Floater' ? `Kids: ${kidsCount}` : ''
+      ].filter(Boolean).join(' | ')
+    }`;
+
+    try {
+      addHistoryLog('ai', inputSummary);
+    } catch (err) {
+      console.error('History log failed silently:', err);
+    }
 
     const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
     const pedVal = maxPedWaitingMonths === "Any" ? 0 : Number(maxPedWaitingMonths);
