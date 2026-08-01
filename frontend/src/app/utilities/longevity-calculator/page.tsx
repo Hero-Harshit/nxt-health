@@ -101,38 +101,75 @@ export default function LongevityCalculator() {
 
   const handleSyncData = () => {
     let updatedInputs = { ...inputs };
+    let foundProfile = false;
 
     try {
-      // 1. Sync Profile / Passport Data
-      const profileRaw = localStorage.getItem('nxt_health_passport');
+      // Sync Profile / Passport Data
+      const possibleKeys = ['nxt_health_passport', 'user_profile', 'health_passport', 'profile_data', 'nxthealth_profile'];
+      let profileRaw = null;
+
+      for (const key of possibleKeys) {
+        profileRaw = localStorage.getItem(key);
+        if (profileRaw) break;
+      }
+
       if (profileRaw) {
-        const passport = JSON.parse(profileRaw);
-        if (passport.age) updatedInputs.age = Number(passport.age);
-        if (passport.gender) {
-          const g = passport.gender.toLowerCase();
-          if (g === 'male' || g === 'female') updatedInputs.gender = g as 'male' | 'female';
+        const profile = JSON.parse(profileRaw);
+
+        // Robust age extraction (handles strings, numbers, common nested objects, and date of birth conversion)
+        let extractedAge = profile.age || profile?.personalInfo?.age || profile?.details?.age;
+        if (!extractedAge && profile.dob) {
+          const birthDate = new Date(profile.dob);
+          if (!isNaN(birthDate.getTime())) {
+            const today = new Date();
+            let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+              calculatedAge--;
+            }
+            extractedAge = calculatedAge;
+          }
         }
-        
+
+        if (extractedAge && !isNaN(parseInt(extractedAge, 10))) {
+          updatedInputs.age = parseInt(extractedAge, 10);
+          foundProfile = true;
+        }
+
+        // Robust gender extraction
+        const extractedGender = profile.gender || profile?.personalInfo?.gender || profile?.details?.gender;
+        if (extractedGender) {
+          const g = String(extractedGender).toLowerCase();
+          if (g === 'male' || g === 'female') {
+            updatedInputs.gender = g as 'male' | 'female';
+            foundProfile = true;
+          }
+        }
+
         // Map smoking status if available
-        if (passport.smokingStatus) {
-          const s = passport.smokingStatus.toLowerCase();
+        const extractedSmoking = profile.smokingStatus || profile.smoking_status || profile?.details?.smokingStatus;
+        if (extractedSmoking) {
+          const s = String(extractedSmoking).toLowerCase();
           if (s.includes('non') || s.includes('never')) updatedInputs.smoking = 'never';
           else if (s.includes('former')) updatedInputs.smoking = 'former';
           else if (s.includes('active') || s.includes('smoker')) updatedInputs.smoking = 'current';
         }
 
         // Map dietary preference if available
-        if (passport.dietaryPreference) {
-          const d = passport.dietaryPreference.toLowerCase();
+        const extractedDiet = profile.dietaryPreference || profile.dietary_preference || profile?.details?.dietaryPreference;
+        if (extractedDiet) {
+          const d = String(extractedDiet).toLowerCase();
           if (d.includes('vegan') || d.includes('vegetarian') || d.includes('healthy')) {
             updatedInputs.diet = 'healthy';
           } else if (d.includes('non-veg')) {
             updatedInputs.diet = 'average';
+          } else if (d.includes('poor')) {
+            updatedInputs.diet = 'poor';
           }
         }
       }
 
-      // 2. Sync Sleep Tracker Data
+      // Sync Sleep Tracker Data
       const sleepRaw = localStorage.getItem('nxthealth_sleep_tracker_data');
       if (sleepRaw) {
         const sleepLogs = JSON.parse(sleepRaw);
@@ -145,9 +182,15 @@ export default function LongevityCalculator() {
         }
       }
 
-      setInputs(updatedInputs);
+      if (foundProfile) {
+        setInputs(updatedInputs);
+        alert('✅ Age & Gender synced from your Profile!'); 
+      } else {
+        alert('⚠️ Could not find Age in your Profile. Please ensure your Profile is saved.');
+      }
     } catch (error) {
       console.error("Error syncing data:", error);
+      alert('Failed to sync profile data.');
     }
   };
 
