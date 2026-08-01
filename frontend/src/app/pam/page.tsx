@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck, Search, Plus, Moon, Pill } from 'lucide-react';
+import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck, Search, Plus, MessageSquare } from 'lucide-react';
 
 const HEALTH_QUOTES = [
   { text: "The greatest wealth is health.", author: "Virgil" },
@@ -12,19 +12,13 @@ const HEALTH_QUOTES = [
   { text: "Physical fitness is the first requisite of happiness.", author: "Joseph Pilates" }
 ];
 
-const MOCK_HISTORY = [
-  { id: 1, title: 'CBC Blood Report Analysis', date: 'Tue', icon: FileText },
-  { id: 2, title: 'My Longevity Action Plan', date: 'Mon', icon: Activity },
-  { id: 3, title: 'Why is my sleep score low?', date: 'Last Week', icon: Moon },
-  { id: 4, title: 'Medicine schedule reminder setup', date: 'Last Week', icon: Pill },
-];
-
 export default function PamInterface() {
   const router = useRouter();
   const [userName, setUserName] = useState("Hero");
   const [quote, setQuote] = useState(HEALTH_QUOTES[0]);
   const [isMounted, setIsMounted] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
 
   useEffect(() => {
     // Randomize quote on load
@@ -46,6 +40,16 @@ export default function PamInterface() {
       }
     } catch (e) {
       console.error("Could not parse profile for name");
+    }
+
+    // Fetch chat history securely from local storage
+    try {
+      const history = localStorage.getItem('pam_chat_history');
+      if (history) {
+        setChatHistory(JSON.parse(history));
+      }
+    } catch (e) {
+      console.error("Failed to parse chat history");
     }
     
     setIsMounted(true);
@@ -87,41 +91,54 @@ export default function PamInterface() {
           </div>
         </div>
 
-        {/* Drawer History List */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
-              Last 7 Days
-            </p>
-            <span className="bg-gray-200/80 text-gray-500 px-1.5 py-0.5 rounded text-[10px] font-bold">
-              {MOCK_HISTORY.length}
-            </span>
-          </div>
-          
-          <div className="space-y-3">
-            {MOCK_HISTORY.map((chat) => {
-              const Icon = chat.icon;
-              return (
-                <button key={chat.id} className="w-full bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex items-center justify-between group text-left">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="p-2.5 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors shrink-0">
-                      <Icon className="w-4 h-4 text-blue-600" />
+        {/* Drawer History List / Empty State */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col">
+          {chatHistory.length === 0 ? (
+            // EMPTY STATE UI
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-4 pb-12">
+              <div className="w-20 h-20 bg-indigo-50/50 border border-indigo-100 rounded-full flex items-center justify-center mb-5 shadow-inner">
+                <MessageSquare className="w-8 h-8 text-indigo-300" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-base font-extrabold text-gray-900 mb-2">No conversations yet</h3>
+              <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-[200px]">
+                Your health chats and analysis with Pam will securely appear here.
+              </p>
+            </div>
+          ) : (
+            // FILLED HISTORY UI
+            <>
+              <div className="flex items-center gap-2 mb-4">
+                <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
+                  Recent History
+                </p>
+                <span className="bg-gray-200/80 text-gray-500 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                  {chatHistory.length}
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                {chatHistory.map((chat: any) => (
+                  <button key={chat.id} className="w-full bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex items-center justify-between group text-left">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="p-2.5 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors shrink-0">
+                        <MessageSquare className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <span className="text-sm font-bold text-gray-700 truncate group-hover:text-blue-700 transition-colors">
+                        {chat.title}
+                      </span>
                     </div>
-                    <span className="text-sm font-bold text-gray-700 truncate group-hover:text-blue-700 transition-colors">
-                      {chat.title}
+                    <span className="text-[11px] text-gray-400 font-semibold shrink-0 ml-3">
+                        {chat.date || 'Just now'}
                     </span>
-                  </div>
-                  <span className="text-[11px] text-gray-400 font-semibold shrink-0 ml-3">
-                    {chat.date}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          
-          <div className="mt-8 text-center">
-            <p className="text-xs font-semibold text-gray-400">That's all your conversations</p>
-          </div>
+                  </button>
+                ))}
+              </div>
+              
+              <div className="mt-8 text-center">
+                <p className="text-xs font-semibold text-gray-400">That's all your conversations</p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
