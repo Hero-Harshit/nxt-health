@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, FormEvent } from "react";
+import { addHistoryLog } from '@/utils/history';
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartPulse, Sparkles, RefreshCw, AlertCircle, HelpCircle } from "lucide-react";
@@ -55,6 +56,17 @@ export default function ExplainerPage() {
     setIsLoading(true);
     setErrorMsg("");
     setResult(null);
+
+    const termToExplain = input.trim();
+    if (termToExplain) {
+      const explainerSummary = `Medical Term Explained - Term: "${ termToExplain.length > 50 ? termToExplain.substring(0, 47) + '...' : termToExplain }"`;
+
+      try {
+        addHistoryLog('explainer', explainerSummary);
+      } catch (err) {
+        console.error('History log failed silently:', err);
+      }
+    }
 
     const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
 
