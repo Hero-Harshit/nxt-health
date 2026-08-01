@@ -71,25 +71,27 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* 2. By The Numbers Stats Bar */}
-        <div className="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg shadow-blue-500/10">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-6 text-center">NXT Health By The Numbers</h3>
+        {/* 2. By The Numbers Stats Bar (Light Blue Theme) */}
+        <div className="bg-gradient-to-r from-blue-50 via-indigo-50/60 to-blue-50 rounded-3xl p-6 sm:p-8 border border-blue-100/80 shadow-sm">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-6 text-center">
+            NXT Health By The Numbers
+          </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="space-y-1">
-              <span className="text-3xl sm:text-4xl font-extrabold text-white">9</span>
-              <p className="text-xs text-blue-200 font-medium">Core Modules</p>
+              <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">9</span>
+              <p className="text-xs text-gray-600 font-semibold">Core Modules</p>
             </div>
             <div className="space-y-1">
-              <span className="text-3xl sm:text-4xl font-extrabold text-white">8+</span>
-              <p className="text-xs text-blue-200 font-medium">Utility Tools</p>
+              <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">8+</span>
+              <p className="text-xs text-gray-600 font-semibold">Utility Tools</p>
             </div>
             <div className="space-y-1">
-              <span className="text-3xl sm:text-4xl font-extrabold text-white">24×7</span>
-              <p className="text-xs text-blue-200 font-medium">Health Access</p>
+              <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">24×7</span>
+              <p className="text-xs text-gray-600 font-semibold">Health Access</p>
             </div>
             <div className="space-y-1">
-              <span className="text-3xl sm:text-4xl font-extrabold text-white">100%</span>
-              <p className="text-xs text-blue-200 font-medium">Privacy Focused</p>
+              <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">100%</span>
+              <p className="text-xs text-gray-600 font-semibold">Privacy Focused</p>
             </div>
           </div>
         </div>
