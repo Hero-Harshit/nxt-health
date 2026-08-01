@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -14,6 +14,14 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  themeColor: '#2563eb',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // Ensures app feels like a solid native mobile UI
+};
 
 export const metadata: Metadata = {
   title: "NxtHealth",
