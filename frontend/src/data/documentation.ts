@@ -1,4 +1,4 @@
-import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText } from 'lucide-react';
+import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText, ClipboardList } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -219,6 +219,34 @@ export const moduleDocs: DocModule[] = [
           'Doctor Prescriptions: Search for medical words or abbreviations found on prescriptions to better understand your doctor\'s notes.',
           'Abbreviations: The module acts as a dictionary for common medical abbreviations, providing their full forms so you can read healthcare documents with confidence.'
         ]
+      }
+    ]
+  },
+  {
+    id: 'health-passport',
+    title: 'Personal Health Passport',
+    description: 'Access a complete summary of your medical history, health activities, and insurance details in one centralized report.',
+    icon: ClipboardList,
+    color: 'text-fuchsia-600',
+    bg: 'bg-fuchsia-50',
+    border: 'hover:border-fuchsia-200',
+    content: [
+      {
+        heading: 'What is the Personal Health Passport?',
+        body: 'The Personal Health Passport (also known as the Personal Health Report) provides a complete, 360-degree summary of your health and insurance information. It intelligently combines your medical records, daily health activities, and insurance details into a single, easy-to-access digital profile.'
+      },
+      {
+        heading: 'What Does It Include?',
+        body: 'By organizing your data as you use the NxtHealth platform, your passport consolidates critical information:',
+        list: [
+          'Medical History & Reports: Quick access to your uploaded medical documents, previous lab results, and general health profile.',
+          'Insurance Information: View your insurance provider details, active policy information, and coverage benefits in one dashboard.',
+          'Claim Tracking: Monitor insurance claim-related information, eligible medical expenses, and remaining policy benefits.'
+        ]
+      },
+      {
+        heading: 'Crucial for Emergencies',
+        body: 'Beyond daily organization, this consolidated report is designed to be a lifesaver during critical moments. In an emergency situation, doctors and hospitals can quickly review this passport to understand your vital health and insurance information, leading to faster, safer treatment and smoother administrative processing.'
       }
     ]
   }
