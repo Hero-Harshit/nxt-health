@@ -186,6 +186,13 @@ export default function Navbar() {
               </Link>
 
               <Link
+                href="/privacy"
+                className="text-sm font-semibold text-slate-700 hover:text-sky-600 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+
+              <Link
                 href="/about"
                 className="text-sm font-semibold text-slate-700 hover:text-sky-600 transition-colors"
               >
@@ -339,6 +346,13 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Help
+          </Link>
+          <Link
+            href="/privacy"
+            className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Privacy Policy
           </Link>
           <Link
             href="/about"
