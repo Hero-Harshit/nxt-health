@@ -1,4 +1,4 @@
-import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText, ClipboardList, Receipt, FolderLock } from 'lucide-react';
+import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText, ClipboardList, Receipt, FolderLock, Wrench } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -14,6 +14,7 @@ export type DocModule = {
   color: string;
   bg: string;
   border: string;
+  badge?: string;
   content: DocSection[];
 };
 
@@ -304,5 +305,49 @@ export const moduleDocs: DocModule[] = [
           body: 'You can upload and organize a wide variety of healthcare documents, including blood reports, prescriptions, X-rays, MRI/CT scans, vaccination certificates, insurance papers, and hospital discharge summaries into automatically sorted health folders.'
         }
       ]
+  },
+  {
+    id: 'utilities',
+    title: 'Health Utilities',
+    description: 'Interactive daily wellness calculators, trackers, and emergency guidance tools.',
+    icon: Wrench,
+    color: 'text-sky-600',
+    bg: 'bg-sky-50',
+    border: 'hover:border-sky-200',
+    badge: 'TOOLS',
+    content: [
+      {
+        heading: '🔥 Calorie Calculator',
+        body: 'Calculates daily caloric needs and macronutrient balance based on age, weight, height, and activity level to support weight maintenance or fitness goals.'
+      },
+      {
+        heading: '💧 Hydration Tracker',
+        body: 'Monitors daily water intake against personalized climate and activity targets, helping maintain optimal physical and cognitive performance.'
+      },
+      {
+        heading: '🧘 Breathing Exercise',
+        body: 'Guided box-breathing and deep relaxation session timers designed to lower heart rate and alleviate acute stress or anxiety.'
+      },
+      {
+        heading: '💊 Medicine Time Wheel',
+        body: 'A visual schedule wheel to map complex medication regimens, ensuring timely dosage tracking and preventing missed prescriptions.'
+      },
+      {
+        heading: '🧬 Family Health Risk Map',
+        body: 'Evaluates hereditary health background to map potential genetic risk factors and suggest proactive screening timelines.'
+      },
+      {
+        heading: '🌙 Sleep Tracker',
+        body: 'Logs sleep duration, hygiene factors, and sleep cycle consistency to help improve rest quality and recovery.'
+      },
+      {
+        heading: '💖 Longevity Estimator',
+        body: 'Analyzes key lifestyle habits, biomarkers, and daily activity metrics to calculate estimated biological age and healthspan.'
+      },
+      {
+        heading: '🩹 Virtual First Aid Box',
+        body: 'Instant digital reference guide providing step-by-step triage procedures, basic CPR protocols, and acute home emergency care steps.'
+      }
+    ]
   }
 ];
