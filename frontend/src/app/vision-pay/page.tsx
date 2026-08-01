@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { addHistoryLog } from "@/utils/history";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
@@ -147,6 +148,30 @@ export default function VisionPayPage() {
       } else {
         // Fallback parsing if QR is plain text
         setHospitalName(decodedText);
+      }
+
+      let payeeName = 'Hospital/Medical Center';
+      let upiId = 'N/A';
+      let amountVal = 'Pending Input';
+
+      if (decodedText.startsWith("upi://pay")) {
+        const urlParams = new URLSearchParams(decodedText.substring(decodedText.indexOf("?")));
+        const pa = urlParams.get("pa") || "";
+        const pn = urlParams.get("pn") || "";
+        const am = urlParams.get("am") || "";
+        payeeName = pn ? decodeURIComponent(pn) : 'Hospital/Medical Center';
+        upiId = pa || 'N/A';
+        amountVal = am ? `₹${am}` : 'Pending Input';
+      } else {
+        payeeName = decodedText;
+      }
+
+      const scanSummary = `Vision Pay QR Scanned - Recipient: ${payeeName} | UPI ID: ${upiId} | Amount: ${amountVal}`;
+
+      try {
+        addHistoryLog('payment', scanSummary);
+      } catch (err) {
+        console.error('History log failed silently:', err);
       }
     } catch (e) {
       setHospitalName(decodedText);
