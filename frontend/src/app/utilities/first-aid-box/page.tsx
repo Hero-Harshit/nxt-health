@@ -32,6 +32,7 @@ const NAVY = '#0B1E3D';
 const RED_ALERT = '#EF4444';
 const AMBER_WARN = '#F59E0B';
 const GREEN_OK = '#10B981';
+const BLUE = '#2F6FED';
 
 const CATEGORIES: FirstAidCategory[] = [
   'Medicines',
@@ -51,38 +52,7 @@ const CATEGORY_ICONS: Record<FirstAidCategory, React.ComponentType<{ className?:
   'General': Layers,
 };
 
-const INITIAL_ITEMS: FirstAidItem[] = [
-  {
-    id: '1',
-    name: 'Paracetamol 500mg',
-    category: 'Medicines',
-    quantity: 10,
-    unit: 'tablets',
-    expiryDate: '2026-11-15',
-    notes: 'For fever and body pain',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Betadine Antiseptic Solution',
-    category: 'Antiseptics & Liquids',
-    quantity: 1,
-    unit: 'bottle (100ml)',
-    expiryDate: '2026-08-10',
-    notes: 'For cleaning open wounds',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    name: 'Adhesive Bandages (Band-Aids)',
-    category: 'Bandages & Dressings',
-    quantity: 15,
-    unit: 'strips',
-    expiryDate: '2028-01-01',
-    notes: 'Waterproof small size',
-    createdAt: new Date().toISOString(),
-  }
-];
+const INITIAL_ITEMS: FirstAidItem[] = [];
 
 export default function FirstAidBoxPage() {
   const [items, setItems] = useState<FirstAidItem[]>([]);
@@ -251,9 +221,6 @@ export default function FirstAidBoxPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl text-white font-bold bg-red-600">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
               <h1 className="text-2xl font-bold tracking-tight" style={{ color: NAVY }}>
                 Virtual First Aid Box
               </h1>
@@ -265,7 +232,8 @@ export default function FirstAidBoxPage() {
 
           <button
             onClick={handleOpenAdd}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white shadow-sm transition-all hover:bg-red-700 bg-red-600 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white shadow-sm transition-all hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: BLUE }}
           >
             <PlusCircle className="w-4 h-4" />
             <span>Add Supply</span>
