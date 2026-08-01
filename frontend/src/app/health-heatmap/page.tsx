@@ -317,7 +317,7 @@ export default function HealthHeatmapTracker() {
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-              Health Contributions ({weeks.length * 7} Days)
+              Health Contributions (Last 365 Days)
             </h3>
             <span className="text-xs font-medium text-gray-500">
               {todayCompletedCount === 10 ? '🎉 All tasks completed today!' : `${10 - todayCompletedCount} tasks remaining today`}
