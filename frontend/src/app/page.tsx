@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint, ReceiptText, HardDrive } from "lucide-react";
+import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint, ReceiptText, HardDrive, Trophy, ChevronRight } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -110,61 +110,76 @@ export default function HomePage() {
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* User Profile Snapshot Header */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-xl bg-sky-100 flex items-center justify-center">
-                <UserCheck className="h-6 w-6 text-sky-700" />
+        <Link 
+          href="/profile" 
+          className="block group cursor-pointer transition-all duration-200"
+        >
+          <section className="rounded-2xl border border-slate-200 hover:border-sky-350 bg-white p-6 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-xl bg-sky-100 flex items-center justify-center">
+                  <UserCheck className="h-6 w-6 text-sky-700" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-[#0F2744]">
+                    Welcome back, {profile?.full_name || "NxtHealth User"}
+                  </h1>
+                  <p className="text-xs text-slate-500">Your explainable health decision workspace</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-[#0F2744]">
-                  Welcome back, {profile?.full_name || "NxtHealth User"}
-                </h1>
-                <p className="text-xs text-slate-500">Your explainable health decision workspace</p>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
+                  Age: {profile?.age || "N/A"}
+                </span>
+                <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
+                  Gender: {profile?.gender || "N/A"}
+                </span>
+                <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
+                  BMI: {getBmiCategory()}
+                </span>
+                {/* NEW: Awards Won Badge (Fixed at 1 Award Won) */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-800 border border-amber-200/80 rounded-full text-xs font-bold shadow-xs">
+                  <Trophy className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                  <span>1 Award Won</span>
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-1">
-              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
-                Age: {profile?.age || "N/A"}
-              </span>
-              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
-                Gender: {profile?.gender || "N/A"}
-              </span>
-              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
-                BMI: {getBmiCategory()}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6 shrink-0 lg:border-l lg:border-slate-200/50 lg:pl-8">
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center text-xs font-bold text-slate-500">
-                <span>PROFILE COMPLETENESS</span>
-                <span className="text-sky-700">{completionPercentage}%</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6 shrink-0 lg:border-l lg:border-slate-200/50 lg:pl-8">
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs font-bold text-slate-500">
+                  <span>PROFILE COMPLETENESS</span>
+                  <span className="text-sky-700">{completionPercentage}%</span>
+                </div>
+                <div className="w-56 bg-slate-100 rounded-full h-3 overflow-hidden">
+                  <div
+                    className="bg-sky-600 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${completionPercentage}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-56 bg-slate-100 rounded-full h-3 overflow-hidden">
+
+              {completionPercentage < 100 ? (
                 <div
-                  className="bg-sky-600 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${completionPercentage}%` }}
-                />
+                  className="bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs py-3 px-5 rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                >
+                  Complete Profile <ArrowRight className="h-4 w-4" />
+                </div>
+              ) : (
+                <span className="text-xs font-bold px-3 py-2.5 rounded-xl bg-sky-100 text-sky-700 border border-sky-200/55 flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4" /> Profile Fully Synced
+                </span>
+              )}
+
+              {/* View Profile Indicator Link */}
+              <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-sky-650 group-hover:translate-x-1 transition-transform">
+                <span>View Profile</span>
+                <ChevronRight className="w-4 h-4" />
               </div>
             </div>
-
-            {completionPercentage < 100 ? (
-              <button
-                onClick={() => router.push("/profile")}
-                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs py-3 px-5 rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm"
-              >
-                Complete Profile <ArrowRight className="h-4 w-4" />
-              </button>
-            ) : (
-              <span className="text-xs font-bold px-3 py-2.5 rounded-xl bg-sky-100 text-sky-700 border border-sky-200/55 flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4" /> Profile Fully Synced
-              </span>
-            )}
-          </div>
-        </section>
+          </section>
+        </Link>
 
         {/* 6 Core Modules Grid (Quick Launch) */}
         <section className="space-y-4">
