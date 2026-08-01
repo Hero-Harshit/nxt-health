@@ -79,7 +79,7 @@ export function PamBlob() {
         shadow-[0_8px_16px_-4px_rgba(37,99,235,0.4),inset_0_-4px_8px_rgba(0,0,0,0.3),inset_0_2px_4px_rgba(255,255,255,0.5)]
         ${isDragging ? 'scale-110' : 'hover:scale-105'}`}
     >
-      <span className="text-white text-[11px] font-black tracking-[0.15em] drop-shadow-sm select-none pointer-events-none mt-[1px] ml-[2px]">
+      <span className="text-white text-[11px] font-black tracking-[0.15em] drop-shadow-sm select-none pointer-events-none mt-[1px] ml-[2px] [-webkit-text-stroke:0.5px_black]">
         PAM
       </span>
     </div>
