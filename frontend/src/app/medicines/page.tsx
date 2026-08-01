@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { addHistoryLog } from '@/utils/history';
 import { Pill, Search, X, AlertCircle, HeartPulse, Sparkles, HelpCircle } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -85,6 +86,16 @@ export default function MedicinesPage() {
     setSelectedMedicine(med);
     setSearchQuery(med.medicine_name);
     setShowDropdown(false);
+
+    const searchedQuery = med.medicine_name || 'Generic Medicine';
+    const composition = med.active_ingredient ? ` (${med.active_ingredient})` : '';
+    const medicineSummary = `Generic Medicine Search - ${searchedQuery}${composition}`;
+
+    try {
+      addHistoryLog('search', medicineSummary);
+    } catch (err) {
+      console.error('History log failed silently:', err);
+    }
   };
 
   const handleClear = () => {
