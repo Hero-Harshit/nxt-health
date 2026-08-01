@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  HeartPulse, Activity, Wine, Cigarette, Utensils, Moon, 
+  Activity, Wine, Cigarette, Utensils, Moon, 
   Zap, TrendingUp, Award, RotateCcw, Sparkles, ShieldCheck, AlertCircle
 } from 'lucide-react';
 
@@ -131,14 +131,9 @@ export default function LongevityCalculator() {
         {/* HEADER BAR */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
           <div>
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl text-white font-bold" style={{ backgroundColor: NAVY }}>
-                <HeartPulse className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight" style={{ color: NAVY }}>Longevity & Healthspan Estimator</h1>
-                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Analyze how daily habits impact your life expectancy.</p>
-              </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight" style={{ color: NAVY }}>Longevity & Healthspan Estimator</h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">Analyze how daily habits impact your life expectancy.</p>
             </div>
           </div>
           <button onClick={resetForm} className="flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-indigo-600 bg-gray-50 hover:bg-indigo-50 px-4 py-2.5 rounded-xl border border-gray-200/80 transition-all">
