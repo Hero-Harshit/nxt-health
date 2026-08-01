@@ -1,4 +1,4 @@
-import { MessageSquare, ShieldAlert, ShieldCheck, QrCode } from 'lucide-react';
+import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -136,6 +136,37 @@ export const moduleDocs: DocModule[] = [
       {
         heading: 'Analyze Bill & Verify Risk',
         body: 'Before you make a payment, Vision Pay acts as a financial safeguard. The "Analyze Bill & Verify Risk" feature checks the extracted billing details for possible inconsistencies and verifies authenticity. This helps identify potential risks, ensuring you make safer and more informed payments at the hospital.'
+      }
+    ]
+  },
+  {
+    id: 'preventive-planner',
+    title: 'Preventive Health Planner',
+    description: 'Create customized health routines, track daily activities, and achieve your wellness goals with AI-driven recommendations.',
+    icon: CalendarDays,
+    color: 'text-rose-600',
+    bg: 'bg-rose-50',
+    border: 'hover:border-rose-200',
+    content: [
+      {
+        heading: 'Personalized Health Planning',
+        body: 'The Preventive Health Planner lets you create a custom health plan by simply entering your health goals (like fitness, weight management, or general wellness) and preferences. The AI then generates suitable activities, routines, and recommendations tailored specifically to you.'
+      },
+      {
+        heading: 'Daily Tracking & Reports',
+        body: 'Stay on top of your wellness journey by tracking your daily progress directly through the dashboard:',
+        list: [
+          'Activity Logging: Record completed tasks like daily exercise, water intake, and other healthy habits.',
+          'Progress Reports: Access health summaries and progress reports to analyze your improvement over time.'
+        ]
+      },
+      {
+        heading: 'AI Suggestions & Flexibility',
+        body: 'Your health journey is dynamic, and so is the planner:',
+        list: [
+          'Smart Suggestions: The AI continually analyzes your inputs and progress to provide customized health recommendations that improve over time.',
+          'Seamless Updates: You can modify your health goals and routines whenever required. The planner automatically adjusts its recommendations based on your new updates.'
+        ]
       }
     ]
   }
