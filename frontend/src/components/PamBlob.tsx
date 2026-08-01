@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export function PamBlob() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -11,6 +11,7 @@ export function PamBlob() {
   const blobRef = useRef<HTMLDivElement>(null);
   const dragInfo = useRef({ startX: 0, startY: 0, initialX: 0, initialY: 0, moved: false });
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Initialize in the bottom right corner
@@ -61,6 +62,9 @@ export function PamBlob() {
   };
 
   if (!isMounted) return null;
+  
+  // Hide the blob if we are already inside Pam's dedicated page
+  if (pathname === '/pam') return null;
 
   return (
     <div
