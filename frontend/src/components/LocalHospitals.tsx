@@ -67,7 +67,7 @@ export default function LocalHospitals() {
 
       {/* Popover Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2.5 w-96 max-h-[400px] overflow-y-auto rounded-xl bg-white border border-slate-200 shadow-lg z-50 animate-fadeIn">
+        <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 max-w-sm mx-auto bg-white rounded-3xl shadow-2xl border border-slate-200 z-50 max-h-[80vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
           {isLocating ? (
             <div className="p-8 flex flex-col items-center justify-center text-center space-y-3">
               <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />

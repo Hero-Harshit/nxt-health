@@ -59,7 +59,7 @@ export default function EmergencyHelplines() {
 
       {/* Popover Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2.5 w-80 sm:w-96 max-h-[400px] overflow-y-auto rounded-xl bg-white border border-slate-200 shadow-lg z-50 animate-fadeIn">
+        <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 max-w-sm mx-auto bg-white rounded-3xl shadow-2xl border border-slate-200 z-50 max-h-[80vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
           <div className="p-3 border-b border-slate-100 bg-slate-50 rounded-t-xl sticky top-0 z-10">
             <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
               🚨 Emergency Helplines
