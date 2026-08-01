@@ -208,8 +208,13 @@ export default function HomePage() {
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
-                <div className="h-10 w-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <FileText className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
+                    COVERAGE CHECK
+                  </span>
                 </div>
                 <h3 className="font-bold text-xl text-[#0F2744]">Health Policy Advisor</h3>
                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -227,11 +232,11 @@ export default function HomePage() {
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="h-10 w-10 rounded-xl bg-sky-100/70 text-sky-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Fingerprint className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform">
+                    <Fingerprint className="w-5 h-5" />
                   </div>
-                  <span className="bg-sky-50 text-sky-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200">
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
                     BIOMETRIC SECURED
                   </span>
                 </div>
@@ -247,12 +252,17 @@ export default function HomePage() {
 
             {/* Module 2: Preventive Planner */}
             <Link
-              href="/preventive-planner"
+              href="/preventive-health"
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
-                <div className="h-10 w-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <Sparkles className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
+                    PROACTIVE
+                  </span>
                 </div>
                 <h3 className="font-bold text-xl text-[#0F2744]">Preventive Health Planner</h3>
                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -266,12 +276,17 @@ export default function HomePage() {
 
             {/* Module 3: Generic Medicines */}
             <Link
-              href="/generic-finder"
+              href="/medicines"
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
-                <div className="h-10 w-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <Pill className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform">
+                    <Pill className="w-5 h-5" />
+                  </div>
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
+                    AFFORDABLE
+                  </span>
                 </div>
                 <h3 className="font-bold text-xl text-[#0F2744]">Generic Medicine Finder</h3>
                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -289,8 +304,13 @@ export default function HomePage() {
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
-                <div className="h-10 w-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <Layers className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
+                    PLAIN TEXT
+                  </span>
                 </div>
                 <h3 className="font-bold text-xl text-[#0F2744]">Medical Term Explainer</h3>
                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -308,11 +328,11 @@ export default function HomePage() {
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-sky-100/70 p-3 rounded-xl text-sky-700 group-hover:scale-105 transition-transform">
-                    <ClipboardList className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform">
+                    <ClipboardList className="w-5 h-5" />
                   </div>
-                  <span className="bg-sky-50 text-sky-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200">
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
                     PORTABLE
                   </span>
                 </div>
@@ -332,8 +352,13 @@ export default function HomePage() {
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
-                <div className="h-10 w-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <ReceiptText className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform">
+                    <ReceiptText className="w-5 h-5" />
+                  </div>
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
+                    AUDIT TOOL
+                  </span>
                 </div>
                 <h3 className="font-bold text-xl text-[#0F2744]">Hospital Bill Checker</h3>
                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -351,12 +376,12 @@ export default function HomePage() {
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="h-10 w-10 rounded-xl bg-sky-100/70 text-sky-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <HardDrive className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform">
+                    <HardDrive className="w-5 h-5" />
                   </div>
-                  <span className="bg-sky-50 text-sky-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200">
-                    SECURED
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
+                    CLOUD STORAGE
                   </span>
                 </div>
                 <h3 className="font-bold text-xl text-[#0F2744]">Health Vault</h3>
@@ -372,11 +397,11 @@ export default function HomePage() {
             {/* Module 6: Coming Soon Teaser */}
             <div className="bg-slate-50/60 rounded-2xl p-6 border border-dashed border-slate-300 flex flex-col justify-between h-full opacity-90 cursor-default">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-slate-200/50 text-slate-500 p-3 rounded-xl">
-                    <Sparkles className="h-5.5 w-5.5" />
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div className="p-2.5 bg-slate-200/50 text-slate-500 rounded-xl">
+                    <Sparkles className="w-5 h-5" />
                   </div>
-                  <span className="bg-slate-200/70 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-full w-fit">
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-gray-100 text-gray-500 border-gray-200">
                     IN ROADMAP
                   </span>
                 </div>
