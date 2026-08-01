@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { ChevronDown, User, LogOut, Settings, Menu, X, LayoutGrid, Activity, Award } from "lucide-react";
+import { ChevronDown, User, LogOut, Settings, Menu, X, LayoutGrid, Activity, Award, History } from "lucide-react";
 import EmergencyHelplines from "./EmergencyHelplines";
 import LocalHospitals from "./LocalHospitals";
 
@@ -223,6 +223,13 @@ export default function Navbar() {
                       >
                         <Award className="h-4 w-4 text-slate-400" /> Awards
                       </Link>
+                      <Link
+                        href="/history"
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        <History className="h-4 w-4 text-slate-400" /> My History
+                      </Link>
                       <button
                         onClick={() => {
                           setIsProfileOpen(false);
@@ -361,6 +368,13 @@ export default function Navbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 🏆 Awards & Achievements
+              </Link>
+              <Link
+                href="/history"
+                className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                📜 My History
               </Link>
               <button
                 onClick={() => {

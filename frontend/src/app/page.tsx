@@ -393,60 +393,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Recent Activity & History Feed */}
-        <section className="space-y-4">
-          <h2 className="text-lg font-bold text-[#0F2744] flex items-center gap-2">
-            <Activity className="h-5 w-5 text-sky-600" /> Recent History Feed
-          </h2>
 
-          {history.length > 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden divide-y divide-slate-100">
-              {history.map((item, index) => (
-                <div key={item.id || index} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200/50">
-                        {item.module}
-                      </span>
-                      <span className="text-[10px] text-slate-500">
-                        {new Date(item.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
-                      </span>
-                    </div>
-                    <div className="font-bold text-sm text-slate-900">
-                      Query: &quot;{item.query_text}&quot;
-                    </div>
-                    <div className="text-xs text-slate-600 leading-relaxed">
-                      Result Summary: {item.summary_result}
-                    </div>
-                  </div>
-                  <div className="shrink-0">
-                    <Link
-                      href={
-                        item.module.includes("Advisor")
-                          ? "/advisor"
-                          : item.module.includes("Planner")
-                            ? "/preventive-health"
-                            : item.module.includes("Alternative")
-                              ? "/medicines"
-                              : "/explainer"
-                      }
-                      className="text-xs font-semibold text-sky-600 hover:underline flex items-center gap-1"
-                    >
-                      Re-run <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-100/30 p-8 text-center flex flex-col items-center justify-center">
-              <AlertTriangle className="h-8 w-8 text-sky-600 mb-3" />
-              <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                No activity history recorded yet. Perform a search in any module to populate your feed.
-              </p>
-            </div>
-          )}
-        </section>
 
       </div>
     </div>
