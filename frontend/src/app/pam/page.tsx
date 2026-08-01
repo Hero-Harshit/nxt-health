@@ -189,7 +189,7 @@ export default function PamInterface() {
       </div>
 
       {/* TOP NAVIGATION BAR */}
-      <header className="flex items-center justify-between p-4 sm:p-6">
+      <header className="sticky top-0 z-[60] flex items-center justify-between p-4 sm:p-6 bg-[#f8faff]/80 backdrop-blur-md border-b border-gray-100/50">
         <button 
           onClick={() => setIsDrawerOpen(true)}
           className="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm text-gray-700"
