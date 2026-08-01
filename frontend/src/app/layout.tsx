@@ -3,6 +3,7 @@ import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { PamBlob } from "@/components/PamBlob";
+import InstallAppModal from "@/components/InstallAppModal";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <Navbar />
         <main>{children}</main>
         <PamBlob />
+        <InstallAppModal />
       </body>
     </html>
   );
