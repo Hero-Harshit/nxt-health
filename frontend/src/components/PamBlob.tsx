@@ -71,12 +71,12 @@ export function PamBlob() {
       style={{ 
         left: pos.x, 
         top: pos.y, 
-        touchAction: 'none' 
+        touchAction: 'none',
+        background: 'radial-gradient(circle at 30% 30%, #93c5fd 0%, #3b82f6 50%, #1e40af 100%)'
       }}
       className={`fixed z-[9999] flex items-center justify-center w-[64px] h-[64px] rounded-full cursor-grab active:cursor-grabbing transition-transform select-none
         border-[1px] border-black/20 
-        bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-300 via-blue-500 to-blue-700
-        shadow-[0_8px_16px_-4px_rgba(37,99,235,0.4),inset_0_-4px_8px_rgba(0,0,0,0.2),inset_0_2px_4px_rgba(255,255,255,0.4)]
+        shadow-[0_8px_16px_-4px_rgba(37,99,235,0.4),inset_0_-4px_8px_rgba(0,0,0,0.3),inset_0_2px_4px_rgba(255,255,255,0.5)]
         ${isDragging ? 'scale-110' : 'hover:scale-105'}`}
     >
       <span className="text-white text-[11px] font-black tracking-[0.15em] drop-shadow-sm select-none pointer-events-none mt-[1px] ml-[2px]">
