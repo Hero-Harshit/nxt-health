@@ -810,6 +810,51 @@ app.post('/api/check-bill', async (req: any, res: any) => {
   }
 });
 
+app.post("/api/pam/chat", async (req, res) => {
+  try {
+    const { prompt, history } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-3.1-flash-lite",
+      systemInstruction: "You are Pam (Personal Assistant & Manager), a highly professional, empathetic, and concise healthcare receptionist for the NxtHealth platform. You help users understand their health data, log metrics, and manage their health vault. Keep responses short, modern, and structured with markdown. Do not give direct medical diagnoses; instead, advise consulting a doctor while providing helpful wellness context."
+    });
+
+    const contents = [];
+    if (Array.isArray(history)) {
+      for (const msg of history) {
+        if (msg.role && msg.content) {
+          contents.push({
+            role: msg.role === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.content }]
+          });
+        }
+      }
+    }
+
+    contents.push({
+      role: 'user',
+      parts: [{ text: prompt }]
+    });
+
+    const result = await model.generateContent({ contents });
+    const responseText = result.response.text();
+
+    return res.status(200).json({ reply: responseText });
+
+  } catch (error: any) {
+    console.error("Pam Gemini API Error:", error);
+    return res.status(500).json({ 
+      error: "Failed to communicate with Pam", 
+      details: error.message || String(error) 
+    });
+  }
+});
+
 const PORT = process.env.PORT ?? 5000;
 
 app.listen(PORT, () => {
