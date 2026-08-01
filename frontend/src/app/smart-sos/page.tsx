@@ -37,6 +37,21 @@ export default function SmartSOSPage() {
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [showEmailAlert, setShowEmailAlert] = useState<boolean>(false);
   const [locationData, setLocationData] = useState<{ lat: number; lng: number } | null>(null);
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkDevice = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      const isSmallScreen = window.innerWidth < 768;
+      // Mark as desktop if NOT a mobile user agent AND screen width >= 768px
+      setIsDesktop(!isMobileUA && !isSmallScreen);
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
@@ -616,6 +631,19 @@ export default function SmartSOSPage() {
                   <span className="text-center px-2 uppercase tracking-wide leading-tight">{buttonText}</span>
                 </button>
               </div>
+
+              {/* Desktop / Laptop Location Precision Note (Hidden on Mobile) */}
+              {isDesktop && (
+                <div className="mt-2 p-4 bg-amber-50 border border-amber-200 rounded-xl text-left max-w-md flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-xs font-bold text-amber-900">Desktop Location Precision Notice</h4>
+                    <p className="text-[11px] text-amber-700 leading-relaxed mt-0.5">
+                      Laptops and desktops generally lack hardware GPS receivers. Location data on these devices is calculated using IP-based positioning, which might not accurately represent your exact room or building coordinates. For precise location accuracy during emergencies, we highly recommend launching this platform via the NxtHealth mobile app.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={handleOfflineSMS}
