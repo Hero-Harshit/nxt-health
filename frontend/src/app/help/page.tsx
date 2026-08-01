@@ -4,9 +4,11 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, HelpCircle, X, MessageSquare, ChevronDown, ChevronRight, BookOpen } from 'lucide-react';
 import { faqData } from '@/data/faqs';
+import { moduleDocs, DocModule } from '@/data/documentation';
 
 export default function HelpPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeDoc, setActiveDoc] = useState<DocModule | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
 
@@ -64,9 +66,32 @@ export default function HelpPage() {
             </div>
             <h2 className="text-xl font-bold text-gray-800">Documentation</h2>
           </div>
-          <div className="h-48 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center bg-gray-50/50 text-center px-4">
-            <p className="text-gray-400 font-bold mb-1">Documentation goes here</p>
-            <p className="text-xs text-gray-400 font-medium">Ready for the next injection phase.</p>
+          {/* Dynamic Documentation Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+            {moduleDocs.map((doc) => {
+              const Icon = doc.icon;
+              return (
+                <button 
+                  key={doc.id}
+                  onClick={() => setActiveDoc(doc)}
+                  className={`group text-left p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200 ${doc.border}`}
+                >
+                  <div className="flex flex-col items-start gap-4">
+                    <div className={`p-3 rounded-xl transition-colors ${doc.bg}`}>
+                      <Icon className={`w-6 h-6 ${doc.color}`} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">
+                        {doc.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 font-medium leading-relaxed line-clamp-2">
+                        {doc.description}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -177,6 +202,64 @@ export default function HelpPage() {
                   </Link>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* DOCUMENTATION READING MODAL */}
+      {activeDoc && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-gray-900/60 backdrop-blur-sm">
+          <div 
+            className="bg-white rounded-[2rem] w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className={`p-6 sm:p-8 border-b border-gray-100 ${activeDoc.bg} bg-opacity-30`}>
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-xl bg-white shadow-sm ${activeDoc.color}`}>
+                    <activeDoc.icon className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-extrabold text-gray-900">{activeDoc.title}</h3>
+                    <p className="text-sm font-medium text-gray-600 mt-1">{activeDoc.description}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setActiveDoc(null)} 
+                  className="p-2 bg-white/50 hover:bg-white text-gray-600 rounded-full transition-colors shadow-sm"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body (Rich Text Reading Area) */}
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8 bg-white custom-scrollbar">
+              <div className="space-y-8">
+                {activeDoc.content.map((section, idx) => (
+                  <div key={idx} className="space-y-3">
+                    <h4 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2">
+                      {section.heading}
+                    </h4>
+                    {section.body && (
+                      <p className="text-sm text-gray-600 font-medium leading-relaxed">
+                        {section.body}
+                      </p>
+                    )}
+                    {section.list && (
+                      <ul className="space-y-2 mt-3">
+                        {section.list.map((listItem, lIdx) => (
+                          <li key={lIdx} className="flex items-start gap-3 text-sm text-gray-600 font-medium leading-relaxed">
+                            <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${activeDoc.color.replace('text-', 'bg-')}`} />
+                            {listItem}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
