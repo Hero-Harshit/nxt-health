@@ -158,6 +158,13 @@ export default function Navbar() {
                       🌙 Sleep Tracker
                     </Link>
                     <Link
+                      href="/utilities/longevity-calculator"
+                      className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
+                      onClick={() => setIsUtilitiesOpen(false)}
+                    >
+                      ❤️ Longevity Estimator
+                    </Link>
+                    <Link
                       href="/utilities/first-aid-box"
                       className="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
                       onClick={() => setIsUtilitiesOpen(false)}
@@ -291,6 +298,13 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(false)}
           >
             🌙 Sleep Tracker
+          </Link>
+          <Link
+            href="/utilities/longevity-calculator"
+            className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-white hover:text-sky-600"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            ❤️ Longevity Estimator
           </Link>
           <Link
             href="/utilities/first-aid-box"
