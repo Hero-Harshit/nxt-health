@@ -1,4 +1,4 @@
-import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays } from 'lucide-react';
+import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -166,6 +166,58 @@ export const moduleDocs: DocModule[] = [
         list: [
           'Smart Suggestions: The AI continually analyzes your inputs and progress to provide customized health recommendations that improve over time.',
           'Seamless Updates: You can modify your health goals and routines whenever required. The planner automatically adjusts its recommendations based on your new updates.'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'medical-finder',
+    title: 'Generic Medical Finder',
+    description: 'Search for medicines, discover cost-effective generic alternatives, and check active compositions.',
+    icon: Pill,
+    color: 'text-orange-600',
+    bg: 'bg-orange-50',
+    border: 'hover:border-orange-200',
+    content: [
+      {
+        heading: 'What is the Generic Medical Finder?',
+        body: 'The Generic Medical Finder is a powerful search tool designed to help you understand your medications better. By entering a brand or generic medicine name, you instantly receive basic information, availability, and its active composition.'
+      },
+      {
+        heading: 'Finding Alternatives',
+        body: 'One of the core features is finding generic alternatives. The app identifies similar generic medicines with the exact same active ingredients (composition), allowing you to compare available alternatives and potentially save on healthcare costs.'
+      },
+      {
+        heading: 'Usage & Dosage Information',
+        body: 'The module provides quick reference details for any searched medicine:',
+        list: [
+          'Purpose & Usage: Understand what the medicine is used for and its general benefits.',
+          'Composition Details: View the active ingredients to easily identify similar medicines.',
+          'General Dosage: Provides general dosage guidelines (Note: Always follow your doctor\'s official instructions for actual usage).'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'term-explainer',
+    title: 'Medical Term Explainer',
+    description: 'Translate complex medical jargon, lab report abbreviations, and conditions into simple language.',
+    icon: BookText,
+    color: 'text-cyan-600',
+    bg: 'bg-cyan-50',
+    border: 'hover:border-cyan-200',
+    content: [
+      {
+        heading: 'What is the Medical Term Explainer?',
+        body: 'Healthcare is full of confusing terminology. The Medical Term Explainer converts difficult healthcare terms, diseases, and conditions into simple, easy-to-understand explanations.'
+      },
+      {
+        heading: 'Understanding Your Documents',
+        body: 'You can use the Explainer to decode various types of medical paperwork:',
+        list: [
+          'Lab Reports: Enter unfamiliar terms mentioned in your medical reports to get a user-friendly explanation of what they mean.',
+          'Doctor Prescriptions: Search for medical words or abbreviations found on prescriptions to better understand your doctor\'s notes.',
+          'Abbreviations: The module acts as a dictionary for common medical abbreviations, providing their full forms so you can read healthcare documents with confidence.'
         ]
       }
     ]
