@@ -219,16 +219,18 @@ export default function PamInterface() {
               <div className="space-y-3">
                 {chatHistory.map((chat: any) => (
                   <div key={chat.id} className="relative group">
+                    {/* Added pr-12 to create a safe zone for the absolute 3-dot menu */}
                     <button 
                       onClick={() => loadChat(chat)} 
-                      className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between text-left ${currentChatId === chat.id ? 'bg-blue-50/50 border-blue-200 shadow-sm' : 'bg-white border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200'}`}
+                      className={`w-full py-4 pl-4 pr-12 rounded-2xl border transition-all flex items-center justify-between text-left ${currentChatId === chat.id ? 'bg-blue-50/50 border-blue-200 shadow-sm' : 'bg-white border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200'}`}
                     >
-                      <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="flex items-center gap-3 overflow-hidden w-full">
                         <div className={`p-2.5 rounded-xl transition-colors shrink-0 ${currentChatId === chat.id ? 'bg-blue-100' : 'bg-blue-50 group-hover:bg-blue-100'}`}>
                           <MessageSquare className="w-4 h-4 text-blue-600" />
                         </div>
-                        <div className="flex flex-col overflow-hidden">
-                          <span className={`text-sm font-bold truncate transition-colors ${currentChatId === chat.id ? 'text-blue-700' : 'text-gray-700 group-hover:text-blue-700'}`}>
+                        {/* Added w-full and block to ensure truncation happens before the padding */}
+                        <div className="flex flex-col overflow-hidden w-full">
+                          <span className={`text-sm font-bold truncate transition-colors block w-full ${currentChatId === chat.id ? 'text-blue-700' : 'text-gray-700 group-hover:text-blue-700'}`}>
                             {chat.title}
                           </span>
                           <span className="text-[10px] text-gray-400 font-semibold">{chat.date}</span>
@@ -236,22 +238,20 @@ export default function PamInterface() {
                       </div>
                     </button>
 
-                    {/* Three Dot Menu Button */}
+                    {/* Three Dot Menu Button - Removed hover opacity, now always visible */}
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveMenuId(activeMenuId === chat.id ? null : chat.id);
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       <MoreVertical className="w-4 h-4" />
                     </button>
 
                     {/* Dropdown Menu */}
                     {activeMenuId === chat.id && (
-                      <div 
-                        className="absolute right-8 top-1/2 -translate-y-1/2 w-32 bg-white border border-gray-100 shadow-xl rounded-xl z-[110] py-1 overflow-hidden"
-                      >
+                      <div className="absolute right-8 top-1/2 -translate-y-1/2 w-32 bg-white border border-gray-100 shadow-xl rounded-xl z-[110] py-1 overflow-hidden">
                         <button 
                           onClick={(e) => { e.stopPropagation(); editChatTitle(chat.id, chat.title); }} 
                           className="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2"
