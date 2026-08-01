@@ -2,13 +2,14 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, HelpCircle, X, MessageSquare, ChevronDown, ChevronRight, BookOpen, Mail } from 'lucide-react';
+import { Search, HelpCircle, X, MessageSquare, ChevronDown, ChevronRight, BookOpen, Mail, Lightbulb, ExternalLink } from 'lucide-react';
 import { faqData } from '@/data/faqs';
 import { moduleDocs, DocModule } from '@/data/documentation';
 
 export default function HelpPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeDoc, setActiveDoc] = useState<DocModule | null>(null);
+  const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
 
@@ -73,7 +74,13 @@ export default function HelpPage() {
               return (
                 <button 
                   key={doc.id}
-                  onClick={() => setActiveDoc(doc)}
+                  onClick={() => {
+                    if (doc.isModalTrigger) {
+                      setIsSuggestModalOpen(true);
+                    } else {
+                      setActiveDoc(doc);
+                    }
+                  }}
                   className={`group text-left p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200 ${doc.border}`}
                 >
                   <div className="flex flex-col items-start gap-4">
@@ -285,6 +292,45 @@ export default function HelpPage() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Suggest Us Modal */}
+      {isSuggestModalOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 sm:p-8 text-center animate-in zoom-in-95 duration-200">
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setIsSuggestModalOpen(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Lightbulb Icon Badge */}
+            <div className="w-14 h-14 mx-auto mb-4 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-blue-500/10">
+              <Lightbulb className="w-7 h-7" />
+            </div>
+
+            {/* Title & Explanation */}
+            <h3 className="text-xl font-bold text-gray-900 tracking-tight mb-2">
+              We’re Listening! 💡
+            </h3>
+            <p className="text-sm text-gray-600 leading-relaxed mb-6">
+              We are always actively listening to feedback and continuously improving our platform. Have an idea for a feature or utility we don’t have yet? We’d love to hear it!
+            </p>
+
+            {/* Action CTA Button */}
+            <a
+              href="mailto:heroharshitlaptop@gmail.com?subject=NxtHealth%20Feature%20Suggestion&body=Hi%20NxtHealth%20Team%2C%0A%0AI%20have%20a%20feature%20suggestion%20for%20the%20platform%3A%0A%0A"
+              onClick={() => setIsSuggestModalOpen(false)}
+              className="inline-flex items-center justify-center gap-2 w-full py-3 px-5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/25 transition-all active:scale-95 cursor-pointer"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Suggest a Feature</span>
+              <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+            </a>
           </div>
         </div>
       )}

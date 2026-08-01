@@ -1,4 +1,4 @@
-import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText, ClipboardList, Receipt, FolderLock, Wrench } from 'lucide-react';
+import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText, ClipboardList, Receipt, FolderLock, Wrench, Lightbulb } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -15,6 +15,7 @@ export type DocModule = {
   bg: string;
   border: string;
   badge?: string;
+  isModalTrigger?: boolean;
   content: DocSection[];
 };
 
@@ -347,6 +348,23 @@ export const moduleDocs: DocModule[] = [
       {
         heading: '🩹 Virtual First Aid Box',
         body: 'Instant digital reference guide providing step-by-step triage procedures, basic CPR protocols, and acute home emergency care steps.'
+      }
+    ]
+  },
+  {
+    id: 'suggest-us',
+    title: 'Suggest Us',
+    description: 'Have ideas for features we don’t have yet? Help us build the future of NxtHealth.',
+    icon: Lightbulb,
+    color: 'text-amber-500',
+    bg: 'bg-amber-50',
+    border: 'hover:border-amber-200',
+    badge: 'FEEDBACK',
+    isModalTrigger: true,
+    content: [
+      {
+        heading: '💡 We Build With You',
+        body: 'NxtHealth is continuously evolving. If you have a feature request or idea, share it directly with our core engineering team!'
       }
     ]
   }
