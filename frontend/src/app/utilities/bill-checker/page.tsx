@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, IndianRupee, MapPin, ShieldCheck, Activity, ReceiptText, ChevronDown } from 'lucide-react';
+import { Search, IndianRupee, MapPin, ShieldCheck, Activity, ReceiptText, ChevronDown, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
 
 // --- DESIGN TOKENS ---
 const NAVY = '#0B1E3D';
@@ -63,6 +63,9 @@ export default function BillCheckerPage() {
   const [amount, setAmount] = useState('');
   const [cityTier, setCityTier] = useState('');
   
+  // Result State
+  const [result, setResult] = useState<any>(null);
+  
   // UI State
   const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -83,15 +86,31 @@ export default function BillCheckerPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleCheck = (e: React.FormEvent) => {
+  const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProcedure || !amount || !cityTier) return;
     
     setIsLoading(true);
-    // Placeholder for next step: AI API Call
-    setTimeout(() => {
+    setResult(null);
+    
+    try {
+      const res = await fetch('/api/check-bill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ procedure: selectedProcedure, amount: Number(amount), cityTier })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setResult(data);
+      } else {
+        console.error("Failed to fetch analysis");
+      }
+    } catch (err) {
+      console.error("API Error:", err);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -237,23 +256,71 @@ export default function BillCheckerPage() {
             </form>
           </div>
 
-          {/* RIGHT: AI Analysis Placeholder */}
+          {/* RIGHT: AI Analysis Result */}
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8 flex flex-col h-full min-h-[400px]">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-6 flex items-center gap-2">
               <span style={{ color: BLUE }}>✨</span> AI Analysis Result
             </h3>
             
-            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 opacity-60">
-              <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
-                <ShieldCheck className="w-10 h-10" style={{ color: BLUE }} />
+            {!result && !isLoading && (
+              <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 opacity-60">
+                <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
+                  <ShieldCheck className="w-10 h-10" style={{ color: BLUE }} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-700">Awaiting Details</p>
+                  <p className="text-xs text-gray-500 max-w-[250px] mx-auto mt-1">
+                    Fill out the form on the left to see if your hospital bill aligns with standard pricing benchmarks.
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-bold text-gray-700">Awaiting Details</p>
-                <p className="text-xs text-gray-500 max-w-[250px] mx-auto mt-1">
-                  Fill out the form on the left to see if your hospital bill aligns with standard pricing benchmarks.
-                </p>
+            )}
+
+            {isLoading && (
+              <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
+                <p className="text-sm font-bold text-gray-600 animate-pulse">Analyzing benchmarks...</p>
               </div>
-            </div>
+            )}
+
+            {result && !isLoading && (
+              <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
+                {/* Status Badge */}
+                <div className={`p-4 rounded-xl border flex items-start gap-4 ${
+                  result.color === 'RED' ? 'bg-red-50 border-red-200 text-red-900' :
+                  result.color === 'YELLOW' ? 'bg-amber-50 border-amber-200 text-amber-900' :
+                  result.color === 'BLUE' ? 'bg-blue-50 border-blue-200 text-blue-900' :
+                  'bg-emerald-50 border-emerald-200 text-emerald-900'
+                }`}>
+                  <div className="mt-0.5">
+                    {result.color === 'RED' ? <AlertCircle className="w-6 h-6 text-red-600" /> :
+                     result.color === 'YELLOW' ? <AlertTriangle className="w-6 h-6 text-amber-600" /> :
+                     <CheckCircle2 className="w-6 h-6 text-emerald-600" />}
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black tracking-tight mb-1">{result.verdict}</h4>
+                    <p className="text-sm font-medium opacity-90 leading-relaxed">{result.explanation}</p>
+                  </div>
+                </div>
+
+                {/* Actionable Tips */}
+                <div className="space-y-3 pt-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Negotiation & Action Plan
+                  </h4>
+                  <ul className="space-y-3">
+                    {result.tips.map((tip: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-3 bg-gray-50 border border-gray-100 p-3.5 rounded-xl">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </div>
+                        <p className="text-sm text-gray-700 font-medium leading-snug">{tip}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
