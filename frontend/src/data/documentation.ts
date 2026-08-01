@@ -1,4 +1,4 @@
-import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText, ClipboardList } from 'lucide-react';
+import { MessageSquare, ShieldAlert, ShieldCheck, QrCode, CalendarDays, Pill, BookText, ClipboardList, Receipt, FolderLock } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -249,5 +249,60 @@ export const moduleDocs: DocModule[] = [
         body: 'Beyond daily organization, this consolidated report is designed to be a lifesaver during critical moments. In an emergency situation, doctors and hospitals can quickly review this passport to understand your vital health and insurance information, leading to faster, safer treatment and smoother administrative processing.'
       }
     ]
+  },
+  {
+    id: 'bill-checker',
+    title: 'Hospital Bill Checker',
+    description: 'Compare hospital bills against regional standard pricing benchmarks to check for overcharging and unexpected fees.',
+    icon: Receipt,
+    color: 'text-amber-600',
+    bg: 'bg-amber-50',
+    border: 'hover:border-amber-200',
+    content: [
+      {
+        heading: 'What is the Hospital Bill Checker?',
+        body: 'The Hospital Bill Overcharge Checker helps you estimate whether the amount quoted for a medical procedure, surgery, or diagnostic test falls within standard, fair price ranges. It compares your bill against benchmark data based on your specific location category.'
+      },
+      {
+        heading: 'How to Check Your Bill',
+        body: 'Using the checker is simple and fast:',
+        list: [
+          'Select the specific medical procedure or test from the database.',
+          'Enter the quoted bill amount given by the hospital.',
+          'Choose your location category (such as metropolitan cities, smaller towns, or rural areas) to ensure accurate regional pricing benchmarks are applied.'
+        ]
+      },
+      {
+        heading: 'AI-Driven Analysis',
+        body: 'The built-in AI analyzes your input and indicates whether the billed amount appears reasonable or may require further review. Note: This provides an estimate based on standard pricing benchmarks as a helpful reference, rather than a formal legal guarantee.'
+      }
+    ]
+  },
+  {
+      id: 'health-vault',
+      title: 'Health Vault',
+      description: 'Securely organize, store, and manage your medical documents and reports directly through your own Google Drive.',
+      icon: FolderLock,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+      border: 'hover:border-blue-200',
+      content: [
+        {
+          heading: 'What is Health Vault?',
+          body: 'Health Vault is a secure document management system that helps you keep all your medical records neatly categorized. Instead of creating a separate cloud silo, it connects directly with your personal Google Drive to establish a dedicated, protected folder.'
+        },
+        {
+          heading: 'Your Files, Your Ownership',
+          body: 'Your medical data privacy is paramount:',
+          list: [
+            'Direct Ownership: All files remain safely inside your personal Google Drive under your complete control.',
+            'Secure Authentication: Access and file synchronization are protected using secure Google OAuth standards.'
+          ]
+        },
+        {
+          heading: 'Supported Documents & Organization',
+          body: 'You can upload and organize a wide variety of healthcare documents, including blood reports, prescriptions, X-rays, MRI/CT scans, vaccination certificates, insurance papers, and hospital discharge summaries into automatically sorted health folders.'
+        }
+      ]
   }
 ];
