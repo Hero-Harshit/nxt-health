@@ -62,7 +62,7 @@ export default function HelpPage() {
             <div className="p-2 bg-indigo-50 rounded-lg">
               <BookOpen className="w-5 h-5 text-indigo-600" />
             </div>
-            <h2 className="text-xl font-bold text-gray-800">Module Documentation</h2>
+            <h2 className="text-xl font-bold text-gray-800">Documentation</h2>
           </div>
           <div className="h-48 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center bg-gray-50/50 text-center px-4">
             <p className="text-gray-400 font-bold mb-1">Documentation goes here</p>
