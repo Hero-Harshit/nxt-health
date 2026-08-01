@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { HeartPulse, ShieldCheck, RefreshCw, AlertCircle, Award, ArrowRight } from "lucide-react";
 
@@ -524,6 +525,25 @@ export default function ProfilePage() {
               <div className="font-semibold leading-relaxed">{successMsg}</div>
             </div>
           )}
+
+          {/* Health Passport Integration CTA */}
+          <div className="mt-8 mb-6 p-5 bg-blue-50/60 border border-blue-100 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div className="flex-1">
+              <h4 className="text-sm font-bold text-blue-950 mb-1 flex items-center gap-2">
+                <span className="bg-blue-100 text-blue-600 p-1 rounded-md text-xs">🛂</span> 
+                Personal Health Passport
+              </h4>
+              <p className="text-xs text-blue-800/80 leading-relaxed max-w-md font-medium">
+                Your basic profile and Personal Health Passport work together to personalize your experience. Ensure your medical details are up to date to unlock better AI insights.
+              </p>
+            </div>
+            <Link 
+              href="/health-passport" 
+              className="shrink-0 px-4 py-2.5 bg-white border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm active:scale-95 text-center"
+            >
+              Manage Your Health Passport
+            </Link>
+          </div>
 
           {/* Action Save Button */}
           <button
