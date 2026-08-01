@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, FormEvent } from "react";
 import { addHistoryLog } from '@/utils/history';
+import ShareMenu from "@/components/ShareMenu";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartPulse, Sparkles, RefreshCw, AlertCircle, ShieldCheck, ArrowRight, UserCheck, CheckCircle2 } from "lucide-react";
@@ -284,6 +285,14 @@ export default function PreventiveHealthPage() {
             {/* Advice Response - Refactored to native MedTech UI Cards */}
             {status === "success" && plan && (
               <div className="space-y-6 animate-fadeIn">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4 bg-white p-6 rounded-2xl border border-slate-200">
+                  <h3 className="text-lg font-bold text-gray-900">Personalized Health Plan</h3>
+                  <ShareMenu 
+                    title="Preventive Health AI Plan" 
+                    content={`Lifestyle Recommendations:\n${plan.lifestyle?.map((l: any) => `- ${l.topic}: ${l.advice}`).join('\n') || ''}\n\nScreenings:\n${plan.screenings?.map((s: any) => `- ${s.test} (${s.timeline}): ${s.reason}`).join('\n') || ''}\n\nKey Risks:\n${plan.risks?.map((r: string) => `- ${r}`).join('\n') || ''}`} 
+                    fileName="preventive-health-plan" 
+                  />
+                </div>
                 
                 {/* 1. Lifestyle Modifications Card */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">

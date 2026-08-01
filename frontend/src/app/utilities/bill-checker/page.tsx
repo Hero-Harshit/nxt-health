@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { addHistoryLog } from '@/utils/history';
+import ShareMenu from '@/components/ShareMenu';
 import { Search, IndianRupee, MapPin, ShieldCheck, Activity, ReceiptText, ChevronDown, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
 
 // --- DESIGN TOKENS ---
@@ -317,6 +318,14 @@ export default function BillCheckerPage() {
 
             {result && !isLoading && (
               <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">Hospital Bill Analysis</h3>
+                  <ShareMenu 
+                    title="Hospital Bill Analysis Report" 
+                    content={`Verdict: ${result.verdict}\n\nExplanation: ${result.explanation}\n\nNegotiation Tips:\n${result.tips.map((t: string, i: number) => `${i + 1}. ${t}`).join('\n')}`} 
+                    fileName="hospital-bill-analysis" 
+                  />
+                </div>
                 
                 {/* TAILWIND SPECTRUM METER */}
                 {(() => {

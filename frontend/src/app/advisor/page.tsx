@@ -2,6 +2,7 @@
 
 import React, { useState, FormEvent } from "react";
 import { addHistoryLog } from '@/utils/history';
+import ShareMenu from "@/components/ShareMenu";
 import { ShieldCheck, Sparkles, HeartPulse, ChevronDown, ChevronUp, AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { parseJargon } from "@/components/policy-advisor/JargonTooltip";
@@ -364,6 +365,14 @@ export default function AdvisorPage() {
                       key={policyId}
                       className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-300"
                     >
+                      <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+                        <h3 className="text-lg font-bold text-gray-900">Policy Recommendations</h3>
+                        <ShareMenu 
+                          title="Health Policy AI Recommendation" 
+                          content={`Plan Name: ${policy.title}\n\nExplanation: ${policy.explanation}\n\nWhy Not: ${policy.why_not || 'N/A'}\n\nTrade-offs: ${policy.trade_offs || 'N/A'}`} 
+                          fileName="policy-recommendations" 
+                        />
+                      </div>
                        <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                         <div>
                           <div className="flex items-center gap-2">

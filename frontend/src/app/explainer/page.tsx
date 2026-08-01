@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, FormEvent } from "react";
 import { addHistoryLog } from '@/utils/history';
+import ShareMenu from "@/components/ShareMenu";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartPulse, Sparkles, RefreshCw, AlertCircle, HelpCircle } from "lucide-react";
@@ -194,6 +195,14 @@ export default function ExplainerPage() {
         {/* Success / Result Display */}
         {result && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6 animate-fadeIn">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Medical Explanation</h3>
+              <ShareMenu 
+                title={`Medical Term: ${input}`} 
+                content={result.explanation} 
+                fileName="medical-term-explanation" 
+              />
+            </div>
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5.5 w-5.5 text-sky-600" />
