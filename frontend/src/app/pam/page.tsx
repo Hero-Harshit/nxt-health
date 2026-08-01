@@ -19,6 +19,9 @@ export default function PamInterface() {
   const [isMounted, setIsMounted] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const [messages, setMessages] = useState<{role: 'user' | 'pam', content: string}[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Randomize quote on load
@@ -54,6 +57,48 @@ export default function PamInterface() {
     
     setIsMounted(true);
   }, []);
+
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!inputValue.trim() || isLoading) return;
+
+    const userText = inputValue;
+    setInputValue("");
+    const newMessages = [...messages, { role: 'user', content: userText }];
+    setMessages(newMessages as any);
+    setIsLoading(true);
+
+    try {
+      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, ""); 
+      const res = await fetch(`${backendUrl}/api/pam/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userText, history: messages })
+      });
+
+      const data = await res.json();
+      const pamReply = data.reply || data.message || data.text;
+
+      const updatedMessages = [...newMessages, { role: 'pam', content: pamReply }];
+      setMessages(updatedMessages as any);
+
+      // Save to local storage for the slide-out drawer history
+      const existingHistory = JSON.parse(localStorage.getItem('pam_chat_history') || '[]');
+      const newHistoryItem = {
+        id: Date.now(),
+        title: userText.substring(0, 30) + (userText.length > 30 ? '...' : ''),
+        date: 'Just now'
+      };
+      localStorage.setItem('pam_chat_history', JSON.stringify([newHistoryItem, ...existingHistory]));
+      setChatHistory([newHistoryItem, ...existingHistory]);
+
+    } catch (error) {
+      console.error("Pam API Error:", error);
+      setMessages([...newMessages, { role: 'pam', content: "I'm having trouble connecting to my servers right now. Please try again in a moment." }] as any);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!isMounted) return null; // Prevent hydration mismatch
 
@@ -163,72 +208,112 @@ export default function PamInterface() {
 
       {/* MAIN HERO CONTENT */}
       <main className="flex-1 flex flex-col items-center px-4 pt-4 pb-32 max-w-4xl mx-auto w-full">
-        
-        {/* Large Pam Orb */}
-        <div 
-          className="flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32 rounded-full mb-6 border-[1px] border-black/20 shadow-[0_12px_24px_-6px_rgba(37,99,235,0.4),inset_0_-6px_12px_rgba(0,0,0,0.3),inset_0_3px_6px_rgba(255,255,255,0.5)]"
-          style={{ background: 'radial-gradient(circle at 30% 30%, #93c5fd 0%, #3b82f6 50%, #1e40af 100%)' }}
-        >
-          <span className="text-white text-xl sm:text-2xl font-black tracking-[0.15em] select-none pointer-events-none mt-[2px] ml-[3px] drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-            PAM
-          </span>
-        </div>
-
-        <h2 className="text-indigo-700 font-semibold text-sm sm:text-base mb-4">
-          Hello, {userName}
-        </h2>
-        
-        <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 text-center tracking-tight">
-          How can I assist with your well-being today?
-        </h3>
-
-        <div className="text-center max-w-xl mx-auto mb-12 space-y-2">
-          <p className="text-sm sm:text-base text-gray-500 font-medium leading-relaxed">
-            "{quote.text}"
-          </p>
-          <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest">
-            — {quote.author}
-          </p>
-        </div>
-
-        {/* ACTION CARDS GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-3xl">
-          {/* Card 1 */}
-          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group">
-            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
-              <FileText className="w-5 h-5 text-indigo-600" />
+        {messages.length === 0 && (
+          <>
+            {/* Large Pam Orb */}
+            <div 
+              className="flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32 rounded-full mb-6 border-[1px] border-black/20 shadow-[0_12px_24px_-6px_rgba(37,99,235,0.4),inset_0_-6px_12px_rgba(0,0,0,0.3),inset_0_3px_6px_rgba(255,255,255,0.5)]"
+              style={{ background: 'radial-gradient(circle at 30% 30%, #93c5fd 0%, #3b82f6 50%, #1e40af 100%)' }}
+            >
+              <span className="text-white text-xl sm:text-2xl font-black tracking-[0.15em] select-none pointer-events-none mt-[2px] ml-[3px] drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                PAM
+              </span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-1.5">Clinical Analysis</h4>
-            <p className="text-xs text-gray-500 leading-relaxed font-medium">Ask me to review and summarize the latest medical reports securely stored in your Health Vault.</p>
-          </div>
 
-          {/* Card 2 */}
-          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group">
-            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
-              <HeartPulse className="w-5 h-5 text-indigo-600" />
-            </div>
-            <h4 className="font-bold text-gray-900 mb-1.5">Improve My Healthspan</h4>
-            <p className="text-xs text-gray-500 leading-relaxed font-medium">Get personalized daily habits to increase your active lifespan based on your current metrics.</p>
-          </div>
+            <h2 className="text-indigo-700 font-semibold text-sm sm:text-base mb-4">
+              Hello, {userName}
+            </h2>
+            
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 text-center tracking-tight">
+              How can I assist with your well-being today?
+            </h3>
 
-          {/* Card 3 */}
-          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group">
-            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
-              <Activity className="w-5 h-5 text-indigo-600" />
+            <div className="text-center max-w-xl mx-auto mb-12 space-y-2">
+              <p className="text-sm sm:text-base text-gray-500 font-medium leading-relaxed">
+                "{quote.text}"
+              </p>
+              <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest">
+                — {quote.author}
+              </p>
             </div>
-            <h4 className="font-bold text-gray-900 mb-1.5">Log Daily Metrics</h4>
-            <p className="text-xs text-gray-500 leading-relaxed font-medium">Quickly update your sleep, stress levels, and activity for today's Healthy Heatmap streak.</p>
-          </div>
 
-          {/* Card 4 */}
-          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group">
-            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
-              <ShieldCheck className="w-5 h-5 text-indigo-600" />
+            {/* ACTION CARDS GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-3xl">
+              {/* Card 1 */}
+              <div 
+                onClick={() => setInputValue("Review and summarize my latest medical reports securely stored in my Health Vault.")}
+                className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+              >
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
+                  <FileText className="w-5 h-5 text-indigo-600" />
+                </div>
+                <h4 className="font-bold text-gray-900 mb-1.5">Clinical Analysis</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium">Ask me to review and summarize the latest medical reports securely stored in your Health Vault.</p>
+              </div>
+
+              {/* Card 2 */}
+              <div 
+                onClick={() => setInputValue("Give me personalized daily habits to increase my active healthspan based on my metrics.")}
+                className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+              >
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
+                  <HeartPulse className="w-5 h-5 text-indigo-600" />
+                </div>
+                <h4 className="font-bold text-gray-900 mb-1.5">Improve My Healthspan</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium">Get personalized daily habits to increase your active lifespan based on your current metrics.</p>
+              </div>
+
+              {/* Card 3 */}
+              <div 
+                onClick={() => setInputValue("Log my daily health metrics, sleep, stress levels, and activity for today.")}
+                className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+              >
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
+                  <Activity className="w-5 h-5 text-indigo-600" />
+                </div>
+                <h4 className="font-bold text-gray-900 mb-1.5">Log Daily Metrics</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium">Quickly update your sleep, stress levels, and activity for today's Healthy Heatmap streak.</p>
+              </div>
+
+              {/* Card 4 */}
+              <div 
+                onClick={() => setInputValue("Analyze my recent hospital invoices to check for overcharges or billing errors.")}
+                className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+              >
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
+                  <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                </div>
+                <h4 className="font-bold text-gray-900 mb-1.5">Verify Medical Bills</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium">Let me analyze your recent hospital invoices to check for overcharges or billing errors.</p>
+              </div>
             </div>
-            <h4 className="font-bold text-gray-900 mb-1.5">Verify Medical Bills</h4>
-            <p className="text-xs text-gray-500 leading-relaxed font-medium">Let me analyze your recent hospital invoices to check for overcharges or billing errors.</p>
+          </>
+        )}
+
+        {messages.length > 0 && (
+          <div className="w-full max-w-3xl flex flex-col gap-6 mt-8 mb-20">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`px-5 py-3.5 rounded-2xl max-w-[85%] text-[15px] leading-relaxed shadow-sm ${
+                  msg.role === 'user' 
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-none' 
+                    : 'bg-white border border-gray-100 text-gray-800 rounded-bl-none'
+                }`}>
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                 <div className="px-5 py-4 bg-white border border-gray-100 rounded-2xl rounded-bl-none shadow-sm flex gap-2 items-center">
+                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                   <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                 </div>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </main>
 
       {/* BOTTOM CHAT INPUT BAR */}
@@ -237,13 +322,21 @@ export default function PamInterface() {
           <input 
             type="text" 
             placeholder="Ask Pam anything about your health..." 
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            disabled={isLoading}
             className="w-full bg-white border border-gray-200 text-gray-800 text-sm rounded-full pl-6 pr-24 py-4 sm:py-5 shadow-lg focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-gray-400 font-medium"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <button className="p-2.5 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-50">
               <Mic className="w-5 h-5" />
             </button>
-            <button className="p-2.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all">
+            <button 
+              onClick={() => handleSendMessage()}
+              disabled={isLoading}
+              className="p-2.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all"
+            >
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
