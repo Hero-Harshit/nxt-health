@@ -9,6 +9,7 @@ import cors from "cors";
 import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
 import { callGeminiJSON } from "./lib/geminiClient.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const app = express();
 
@@ -694,6 +695,118 @@ app.get("/api/history", async (req, res) => {
   } catch (error: any) {
     console.error("❌ [/api/history EXCEPTION]:", error);
     res.status(500).json({ status: "error", message: error?.message || "Internal server error" });
+  }
+});
+
+// Reference Database (Zero DB Latency)
+const PROCEDURES_DATA = {
+  "MRI Scan": { "min": 3000, "max": 15000 },
+  "CT Scan": { "min": 2000, "max": 8000 },
+  "X-Ray": { "min": 300, "max": 1200 },
+  "Ultrasound Scan": { "min": 800, "max": 3000 },
+  "ECG": { "min": 200, "max": 700 },
+  "2D Echo": { "min": 2000, "max": 6000 },
+  "TMT (Stress Test)": { "min": 2000, "max": 5000 },
+  "Blood Test (CBC)": { "min": 300, "max": 800 },
+  "Thyroid Function Test": { "min": 500, "max": 2000 },
+  "Liver Function Test": { "min": 700, "max": 2500 },
+  "Kidney Function Test": { "min": 700, "max": 2500 },
+  "Endoscopy": { "min": 4000, "max": 15000 },
+  "Colonoscopy": { "min": 8000, "max": 25000 },
+  "Appendectomy (Appendix Removal)": { "min": 45000, "max": 100000 },
+  "Gallbladder Removal": { "min": 60000, "max": 200000 },
+  "Hernia Repair": { "min": 50000, "max": 150000 },
+  "Normal Delivery": { "min": 40000, "max": 120000 },
+  "Cesarean Delivery (C-Section)": { "min": 70000, "max": 200000 },
+  "Kidney Stone Removal (Laser)": { "min": 50000, "max": 200000 },
+  "Dialysis (Per Session)": { "min": 2500, "max": 5500 },
+  "Angiography": { "min": 18000, "max": 45000 },
+  "Angioplasty (1 Stent)": { "min": 180000, "max": 450000 },
+  "Cataract Surgery": { "min": 25000, "max": 80000 },
+  "LASIK Eye Surgery": { "min": 25000, "max": 100000 },
+  "Root Canal Treatment": { "min": 4000, "max": 12000 },
+  "Dental Implant": { "min": 25000, "max": 60000 },
+  "Hair Transplant": { "min": 50000, "max": 180000 },
+  "Dengue Treatment": { "min": 15000, "max": 80000 },
+  "Typhoid Treatment": { "min": 10000, "max": 50000 },
+  "Pneumonia Treatment": { "min": 25000, "max": 120000 },
+  "Tonsillectomy": { "min": 40000, "max": 90000 },
+  "Sinus Surgery": { "min": 70000, "max": 200000 },
+  "Thyroid Surgery": { "min": 80000, "max": 220000 },
+  "Hysterectomy": { "min": 80000, "max": 250000 },
+  "Knee Replacement": { "min": 250000, "max": 550000 },
+  "Hip Replacement": { "min": 280000, "max": 600000 },
+  "Varicose Vein Surgery": { "min": 60000, "max": 180000 },
+  "Hemorrhoid (Piles) Surgery": { "min": 40000, "max": 120000 },
+  "Chemotherapy (Per Cycle)": { "min": 20000, "max": 120000 },
+  "Pacemaker Implantation": { "min": 200000, "max": 600000 }
+};
+
+app.post('/api/check-bill', async (req: any, res: any) => {
+  try {
+    const { procedure, amount, cityTier } = req.body;
+
+    if (!procedure || !amount || !cityTier) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const benchmark = PROCEDURES_DATA[procedure as keyof typeof PROCEDURES_DATA];
+    if (!benchmark) {
+      return res.status(404).json({ error: "Procedure not found in database" });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `
+      You are a fierce, expert Medical Billing Advocate in India. 
+      Analyze this hospital bill quote to protect the patient from overcharging.
+      
+      Patient's Scenario:
+      - Procedure: ${procedure}
+      - Quoted Amount: ₹${amount}
+      - Location: ${cityTier}
+      
+      National Benchmark Database:
+      - Absolute Minimum: ₹${benchmark.min}
+      - Absolute Maximum: ₹${benchmark.max}
+
+      Analysis Rules:
+      1. Tier 3/Rural locations should be billed very close to the Minimum.
+      2. Tier 2 locations should be around the middle range.
+      3. Tier 1 (Metros) can be near the Maximum, but should not exceed it.
+      4. Do NOT give generic advice. Use specific healthcare billing terms.
+
+      Output EXACTLY in this JSON format without any markdown wrappers:
+      {
+        "verdict": "Fair Price" | "Slightly High" | "Severe Overcharge" | "Great Deal",
+        "color": "GREEN" | "YELLOW" | "RED" | "BLUE",
+        "explanation": "2-3 sentence nuanced explanation.",
+        "tips": ["Action step 1", "Action step 2", "Action step 3"]
+      }
+    `;
+
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+
+    // Bulletproof JSON extraction
+    const startIndex = responseText.indexOf('{');
+    const endIndex = responseText.lastIndexOf('}');
+    if (startIndex === -1 || endIndex === -1) {
+      throw new Error("Gemini response did not contain a valid JSON object.");
+    }
+
+    const cleanJsonString = responseText.substring(startIndex, endIndex + 1);
+    const aiData = JSON.parse(cleanJsonString);
+
+    return res.status(200).json(aiData);
+
+  } catch (error: any) {
+    console.error("Gemini API Error:", error);
+    return res.status(500).json({ 
+      error: "Failed to analyze bill", 
+      details: error.message || String(error) 
+    });
   }
 });
 
