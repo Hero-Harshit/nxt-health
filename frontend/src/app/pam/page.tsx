@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck, Search, Plus, MessageSquare, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { addHistoryLog } from '@/utils/history';
 
 const HEALTH_QUOTES = [
   { text: "The greatest wealth is health.", author: "Virgil" },
@@ -119,6 +120,7 @@ export default function PamInterface() {
 
       const updatedMessages = [...newMessages, { role: 'pam', content: pamReply }];
       setMessages(updatedMessages as any);
+      addHistoryLog('ai', 'Chatted with Pam');
 
       // --- REPLACE THE OLD LOCAL STORAGE LOGIC WITH THIS ---
       const existingHistory = JSON.parse(localStorage.getItem('pam_chat_history') || '[]');

@@ -1,19 +1,33 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, History, Activity, FileText, Search, CreditCard, Stethoscope } from 'lucide-react';
+import { ArrowLeft, History as HistoryIcon, Activity, FileText, Search, CreditCard, Stethoscope, AlertCircle } from 'lucide-react';
+import { getHistoryLogs, HistoryLog } from '@/utils/history'; // Adjust import path if needed
 
-// Dummy data to establish the UI layout (Replace with actual DB/localStorage fetch logic later)
-const historyLogs = [
-  { id: 1, type: 'planner', title: 'Updated Preventive Health Plan', date: 'Today, 10:30 AM', icon: Activity, color: 'text-green-600', bg: 'bg-green-100' },
-  { id: 2, type: 'search', title: 'Searched for "MRI Scan Cost"', date: 'Yesterday, 4:15 PM', icon: Search, color: 'text-blue-600', bg: 'bg-blue-100' },
-  { id: 3, type: 'payment', title: 'VisionPay Transaction - City Hospital', date: 'Oct 24, 2023', icon: CreditCard, color: 'text-indigo-600', bg: 'bg-indigo-100' },
-  { id: 4, type: 'ai', title: 'Chatted with Pam about Sleep Routines', date: 'Oct 22, 2023', icon: Stethoscope, color: 'text-purple-600', bg: 'bg-purple-100' },
-  { id: 5, type: 'vault', title: 'Uploaded Blood Test Report', date: 'Oct 20, 2023', icon: FileText, color: 'text-orange-600', bg: 'bg-orange-100' },
-];
+// Map categories to specific UI styles
+const categoryStyles = {
+  planner: { icon: Activity, color: 'text-green-600', bg: 'bg-green-100' },
+  search: { icon: Search, color: 'text-blue-600', bg: 'bg-blue-100' },
+  payment: { icon: CreditCard, color: 'text-indigo-600', bg: 'bg-indigo-100' },
+  ai: { icon: Stethoscope, color: 'text-purple-600', bg: 'bg-purple-100' },
+  vault: { icon: FileText, color: 'text-orange-600', bg: 'bg-orange-100' },
+  general: { icon: HistoryIcon, color: 'text-gray-600', bg: 'bg-gray-100' },
+};
 
 export default function HistoryPage() {
+  const [logs, setLogs] = useState<HistoryLog[]>([]);
+
+  useEffect(() => {
+    // Load logs on mount
+    setLogs(getHistoryLogs());
+
+    // Listen for updates across the app
+    const handleUpdate = () => setLogs(getHistoryLogs());
+    window.addEventListener('history_updated', handleUpdate);
+    return () => window.removeEventListener('history_updated', handleUpdate);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f8faff] p-4 sm:p-8 font-sans pb-24">
       <div className="max-w-3xl mx-auto">
@@ -35,35 +49,45 @@ export default function HistoryPage() {
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-6 duration-700">
           <div className="flex items-center gap-3 mb-8 pb-4 border-b border-gray-100">
             <div className="p-2.5 bg-blue-50 rounded-xl">
-              <History className="w-5 h-5 text-blue-600" />
+              <HistoryIcon className="w-5 h-5 text-blue-600" />
             </div>
             <h2 className="text-lg font-bold text-gray-800">Recent Activity</h2>
           </div>
 
-          {/* History List */}
-          <div className="space-y-6 relative before:absolute before:inset-0 before:ml-6 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-gray-100 before:via-gray-200 before:to-transparent">
-            {historyLogs.map((log) => {
-              const Icon = log.icon;
-              return (
-                <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  
-                  {/* Icon Marker */}
-                  <div className={`flex items-center justify-center w-12 h-12 rounded-full border-4 border-white ${log.bg} shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10 relative left-0 md:left-1/2 -ml-6 md:ml-0`}>
-                    <Icon className={`w-5 h-5 ${log.color}`} />
-                  </div>
-                  
-                  {/* Card */}
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-4 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-blue-100 transition-all">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-400 mb-1">{log.date}</span>
-                      <span className="text-sm font-bold text-gray-800 leading-snug">{log.title}</span>
+          {/* History List or Empty State */}
+          {logs.length > 0 ? (
+            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-6 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-gray-100 before:via-gray-200 before:to-transparent">
+              {logs.map((log) => {
+                const style = categoryStyles[log.type] || categoryStyles.general;
+                const Icon = style.icon;
+                
+                return (
+                  <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    
+                    {/* Icon Marker */}
+                    <div className={`flex items-center justify-center w-12 h-12 rounded-full border-4 border-white ${style.bg} shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10 relative left-0 md:left-1/2 -ml-6 md:ml-0`}>
+                      <Icon className={`w-5 h-5 ${style.color}`} />
                     </div>
-                  </div>
+                    
+                    {/* Card */}
+                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-4 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-blue-100 transition-all">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-gray-400 mb-1">{log.date}</span>
+                        <span className="text-sm font-bold text-gray-800 leading-snug">{log.title}</span>
+                      </div>
+                    </div>
 
-                </div>
-              )
-            })}
-          </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12 flex flex-col items-center">
+               <AlertCircle className="w-12 h-12 text-gray-300 mb-3" />
+               <p className="text-gray-500 font-bold">No history recorded yet.</p>
+               <p className="text-sm text-gray-400 mt-1">Interact with modules to see them here.</p>
+            </div>
+          )}
 
           {/* Privacy Note */}
           <div className="mt-10 pt-6 border-t border-gray-50 text-center">
@@ -72,7 +96,6 @@ export default function HistoryPage() {
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );
