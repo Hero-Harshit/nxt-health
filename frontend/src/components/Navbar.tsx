@@ -4,11 +4,26 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { ChevronDown, User, LogOut, Settings, Menu, X, LayoutGrid, Activity, Award, History } from "lucide-react";
+import { ChevronDown, User, LogOut, Settings, Menu, X, LayoutGrid, Activity, Award, History, HeartPulse } from "lucide-react";
 import EmergencyHelplines from "./EmergencyHelplines";
 import LocalHospitals from "./LocalHospitals";
 
+const TAGLINES = [
+  "A Complete Healthcare Ecosystem",
+  "AI-Powered Unified Healthcare",
+  "Your AI Health & Emergency Companion",
+  "Smarter Healthcare for Everyone",
+  "Accessible. Proactive. Intelligent."
+];
+
 export default function Navbar() {
+  const [tagline, setTagline] = useState<string>("");
+
+  useEffect(() => {
+    // Pick a random tagline on client mount
+    const randomIndex = Math.floor(Math.random() * TAGLINES.length);
+    setTagline(TAGLINES[randomIndex]);
+  }, []);
   const router = useRouter();
   const pathname = usePathname();
   const [session, setSession] = useState<any>(null);
@@ -61,39 +76,26 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           {/* Left Side: Brand Logo */}
           <div className="flex items-center">
-            <Link className="flex items-center gap-2.5 transition-opacity hover:opacity-90" href="/">
-              {/* Gradient Heart with EKG Line */}
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="nxtLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#38BDF8" />
-                    <stop offset="100%" stopColor="#2563EB" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  stroke="url(#nxtLogoGrad)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                />
-                <path
-                  d="M6 12h2.5l1.5-3 2.5 6 1.5-3h4"
-                  stroke="url(#nxtLogoGrad)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                />
-              </svg>
+            {/* Logo & Dynamic Brand Tagline Section */}
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-2 shrink-0 transition-opacity hover:opacity-90">
+                <div className="p-2 bg-blue-600 rounded-xl text-white shadow-md shadow-blue-500/20">
+                  <HeartPulse className="w-5 h-5" />
+                </div>
+                <span className="text-xl font-extrabold text-gray-900 tracking-tight font-sans">
+                  Nxt<span className="text-blue-600">Health</span>
+                </span>
+              </Link>
 
-              {/* Two-Tone Title: Nxt (Navy) + Health (Blue) */}
-              <span className="text-2xl font-extrabold tracking-tight font-sans">
-                <span className="text-[#0F2744]">Nxt</span>
-                <span className="text-[#2563EB]">Health</span>
-              </span>
-            </Link>
+              {/* Dynamic Desktop Tagline (Hidden on Mobile/Tablet) */}
+              {tagline && (
+                <div className="hidden md:flex items-center gap-2 pl-3 border-l border-gray-200 animate-in fade-in duration-500">
+                  <span className="text-xs font-semibold text-gray-500 tracking-wide uppercase">
+                    {tagline}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Side Controls */}
