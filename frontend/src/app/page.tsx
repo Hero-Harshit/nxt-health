@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint } from "lucide-react";
+import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint, ReceiptText } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -323,6 +323,25 @@ export default function HomePage() {
               </div>
               <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4">
                 Manage Passport <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Module: Hospital Bill Checker */}
+            <Link
+              href="/utilities/bill-checker"
+              className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
+            >
+              <div>
+                <div className="h-10 w-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                  <ReceiptText className="h-5.5 w-5.5" />
+                </div>
+                <h3 className="font-bold text-xl text-[#0F2744]">Hospital Bill Checker</h3>
+                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                  Analyze medical procedures against city-tier benchmarks using AI to instantly detect overcharging.
+                </p>
+              </div>
+              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4">
+                Launch Checker <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
