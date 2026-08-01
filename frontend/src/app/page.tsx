@@ -169,7 +169,7 @@ export default function HomePage() {
         {/* 6 Core Modules Grid (Quick Launch) */}
         <section className="space-y-4">
           <h2 className="text-lg font-bold text-[#0F2744]">Health Intelligence Modules</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 items-start md:items-stretch">
 
             {/* Premium Smart SOS Hero Module - Spanning all columns */}
             <Link
@@ -205,10 +205,10 @@ export default function HomePage() {
             {/* Module 1: Policy Advisor */}
             <Link
               href="/policy-advisor"
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 group cursor-pointer"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
                     <FileText className="w-5 h-5" />
                   </div>
@@ -216,23 +216,30 @@ export default function HomePage() {
                     COVERAGE CHECK
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744] mb-1.5 md:mb-2">Health Policy Advisor</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Evaluate health policies and explainable coverage constraints.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    Health Policy Advisor
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Evaluate health policies and explainable coverage constraints.
+                  </p>
+                </div>
               </div>
-              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4 md:mt-6">
-                Launch Advisor <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Launch Advisor</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </Link>
 
             {/* Module: VisionPay */}
             <Link
               href="/vision-pay"
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 group cursor-pointer"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
                     <Fingerprint className="w-5 h-5" />
                   </div>
@@ -240,23 +247,30 @@ export default function HomePage() {
                     BIOMETRIC SECURED
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744] mb-1.5 md:mb-2">VisionPay</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Scan hospital bills, auto-deduct insurance, and pay securely using device biometrics.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    VisionPay
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Scan hospital bills, auto-deduct insurance, and pay securely using device biometrics.
+                  </p>
+                </div>
               </div>
-              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4 md:mt-6">
-                Pay Securely <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Pay Securely</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </Link>
 
             {/* Module 2: Preventive Planner */}
             <Link
               href="/preventive-health"
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 group cursor-pointer"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
                     <Sparkles className="w-5 h-5" />
                   </div>
@@ -264,23 +278,30 @@ export default function HomePage() {
                     PROACTIVE
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744] mb-1.5 md:mb-2">Preventive Health Planner</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Get personalized screening guidelines and risk factors.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    Preventive Health Planner
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Get personalized screening guidelines and risk factors.
+                  </p>
+                </div>
               </div>
-              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4 md:mt-6">
-                Launch Planner <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Launch Planner</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </Link>
 
             {/* Module 3: Generic Medicines */}
             <Link
               href="/medicines"
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 group cursor-pointer"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
                     <Pill className="w-5 h-5" />
                   </div>
@@ -288,23 +309,30 @@ export default function HomePage() {
                     AFFORDABLE
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744] mb-1.5 md:mb-2">Generic Medicine Finder</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Compare medicine ingredients and discover brand cost savings.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    Generic Medicine Finder
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Compare medicine ingredients and discover brand cost savings.
+                  </p>
+                </div>
               </div>
-              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4 md:mt-6">
-                Launch Explorer <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Launch Explorer</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </Link>
 
             {/* Module 4: Prescription Explainer */}
             <Link
               href="/term-explainer"
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 group cursor-pointer"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
                     <Layers className="w-5 h-5" />
                   </div>
@@ -312,23 +340,30 @@ export default function HomePage() {
                     SIMPLIFIED
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744] mb-1.5 md:mb-2">Medical Term Explainer</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Translate medical terminologies and drug sheets into plain text.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    Medical Term Explainer
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Translate medical terminologies and drug sheets into plain text.
+                  </p>
+                </div>
               </div>
-              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4 md:mt-6">
-                Launch Explainer <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Launch Explainer</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </Link>
 
             {/* Module 5: Personal Health Passport */}
             <Link
               href="/health-passport"
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 group cursor-pointer"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
                     <ClipboardList className="w-5 h-5" />
                   </div>
@@ -336,23 +371,30 @@ export default function HomePage() {
                     PORTABLE
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744] mb-1.5 md:mb-2">Personal Health Passport</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  A portable health summary to share with doctors or first responders during visits or emergencies.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    Personal Health Passport
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    A portable health summary to share with doctors or first responders during visits or emergencies.
+                  </p>
+                </div>
               </div>
-              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4 md:mt-6">
-                Manage Passport <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Manage Passport</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </Link>
 
             {/* Module: Hospital Bill Checker */}
             <Link
               href="/utilities/bill-checker"
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 group cursor-pointer"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
                     <ReceiptText className="w-5 h-5" />
                   </div>
@@ -360,23 +402,30 @@ export default function HomePage() {
                     AUDIT TOOL
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744] mb-1.5 md:mb-2">Hospital Bill Checker</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Analyze medical procedures against city-tier benchmarks using AI to instantly detect overcharging.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    Hospital Bill Checker
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Analyze medical procedures against city-tier benchmarks using AI to instantly detect overcharging.
+                  </p>
+                </div>
               </div>
-              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4 md:mt-6">
-                Launch Checker <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Launch Checker</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </Link>
 
             {/* Module: Health Vault */}
             <Link
               href="/utilities/health-vault"
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 group cursor-pointer"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
                     <HardDrive className="w-5 h-5" />
                   </div>
@@ -384,13 +433,20 @@ export default function HomePage() {
                     CLOUD STORAGE
                   </span>
                 </div>
-                <h3 className="font-bold text-xl text-[#0F2744] mb-1.5 md:mb-2">Health Vault</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Securely store and manage medical records directly inside your private Google Drive.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    Health Vault
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Securely store and manage medical records directly inside your private Google Drive.
+                  </p>
+                </div>
               </div>
-              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4 md:mt-6">
-                Open Vault <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Open Vault</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </Link>
 
