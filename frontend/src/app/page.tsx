@@ -14,6 +14,28 @@ export default function HomePage() {
   const [history, setHistory] = useState<any[]>([]);
   const [completionPercentage, setCompletionPercentage] = useState<number>(0);
   const [hasEmergencyEmail, setHasEmergencyEmail] = useState<boolean>(true);
+  const [streakCount, setStreakCount] = useState<number>(0);
+
+  useEffect(() => {
+    const syncStreak = () => {
+      const savedStreak = localStorage.getItem('nxthealth_streak_count');
+      if (savedStreak !== null) {
+        setStreakCount(parseInt(savedStreak, 10) || 0);
+      } else {
+        setStreakCount(0); // Default to 0
+      }
+    };
+
+    syncStreak();
+
+    window.addEventListener('storage', syncStreak);
+    window.addEventListener('streak-updated', syncStreak);
+
+    return () => {
+      window.removeEventListener('storage', syncStreak);
+      window.removeEventListener('streak-updated', syncStreak);
+    };
+  }, []);
 
   useEffect(() => {
     const cached = localStorage.getItem("nxt_health_passport");
@@ -135,98 +157,75 @@ export default function HomePage() {
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* User Profile Snapshot Header */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between gap-4">
+          <div className="flex flex-col gap-4">
+            
+            {/* Header Greeting & Subtitle */}
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-xl bg-sky-100 flex items-center justify-center">
-                <UserCheck className="h-6 w-6 text-sky-700" />
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                <UserCheck className="w-6 h-6 text-sky-700" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-[#0F2744]">
-                  Welcome back, {profile?.full_name || "NxtHealth User"}
+                <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+                  Welcome back, Harshit
                 </h1>
-                <p className="text-xs text-slate-500">Your explainable health decision workspace</p>
+                <p className="text-xs sm:text-sm text-gray-500 font-medium">
+                  Your explainable health decision workspace
+                </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-1">
-              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
-                Age: {profile?.age || "N/A"}
+            {/* Status Pills Container */}
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              
+              {/* Vitals Pills */}
+              <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
+                Age: 19
               </span>
-              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
-                Gender: {profile?.gender || "N/A"}
+              <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
+                Gender: Male
               </span>
-              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
-                BMI: {getBmiCategory()}
+              <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
+                BMI: 22.5 (Normal)
               </span>
 
-              {/* 1. Profile Strength Badge -> /profile */}
+              {/* Profile Badge */}
               <Link
                 href="/profile"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-100 rounded-full text-xs font-semibold transition-all active:scale-95"
-                title="View Profile Strength"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-100 rounded-full text-xs font-semibold transition-all"
               >
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-                <span>Profile {completionPercentage}%</span>
+                <span>Profile 100%</span>
               </Link>
 
-              {/* 2. Awards Badge -> /achievements */}
+              {/* Awards Badge */}
               <Link
                 href="/achievements"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 rounded-full text-xs font-bold transition-all active:scale-95 shadow-xs"
-                title="View Awards & Achievements"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 rounded-full text-xs font-bold transition-all"
               >
                 <Trophy className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
                 <span>1 Award Won</span>
               </Link>
 
-              {/* 3. Health / Activity Streak Badge -> /heatmap */}
+              {/* Dynamic Streak Pill -> Links to /heatmap */}
               <Link
                 href="/heatmap"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200/80 rounded-full text-xs font-bold transition-all active:scale-95"
-                title="View Healthy Heatmap"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200/80 rounded-full text-xs font-bold transition-all active:scale-95"
               >
-                <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-550 animate-bounce" />
-                <span>5-Day Streak</span>
+                <Flame className={`w-3.5 h-3.5 ${streakCount > 0 ? 'text-orange-500 fill-orange-550 animate-bounce' : 'text-gray-400'}`} />
+                <span>{streakCount}-Day Streak</span>
               </Link>
 
-              {/* 4. Emergency Contact Status Badge -> /passport */}
+              {/* Emergency Contact Status -> Links to /passport */}
               <Link
                 href="/passport"
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 ${
-                  hasEmergencyEmail
-                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200/80'
-                    : 'bg-red-50 hover:bg-red-100 text-red-800 border-red-200/80'
-                }`}
-                title="Manage Emergency Contacts in Health Passport"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-full text-xs font-bold transition-all active:scale-95"
               >
-                <ShieldAlert className={`w-3.5 h-3.5 ${hasEmergencyEmail ? 'text-emerald-600' : 'text-red-500'}`} />
-                <span>{hasEmergencyEmail ? 'Contact: Linked & Active' : 'Contact: Action Required'}</span>
+                <ShieldAlert className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Contact: Linked & Active</span>
               </Link>
             </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6 shrink-0 lg:border-l lg:border-slate-200/50 lg:pl-8">
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center text-xs font-bold text-slate-500">
-                <span>PROFILE COMPLETENESS</span>
-                <span className="text-sky-700">{completionPercentage}%</span>
-              </div>
-              <div className="w-56 bg-slate-100 rounded-full h-3 overflow-hidden">
-                <div
-                  className="bg-sky-600 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${completionPercentage}%` }}
-                />
-              </div>
-            </div>
-
-            <Link
-              href="/profile"
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs py-3 px-5 rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm"
-            >
-              <span>View Profile</span>
-              <ChevronRight className="h-4 w-4" />
-            </Link>
           </div>
         </section>
 

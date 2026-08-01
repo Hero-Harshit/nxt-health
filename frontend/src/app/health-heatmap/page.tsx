@@ -181,6 +181,7 @@ export default function HealthHeatmapTracker() {
   const [checkedTasks, setCheckedTasks] = useState<boolean[]>(Array(10).fill(false));
   const [heatmapHistory, setHeatmapHistory] = useState<Record<string, number>>({});
   const [hoveredCell, setHoveredCell] = useState<{ date: string; count: number; x: number; y: number } | null>(null);
+  const [streak, setStreak] = useState<number>(0);
 
   useEffect(() => {
     setTodayKey(getTodayKey());
@@ -240,7 +241,8 @@ export default function HealthHeatmapTracker() {
 
   const toggleTask = (index: number) => {
     const updated = [...checkedTasks];
-    updated[index] = !updated[index];
+    const isNowChecked = !updated[index];
+    updated[index] = isNowChecked;
     setCheckedTasks(updated);
     const completedCount = updated.filter(Boolean).length;
     const TASKS_STORAGE_KEY = `health_tasks_checked_${todayKey}`;
@@ -249,6 +251,13 @@ export default function HealthHeatmapTracker() {
     const updatedHistory = { ...heatmapHistory, [todayKey]: completedCount };
     setHeatmapHistory(updatedHistory);
     localStorage.setItem(HEATMAP_STORAGE_KEY, JSON.stringify(updatedHistory));
+
+    if (isNowChecked) {
+      const newStreak = Math.max(1, streak + 1);
+      setStreak(newStreak);
+      localStorage.setItem('nxthealth_streak_count', newStreak.toString());
+      window.dispatchEvent(new Event('streak-updated'));
+    }
   };
 
   if (!isMounted) return null;
@@ -258,7 +267,7 @@ export default function HealthHeatmapTracker() {
 
   // Safely calculate the current streak of consecutive days with at least 1 task done
   const currentStreak = useMemo(() => {
-    let streak = 0;
+    let streakVal = 0;
     const date = new Date();
     let dateStr = date.toISOString().split('T')[0];
 
@@ -270,12 +279,21 @@ export default function HealthHeatmapTracker() {
 
     // Count backwards sequentially
     while (heatmapHistory[dateStr] && heatmapHistory[dateStr] > 0) {
-      streak++;
+      streakVal++;
       date.setDate(date.getDate() - 1);
       dateStr = date.toISOString().split('T')[0];
     }
-    return streak;
+    return streakVal;
   }, [heatmapHistory]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('nxthealth_streak_count');
+    if (saved) {
+      setStreak(parseInt(saved, 10) || 0);
+    } else {
+      setStreak(currentStreak);
+    }
+  }, [currentStreak]);
 
   return (
     <main className="min-h-screen bg-gray-50/50 px-4 sm:px-6 py-8">
@@ -298,7 +316,7 @@ export default function HealthHeatmapTracker() {
             {/* New Streak Card */}
             <div className="bg-orange-50/80 px-5 py-2.5 rounded-2xl border border-orange-100 text-center min-w-[90px] shadow-sm">
               <span className="block text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-0.5">Streak</span>
-              <span className="text-base font-bold text-orange-700">{currentStreak} 🔥</span>
+              <span className="text-base font-bold text-orange-700">{streak} 🔥</span>
             </div>
             
             <div className="bg-blue-50/80 px-5 py-2.5 rounded-2xl border border-blue-100 text-center min-w-[90px] shadow-sm">
