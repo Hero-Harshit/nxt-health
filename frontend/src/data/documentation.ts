@@ -1,4 +1,4 @@
-import { MessageSquare, ShieldAlert } from 'lucide-react';
+import { MessageSquare, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 export type DocSection = {
   heading: string;
@@ -76,6 +76,38 @@ export const moduleDocs: DocModule[] = [
       {
         heading: 'Accidental Triggers',
         body: 'We understand that panic buttons can sometimes be pressed by mistake. If you accidentally trigger an SOS, the system provides a brief window where you can cancel the alert before it is dispatched, preventing unnecessary notifications to your emergency contacts.'
+      }
+    ]
+  },
+  {
+    id: 'policy-advisor',
+    title: 'Health Policy Advisor',
+    description: 'Understand your health insurance options, compare policies, and navigate coverage details with AI-powered guidance.',
+    icon: ShieldCheck,
+    color: 'text-teal-600',
+    bg: 'bg-teal-50',
+    border: 'hover:border-teal-200',
+    content: [
+      {
+        heading: 'What is the Health Policy Advisor?',
+        body: 'The Health Policy Advisor is your personal guide to navigating the complex world of health insurance. It helps you understand policy options, translates confusing insurance jargon into simple language, and provides personalized guidance based on your specific healthcare needs.'
+      },
+      {
+        heading: 'Finding the Right Policy',
+        body: 'Choosing the right insurance can be overwhelming. The Advisor simplifies this by analyzing factors such as your age, family needs, and expected medical expenses to recommend suitable policy features. It allows you to:',
+        list: [
+          'Compare different health plans based on premiums, coverage limits, hidden benefits, and limitations.',
+          'Evaluate critical factors like hospitalization coverage, network hospitals, and claim benefits.',
+          'Receive personalized guidance on how much insurance coverage you should realistically consider.'
+        ]
+      },
+      {
+        heading: 'Understanding Your Existing Plan',
+        body: 'If you already have a health insurance policy, the Advisor helps you make the most of it.',
+        list: [
+          'Policy Demystification: Explains your current policy terms, coverage details, and hidden benefits in clear, simple language.',
+          'Treatment Coverage Check: Helps you review whether a specific medical treatment or procedure might be covered under your policy (Note: Final approval always depends on your insurance provider).'
+        ]
       }
     ]
   }
