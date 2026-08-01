@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { PamBlob } from "@/components/PamBlob";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className="min-h-full bg-slate-50">
         <Navbar />
         <main>{children}</main>
+        <PamBlob />
       </body>
     </html>
   );
