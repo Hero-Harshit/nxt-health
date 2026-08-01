@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
-import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck, Search, Plus, MessageSquare } from 'lucide-react';
+import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck, Search, Plus, MessageSquare, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 
 const HEALTH_QUOTES = [
   { text: "The greatest wealth is health.", author: "Virgil" },
@@ -23,6 +23,8 @@ export default function PamInterface() {
   const [messages, setMessages] = useState<{role: 'user' | 'pam', content: string}[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [currentChatId, setCurrentChatId] = useState<number | null>(null);
+  const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
 
   useEffect(() => {
     // Randomize quote on load
@@ -59,6 +61,41 @@ export default function PamInterface() {
     setIsMounted(true);
   }, []);
 
+  const startNewChat = () => {
+    setMessages([]);
+    setCurrentChatId(null);
+    setIsDrawerOpen(false);
+  };
+
+  const loadChat = (chat: any) => {
+    setMessages(chat.messages || []);
+    setCurrentChatId(chat.id);
+    setIsDrawerOpen(false);
+  };
+
+  const deleteChat = (id: number) => {
+    const updatedHistory = chatHistory.filter((c: any) => c.id !== id);
+    setChatHistory(updatedHistory);
+    localStorage.setItem('pam_chat_history', JSON.stringify(updatedHistory));
+    if (currentChatId === id) {
+      setMessages([]);
+      setCurrentChatId(null);
+    }
+    setActiveMenuId(null);
+  };
+
+  const editChatTitle = (id: number, oldTitle: string) => {
+    const newTitle = prompt("Edit conversation title:", oldTitle);
+    if (newTitle && newTitle.trim() !== "") {
+      const updatedHistory = chatHistory.map((c: any) => 
+        c.id === id ? { ...c, title: newTitle.trim() } : c
+      );
+      setChatHistory(updatedHistory);
+      localStorage.setItem('pam_chat_history', JSON.stringify(updatedHistory));
+    }
+    setActiveMenuId(null);
+  };
+
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
@@ -83,15 +120,32 @@ export default function PamInterface() {
       const updatedMessages = [...newMessages, { role: 'pam', content: pamReply }];
       setMessages(updatedMessages as any);
 
-      // Save to local storage for the slide-out drawer history
+      // --- REPLACE THE OLD LOCAL STORAGE LOGIC WITH THIS ---
       const existingHistory = JSON.parse(localStorage.getItem('pam_chat_history') || '[]');
-      const newHistoryItem = {
-        id: Date.now(),
-        title: userText.substring(0, 30) + (userText.length > 30 ? '...' : ''),
-        date: 'Just now'
-      };
-      localStorage.setItem('pam_chat_history', JSON.stringify([newHistoryItem, ...existingHistory]));
-      setChatHistory([newHistoryItem, ...existingHistory]);
+      const chatIdToUse = currentChatId || Date.now();
+      if (!currentChatId) setCurrentChatId(chatIdToUse);
+
+      const existingChatIndex = existingHistory.findIndex((c: any) => c.id === chatIdToUse);
+      
+      let newHistory;
+      if (existingChatIndex >= 0) {
+        // Update existing session
+        existingHistory[existingChatIndex].messages = updatedMessages;
+        newHistory = [...existingHistory];
+      } else {
+        // Create new session
+        const newHistoryItem = {
+          id: chatIdToUse,
+          title: userText.substring(0, 30) + (userText.length > 30 ? '...' : ''),
+          date: 'Just now',
+          messages: updatedMessages
+        };
+        newHistory = [newHistoryItem, ...existingHistory];
+      }
+      
+      localStorage.setItem('pam_chat_history', JSON.stringify(newHistory));
+      setChatHistory(newHistory);
+      // -----------------------------------------------------
 
     } catch (error) {
       console.error("Pam API Error:", error);
@@ -131,7 +185,7 @@ export default function PamInterface() {
             <button className="p-2.5 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors shadow-sm text-gray-700 flex items-center justify-center">
               <Search className="w-4 h-4" />
             </button>
-            <button className="p-2.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md hover:shadow-lg transition-all flex items-center justify-center">
+            <button onClick={startNewChat} className="p-2.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md hover:shadow-lg transition-all flex items-center justify-center">
               <Plus className="w-4 h-4" />
             </button>
           </div>
@@ -164,19 +218,55 @@ export default function PamInterface() {
               
               <div className="space-y-3">
                 {chatHistory.map((chat: any) => (
-                  <button key={chat.id} className="w-full bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex items-center justify-between group text-left">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="p-2.5 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors shrink-0">
-                        <MessageSquare className="w-4 h-4 text-blue-600" />
+                  <div key={chat.id} className="relative group">
+                    <button 
+                      onClick={() => loadChat(chat)} 
+                      className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between text-left ${currentChatId === chat.id ? 'bg-blue-50/50 border-blue-200 shadow-sm' : 'bg-white border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200'}`}
+                    >
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <div className={`p-2.5 rounded-xl transition-colors shrink-0 ${currentChatId === chat.id ? 'bg-blue-100' : 'bg-blue-50 group-hover:bg-blue-100'}`}>
+                          <MessageSquare className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div className="flex flex-col overflow-hidden">
+                          <span className={`text-sm font-bold truncate transition-colors ${currentChatId === chat.id ? 'text-blue-700' : 'text-gray-700 group-hover:text-blue-700'}`}>
+                            {chat.title}
+                          </span>
+                          <span className="text-[10px] text-gray-400 font-semibold">{chat.date}</span>
+                        </div>
                       </div>
-                      <span className="text-sm font-bold text-gray-700 truncate group-hover:text-blue-700 transition-colors">
-                        {chat.title}
-                      </span>
-                    </div>
-                    <span className="text-[11px] text-gray-400 font-semibold shrink-0 ml-3">
-                        {chat.date || 'Just now'}
-                    </span>
-                  </button>
+                    </button>
+
+                    {/* Three Dot Menu Button */}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveMenuId(activeMenuId === chat.id ? null : chat.id);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {activeMenuId === chat.id && (
+                      <div 
+                        className="absolute right-8 top-1/2 -translate-y-1/2 w-32 bg-white border border-gray-100 shadow-xl rounded-xl z-[110] py-1 overflow-hidden"
+                      >
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); editChatTitle(chat.id, chat.title); }} 
+                          className="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 text-gray-400" /> Edit Title
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }} 
+                          className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-red-400" /> Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
               
