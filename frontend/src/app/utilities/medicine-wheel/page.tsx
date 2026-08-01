@@ -199,7 +199,7 @@ export default function MedicineWheelPage() {
   );
 
   return (
-    <main className="min-h-screen bg-white px-6 py-8 max-w-6xl mx-auto">
+    <main className="min-h-screen bg-white px-4 sm:px-8 py-8 w-full max-w-full overflow-x-hidden mx-auto">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-400 mb-4">
         Home <span className="mx-1.5">/</span> Utilities{' '}
@@ -221,20 +221,13 @@ export default function MedicineWheelPage() {
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-6">
         {/* LEFT: Wheel card */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
-          <div className="flex items-center justify-between mb-2">
+        <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-sm border border-gray-100 w-full max-w-2xl mx-auto overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2
-                className="text-xl font-bold text-gray-900"
-                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-              >
-                Today's Schedule
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Tap any quadrant to view and check off medicines
-              </p>
+              <h3 className="text-lg font-bold text-gray-800">Today's Schedule</h3>
+              <p className="text-xs text-gray-500 font-medium">Tap any quadrant to view and check off medicines</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={() => setIsEditing(!isEditing)}
@@ -251,13 +244,15 @@ export default function MedicineWheelPage() {
             </div>
           </div>
 
-          <Wheel
-            day={day}
-            activeSlot={activeSlot}
-            progressPercent={progressPercent}
-            streakCount={streak.count}
-            onSelectSlot={(key) => setActiveSlot(activeSlot === key ? null : key)}
-          />
+          <div className="w-full max-w-[280px] sm:max-w-[340px] mx-auto overflow-hidden flex justify-center scale-90 sm:scale-100 origin-center">
+            <Wheel
+              day={day}
+              activeSlot={activeSlot}
+              progressPercent={progressPercent}
+              streakCount={streak.count}
+              onSelectSlot={(key) => setActiveSlot(activeSlot === key ? null : key)}
+            />
+          </div>
 
           {activeSlot && (
             <SlotDetail
