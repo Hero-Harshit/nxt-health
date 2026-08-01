@@ -71,17 +71,15 @@ export function PamBlob() {
       style={{ 
         left: pos.x, 
         top: pos.y, 
-        touchAction: 'none' // Prevents scrolling while dragging on mobile
+        touchAction: 'none' 
       }}
-      className={`fixed z-[9999] flex items-center justify-center w-16 h-16 rounded-full cursor-grab active:cursor-grabbing shadow-2xl shadow-blue-500/40 border-2 border-white/70 bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 text-white transition-transform select-none ${
-        isDragging ? 'scale-110' : 'hover:scale-105'
-      }`}
+      className={`fixed z-[9999] flex items-center justify-center w-[64px] h-[64px] rounded-full cursor-grab active:cursor-grabbing transition-transform select-none
+        border-[1px] border-black/20 
+        bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-300 via-blue-500 to-blue-700
+        shadow-[0_8px_16px_-4px_rgba(37,99,235,0.4),inset_0_-4px_8px_rgba(0,0,0,0.2),inset_0_2px_4px_rgba(255,255,255,0.4)]
+        ${isDragging ? 'scale-110' : 'hover:scale-105'}`}
     >
-      {/* Subtle breathing effect layer */}
-      <div className="absolute inset-0 rounded-full animate-pulse opacity-40 bg-white/20 pointer-events-none" />
-      
-      {/* Text */}
-      <span className="relative z-10 text-[15px] font-black tracking-[0.2em] drop-shadow-md ml-[2px]">
+      <span className="text-white text-[11px] font-black tracking-[0.15em] drop-shadow-sm select-none pointer-events-none mt-[1px] ml-[2px]">
         PAM
       </span>
     </div>
