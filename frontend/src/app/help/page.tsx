@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, HelpCircle, X, MessageSquare, ChevronDown, ChevronRight, BookOpen } from 'lucide-react';
+import { Search, HelpCircle, X, MessageSquare, ChevronDown, ChevronRight, BookOpen, Mail } from 'lucide-react';
 import { faqData } from '@/data/faqs';
 import { moduleDocs, DocModule } from '@/data/documentation';
 
@@ -92,6 +92,30 @@ export default function HelpPage() {
                 </button>
               )
             })}
+          </div>
+        </div>
+
+        {/* 3. Support & Direct Contact Section */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 mt-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-purple-50 rounded-lg">
+              <Mail className="w-5 h-5 text-purple-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Support & Direct Contact</h2>
+          </div>
+          <div className="bg-gradient-to-br from-purple-50/50 to-indigo-50/30 border border-purple-100/60 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-bold text-gray-800 text-base mb-1">Still need help?</h3>
+              <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                If you encounter any issues or have questions not covered in our documentation, feel free to reach out directly to our team.
+              </p>
+            </div>
+            <a 
+              href="mailto:heroharshitlaptop@gmail.com"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md shadow-purple-500/20 hover:shadow-lg transition-all flex items-center gap-2 shrink-0"
+            >
+              <Mail className="w-4 h-4" /> Email Support
+            </a>
           </div>
         </div>
 
