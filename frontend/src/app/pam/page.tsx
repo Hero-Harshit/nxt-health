@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck } from 'lucide-react';
+import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck, Search, Plus, Moon, Pill } from 'lucide-react';
 
 const HEALTH_QUOTES = [
   { text: "The greatest wealth is health.", author: "Virgil" },
@@ -12,11 +12,19 @@ const HEALTH_QUOTES = [
   { text: "Physical fitness is the first requisite of happiness.", author: "Joseph Pilates" }
 ];
 
+const MOCK_HISTORY = [
+  { id: 1, title: 'CBC Blood Report Analysis', date: 'Tue', icon: FileText },
+  { id: 2, title: 'My Longevity Action Plan', date: 'Mon', icon: Activity },
+  { id: 3, title: 'Why is my sleep score low?', date: 'Last Week', icon: Moon },
+  { id: 4, title: 'Medicine schedule reminder setup', date: 'Last Week', icon: Pill },
+];
+
 export default function PamInterface() {
   const router = useRouter();
   const [userName, setUserName] = useState("Hero");
   const [quote, setQuote] = useState(HEALTH_QUOTES[0]);
   const [isMounted, setIsMounted] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     // Randomize quote on load
@@ -47,9 +55,82 @@ export default function PamInterface() {
 
   return (
     <div className="min-h-screen bg-[#f8faff] flex flex-col font-sans selection:bg-blue-100">
+      {/* DRAWER OVERLAY (Closes drawer on click outside) */}
+      {isDrawerOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[100] transition-opacity" 
+          onClick={() => setIsDrawerOpen(false)} 
+        />
+      )}
+
+      {/* SLIDE-OUT DRAWER */}
+      <div className={`fixed inset-y-0 left-0 w-full sm:w-[340px] bg-[#f8faff] z-[101] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        
+        {/* Drawer Header */}
+        <div className="p-4 sm:p-6 flex items-center justify-between border-b border-gray-100/50">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsDrawerOpen(false)} 
+              className="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm text-gray-700"
+            >
+              <Sidebar className="w-5 h-5" />
+            </button>
+            <span className="font-extrabold text-gray-900 text-lg">Conversations</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="p-2.5 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors shadow-sm text-gray-700 flex items-center justify-center">
+              <Search className="w-4 h-4" />
+            </button>
+            <button className="p-2.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md hover:shadow-lg transition-all flex items-center justify-center">
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Drawer History List */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
+              Last 7 Days
+            </p>
+            <span className="bg-gray-200/80 text-gray-500 px-1.5 py-0.5 rounded text-[10px] font-bold">
+              {MOCK_HISTORY.length}
+            </span>
+          </div>
+          
+          <div className="space-y-3">
+            {MOCK_HISTORY.map((chat) => {
+              const Icon = chat.icon;
+              return (
+                <button key={chat.id} className="w-full bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex items-center justify-between group text-left">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="p-2.5 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors shrink-0">
+                      <Icon className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-700 truncate group-hover:text-blue-700 transition-colors">
+                      {chat.title}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-gray-400 font-semibold shrink-0 ml-3">
+                    {chat.date}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-xs font-semibold text-gray-400">That's all your conversations</p>
+          </div>
+        </div>
+      </div>
+
       {/* TOP NAVIGATION BAR */}
       <header className="flex items-center justify-between p-4 sm:p-6">
-        <button className="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm text-gray-700">
+        <button 
+          onClick={() => setIsDrawerOpen(true)}
+          className="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm text-gray-700"
+        >
           <Sidebar className="w-5 h-5" />
         </button>
         <h1 className="text-sm font-bold text-gray-900 tracking-wide">Pam</h1>
