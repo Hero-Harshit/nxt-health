@@ -305,6 +305,50 @@ export default function BillCheckerPage() {
 
             {result && !isLoading && (
               <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
+                
+                {/* TAILWIND SPECTRUM METER */}
+                {(() => {
+                  // Calculate position percentage safely
+                  const benchmark = PROCEDURES_DATA[selectedProcedure];
+                  const minPrice = benchmark?.min || 0;
+                  const maxPrice = benchmark?.max || 100;
+                  const currentPrice = Number(amount) || 0;
+                  
+                  let position = ((currentPrice - minPrice) / (maxPrice - minPrice)) * 100;
+                  // Clamp between 0% (far left) and 100% (far right)
+                  position = Math.max(0, Math.min(100, position));
+
+                  return (
+                    <div className="bg-white border border-gray-100 shadow-sm p-5 rounded-2xl">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-5 text-center">
+                        Price Spectrum Analysis
+                      </h4>
+                      
+                      <div className="relative pt-6 pb-2">
+                        {/* Floating Pointer */}
+                        <div 
+                          className="absolute top-0 -ml-6 flex flex-col items-center transition-all duration-1000 ease-out z-10 w-12"
+                          style={{ left: `${position}%` }}
+                        >
+                          <div className="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md whitespace-nowrap">
+                            ₹{currentPrice.toLocaleString()}
+                          </div>
+                          <div className="w-2 h-2 bg-gray-900 rotate-45 -mt-1" />
+                        </div>
+
+                        {/* Gradient Bar */}
+                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-300 to-red-500 overflow-hidden" />
+                      </div>
+
+                      {/* Min/Max Labels */}
+                      <div className="flex justify-between text-[11px] font-bold text-gray-400 mt-2">
+                        <span>Min: ₹{minPrice.toLocaleString()}</span>
+                        <span>Max: ₹{maxPrice.toLocaleString()}+</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Status Badge */}
                 <div className={`p-4 rounded-xl border flex items-start gap-4 ${
                   result.color === 'RED' ? 'bg-red-50 border-red-200 text-red-900' :
