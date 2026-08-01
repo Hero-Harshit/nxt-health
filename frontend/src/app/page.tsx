@@ -309,7 +309,7 @@ export default function HomePage() {
                     <Layers className="w-5 h-5" />
                   </div>
                   <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-sky-50/80 text-sky-700 border-sky-100">
-                    PLAIN TEXT
+                    SIMPLIFIED
                   </span>
                 </div>
                 <h3 className="font-bold text-xl text-[#0F2744]">Medical Term Explainer</h3>
