@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, History as HistoryIcon, Activity, FileText, Search, CreditCard, Stethoscope, AlertCircle } from 'lucide-react';
+import { ArrowLeft, History as HistoryIcon, Activity, FileText, Search, CreditCard, Stethoscope, AlertCircle, Receipt } from 'lucide-react';
 import { getHistoryLogs, HistoryLog } from '@/utils/history'; // Adjust import path if needed
 
 // Map categories to specific UI styles
@@ -13,6 +13,7 @@ const categoryStyles: Record<string, { icon: any; color: string; bg: string }> =
   ai: { icon: Stethoscope, color: 'text-purple-600', bg: 'bg-purple-100' },
   vault: { icon: FileText, color: 'text-orange-600', bg: 'bg-orange-100' },
   explainer: { icon: FileText, color: 'text-teal-600', bg: 'bg-teal-100' },
+  'bill-checker': { icon: Receipt, color: 'text-amber-600', bg: 'bg-amber-100' },
   general: { icon: HistoryIcon, color: 'text-gray-600', bg: 'bg-gray-100' },
 };
 

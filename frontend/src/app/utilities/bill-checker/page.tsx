@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { addHistoryLog } from '@/utils/history';
 import { Search, IndianRupee, MapPin, ShieldCheck, Activity, ReceiptText, ChevronDown, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
 
 // --- DESIGN TOKENS ---
@@ -94,6 +95,17 @@ export default function BillCheckerPage() {
     setIsLoading(true);
     setResult(null);
     setErrorMsg(null); // Clear previous errors
+
+    const procedureName = selectedProcedure || 'Medical Procedure';
+    const amountFormatted = amount ? `₹${amount}` : 'N/A';
+    const location = cityTier || 'Standard Region';
+    const billSummary = `Hospital Bill Analysis - Procedure: ${procedureName} | Quoted: ${amountFormatted} | Location: ${location}`;
+
+    try {
+      addHistoryLog('bill-checker', billSummary);
+    } catch (err) {
+      console.error('History log failed silently:', err);
+    }
     
     const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
 
