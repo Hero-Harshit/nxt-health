@@ -294,10 +294,46 @@ export default function HealthVault() {
                   <p>Loading documents from Google Drive...</p>
                 </div>
               ) : documents.length === 0 ? (
-                <div className="py-12 text-center text-xs text-gray-400 space-y-1">
-                  <File className="w-8 h-8 mx-auto text-gray-300" />
-                  <p className="font-semibold text-gray-600 text-sm">No health records yet</p>
-                  <p>Upload prescriptions, lab reports, or scans to store them securely.</p>
+                <div className="relative border border-gray-100 rounded-2xl overflow-hidden bg-white">
+                  {/* Fake Table Header */}
+                  <div className="flex justify-between items-center px-5 py-3 bg-gray-50/80 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <span>Document Details</span>
+                    <span>Actions</span>
+                  </div>
+                  
+                  {/* Skeleton Placeholder Rows */}
+                  <div className="opacity-30 pointer-events-none select-none">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="py-4 flex items-center justify-between gap-4 px-5 border-b border-gray-50 last:border-0">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gray-200 animate-pulse" />
+                          <div className="space-y-2.5">
+                            <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-2 w-20 bg-gray-200 rounded animate-pulse" />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-gray-200 animate-pulse" />
+                          <div className="w-8 h-8 rounded-lg bg-gray-200 animate-pulse" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Glass Overlay Message */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
+                    <div className="bg-white p-5 rounded-2xl shadow-lg border border-gray-100 text-center max-w-sm mx-4 transform transition-all">
+                      <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <FileText className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 mb-1">
+                        You haven't uploaded any documents
+                      </p>
+                      <p className="text-xs text-gray-500 leading-relaxed font-medium">
+                        Upload the documents and get the detailed analysis here.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-100">
