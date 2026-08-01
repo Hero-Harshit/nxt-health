@@ -20,7 +20,17 @@ export function PamBlob() {
       y: window.innerHeight - 120 
     });
     setIsMounted(true);
-  }, []);
+
+    const handleOpenPam = (event: CustomEvent<{ message?: string }>) => {
+      if (event.detail?.message) {
+        localStorage.setItem('pam_initial_message', event.detail.message);
+      }
+      router.push('/pam');
+    };
+
+    window.addEventListener('open-pam' as any, handleOpenPam);
+    return () => window.removeEventListener('open-pam' as any, handleOpenPam);
+  }, [router]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     dragInfo.current = {

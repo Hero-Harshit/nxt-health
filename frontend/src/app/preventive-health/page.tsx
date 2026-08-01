@@ -3,6 +3,7 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import { addHistoryLog } from '@/utils/history';
 import ShareMenu from "@/components/ShareMenu";
+import PamNudge from "@/components/PamNudge";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartPulse, Sparkles, RefreshCw, AlertCircle, ShieldCheck, ArrowRight, UserCheck, CheckCircle2 } from "lucide-react";
@@ -352,13 +353,17 @@ export default function PreventiveHealthPage() {
                 <div className="rounded-2xl bg-sky-50 text-sky-800 p-5 border border-sky-100 flex gap-3 shadow-sm">
                   <ShieldCheck className="h-5.5 w-5.5 shrink-0 mt-0.5 text-sky-700" />
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider">Health Information Posture Notice</h4>
-                    <p className="text-xs mt-1 leading-relaxed text-sky-700">
-                      This plan represents personalized preventive advice and is strictly non-diagnostic. You must consult with a qualified medical physician to establish diagnostic screenings, clinical treatments, or drug switch paths.
+                    <h4 className="text-sm font-bold text-sky-950">Disclaimer & Guidance Advice</h4>
+                    <p className="text-xs text-sky-800 leading-relaxed mt-1 font-medium">
+                      NxtHealth provides supportive decision guidance based on reference clinical models. This information is non-diagnostic. Please consult a doctor for official treatment instructions.
                     </p>
                   </div>
                 </div>
 
+                <PamNudge 
+                  text="Want to customize this wellness plan to your diet?" 
+                  suggestedPrompt="Can you help adapt this preventive plan to a vegetarian diet with minimal equipment?" 
+                />
               </div>
             )}
           </div>

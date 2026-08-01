@@ -3,6 +3,7 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import { addHistoryLog } from '@/utils/history';
 import ShareMenu from "@/components/ShareMenu";
+import PamNudge from "@/components/PamNudge";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartPulse, Sparkles, RefreshCw, AlertCircle, HelpCircle } from "lucide-react";
@@ -241,7 +242,6 @@ export default function ExplainerPage() {
               )}
             </div>
 
-            {/* Confidence info */}
             {result.confidence_note && (
               <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/50 flex justify-between items-center gap-4">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
@@ -252,6 +252,11 @@ export default function ExplainerPage() {
                 </span>
               </div>
             )}
+
+            <PamNudge 
+              text="Have follow-up questions about this medical condition?" 
+              suggestedPrompt="What are the standard next diagnostic steps or questions I should ask my doctor regarding this result?" 
+            />
           </div>
         )}
 

@@ -3,6 +3,7 @@
 import React, { useState, FormEvent } from "react";
 import { addHistoryLog } from '@/utils/history';
 import ShareMenu from "@/components/ShareMenu";
+import PamNudge from "@/components/PamNudge";
 import { ShieldCheck, Sparkles, HeartPulse, ChevronDown, ChevronUp, AlertCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { parseJargon } from "@/components/policy-advisor/JargonTooltip";
@@ -453,6 +454,11 @@ export default function AdvisorPage() {
                           </div>
                         )}
                       </div>
+
+                      <PamNudge 
+                        text="Need help understanding claim settlement processes?" 
+                        suggestedPrompt="How do I initiate a cashless claim with the policy recommended above?" 
+                      />
                     </div>
                   );
                 })}

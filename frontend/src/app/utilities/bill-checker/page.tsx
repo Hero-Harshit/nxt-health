@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { addHistoryLog } from '@/utils/history';
 import ShareMenu from '@/components/ShareMenu';
+import PamNudge from '@/components/PamNudge';
 import { Search, IndianRupee, MapPin, ShieldCheck, Activity, ReceiptText, ChevronDown, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
 
 // --- DESIGN TOKENS ---
@@ -404,6 +405,11 @@ export default function BillCheckerPage() {
                     ))}
                   </ul>
                 </div>
+
+                <PamNudge 
+                  text="Want PAM to draft a formal dispute letter for this bill?" 
+                  suggestedPrompt="Can you help me draft an email to the hospital asking for clarification on these extra charges?" 
+                />
               </div>
             )}
           </div>

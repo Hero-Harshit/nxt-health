@@ -60,6 +60,16 @@ export default function PamInterface() {
     }
     
     setIsMounted(true);
+
+    const initialMessage = localStorage.getItem('pam_initial_message');
+    if (initialMessage) {
+      localStorage.removeItem('pam_initial_message');
+      setInputValue(initialMessage);
+      setTimeout(() => {
+        const sendBtn = document.getElementById('pam-send-btn');
+        if (sendBtn) sendBtn.click();
+      }, 300);
+    }
   }, []);
 
   const startNewChat = () => {
@@ -443,6 +453,7 @@ export default function PamInterface() {
               <Mic className="w-5 h-5" />
             </button>
             <button 
+              id="pam-send-btn"
               onClick={() => handleSendMessage()}
               disabled={isLoading}
               className="p-2.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all"
