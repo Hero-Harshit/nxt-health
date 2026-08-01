@@ -9,6 +9,7 @@ import cors from "cors";
 import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
 import { callGeminiJSON } from "./lib/geminiClient.js";
+import { buildPamContextServer } from "./lib/pamContext.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const app = express();
@@ -812,16 +813,18 @@ app.post('/api/check-bill', async (req: any, res: any) => {
 
 app.post("/api/pam/chat", async (req, res) => {
   try {
-    const { prompt, history } = req.body;
+    const { prompt, history, historyLogs } = req.body;
 
     if (!prompt) {
       return res.status(400).json({ error: "Prompt is required" });
     }
 
+    const systemInstruction = buildPamContextServer(historyLogs || []);
+
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
     const model = genAI.getGenerativeModel({ 
       model: "gemini-3.1-flash-lite",
-      systemInstruction: "You are Pam (Personal Assistant & Manager), a highly professional, empathetic, and concise healthcare receptionist for the NxtHealth platform. You help users understand their health data, log metrics, and manage their health vault. Keep responses short, modern, and structured with markdown. Do not give direct medical diagnoses; instead, advise consulting a doctor while providing helpful wellness context."
+      systemInstruction
     });
 
     const contents = [];

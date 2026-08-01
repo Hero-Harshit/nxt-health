@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { Sidebar, X, Mic, ArrowRight, FileText, HeartPulse, Activity, ShieldCheck, Search, Plus, MessageSquare, MoreVertical, Edit2, Trash2 } from 'lucide-react';
-import { addHistoryLog } from '@/utils/history';
+import { addHistoryLog, getHistoryLogs } from '@/utils/history';
 
 const HEALTH_QUOTES = [
   { text: "The greatest wealth is health.", author: "Virgil" },
@@ -112,7 +112,7 @@ export default function PamInterface() {
       const res = await fetch(`${backendUrl}/api/pam/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: userText, history: messages })
+        body: JSON.stringify({ prompt: userText, history: messages, historyLogs: getHistoryLogs() })
       });
 
       const data = await res.json();
