@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint, ReceiptText } from "lucide-react";
+import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint, ReceiptText, HardDrive } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -342,6 +342,30 @@ export default function HomePage() {
               </div>
               <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4">
                 Launch Checker <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Module: Health Vault */}
+            <Link
+              href="/utilities/health-vault"
+              className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between h-full group cursor-pointer"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-sky-100/70 text-sky-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <HardDrive className="h-5.5 w-5.5" />
+                  </div>
+                  <span className="bg-sky-50 text-sky-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200">
+                    SECURED
+                  </span>
+                </div>
+                <h3 className="font-bold text-xl text-[#0F2744]">Health Vault</h3>
+                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                  Securely store and manage medical records directly inside your private Google Drive.
+                </p>
+              </div>
+              <div className="text-sky-600 font-semibold text-xs flex items-center gap-1 mt-4">
+                Open Vault <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
