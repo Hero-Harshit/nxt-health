@@ -6,12 +6,13 @@ import { ArrowLeft, History as HistoryIcon, Activity, FileText, Search, CreditCa
 import { getHistoryLogs, HistoryLog } from '@/utils/history'; // Adjust import path if needed
 
 // Map categories to specific UI styles
-const categoryStyles = {
+const categoryStyles: Record<string, { icon: any; color: string; bg: string }> = {
   planner: { icon: Activity, color: 'text-green-600', bg: 'bg-green-100' },
   search: { icon: Search, color: 'text-blue-600', bg: 'bg-blue-100' },
   payment: { icon: CreditCard, color: 'text-indigo-600', bg: 'bg-indigo-100' },
   ai: { icon: Stethoscope, color: 'text-purple-600', bg: 'bg-purple-100' },
   vault: { icon: FileText, color: 'text-orange-600', bg: 'bg-orange-100' },
+  explainer: { icon: FileText, color: 'text-teal-600', bg: 'bg-teal-100' },
   general: { icon: HistoryIcon, color: 'text-gray-600', bg: 'bg-gray-100' },
 };
 

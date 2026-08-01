@@ -1,4 +1,13 @@
-export type HistoryCategory = 'planner' | 'search' | 'payment' | 'ai' | 'vault' | 'general';
+export type HistoryCategory = 
+  | 'ai' 
+  | 'payment' 
+  | 'search' 
+  | 'utility' 
+  | 'sos' 
+  | 'planner' 
+  | 'explainer' 
+  | 'bill-checker' 
+  | (string & {}); // Flexible type allowing custom string categories while preserving autocomplete
 
 export type HistoryLog = {
   id: number;
