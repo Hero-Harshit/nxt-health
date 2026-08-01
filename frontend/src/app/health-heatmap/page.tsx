@@ -156,25 +156,57 @@ export default function HealthHeatmapTracker() {
   const todayCompletedCount = checkedTasks.filter(Boolean).length;
   const totalCompletedAllTime = Object.values(heatmapHistory).reduce((sum, val) => sum + val, 0);
 
+  // Safely calculate the current streak of consecutive days with at least 1 task done
+  const currentStreak = useMemo(() => {
+    let streak = 0;
+    const date = new Date();
+    let dateStr = date.toISOString().split('T')[0];
+
+    // If today has 0 tasks done, we check yesterday before breaking the streak
+    if (!heatmapHistory[dateStr] || heatmapHistory[dateStr] === 0) {
+      date.setDate(date.getDate() - 1);
+      dateStr = date.toISOString().split('T')[0];
+    }
+
+    // Count backwards sequentially
+    while (heatmapHistory[dateStr] && heatmapHistory[dateStr] > 0) {
+      streak++;
+      date.setDate(date.getDate() - 1);
+      dateStr = date.toISOString().split('T')[0];
+    }
+    return streak;
+  }, [heatmapHistory]);
+
   return (
     <main className="min-h-screen bg-gray-50/50 px-4 sm:px-6 py-8">
       <div className="w-full max-w-5xl mx-auto p-8 bg-white rounded-3xl border border-gray-200/70 shadow-sm space-y-8 font-sans">
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-6">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-1">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">
               Health Activity Overview
             </h2>
-            <p className="text-sm text-gray-500">
-              Complete your 10 daily micro-habits to fill your health activity matrix.
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Complete your 10 daily micro-habits to fill your health activity matrix. 
+              <br className="hidden md:block" />
+              <span className="font-semibold text-blue-600">✨ New tasks are refreshed automatically every day.</span>
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-50/80 px-5 py-2.5 rounded-2xl border border-blue-100 text-center min-w-[90px]">
+          
+          {/* STAT CARDS */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* New Streak Card */}
+            <div className="bg-orange-50/80 px-5 py-2.5 rounded-2xl border border-orange-100 text-center min-w-[90px] shadow-sm">
+              <span className="block text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-0.5">Streak</span>
+              <span className="text-base font-bold text-orange-700">{currentStreak} 🔥</span>
+            </div>
+            
+            <div className="bg-blue-50/80 px-5 py-2.5 rounded-2xl border border-blue-100 text-center min-w-[90px] shadow-sm">
               <span className="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Today</span>
               <span className="text-base font-bold text-blue-900">{todayCompletedCount} / 10</span>
             </div>
-            <div className="bg-blue-50/80 px-5 py-2.5 rounded-2xl border border-blue-100 text-center min-w-[90px]">
+            
+            <div className="bg-blue-50/80 px-5 py-2.5 rounded-2xl border border-blue-100 text-center min-w-[90px] shadow-sm">
               <span className="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Total Done</span>
               <span className="text-base font-bold text-blue-900">{totalCompletedAllTime}</span>
             </div>
