@@ -65,6 +65,7 @@ export default function BillCheckerPage() {
   
   // Result State
   const [result, setResult] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   // UI State
   const [isLoading, setIsLoading] = useState(false);
@@ -92,6 +93,7 @@ export default function BillCheckerPage() {
     
     setIsLoading(true);
     setResult(null);
+    setErrorMsg(null); // Clear previous errors
     
     try {
       const res = await fetch('/api/check-bill', {
@@ -100,14 +102,18 @@ export default function BillCheckerPage() {
         body: JSON.stringify({ procedure: selectedProcedure, amount: Number(amount), cityTier })
       });
       
+      const data = await res.json(); // Always parse the response, even on 500
+      
       if (res.ok) {
-        const data = await res.json();
         setResult(data);
       } else {
-        console.error("Failed to fetch analysis");
+        // Capture the exact backend error details
+        console.error("Backend Error:", data);
+        setErrorMsg(data.details || data.error || "An unknown 500 error occurred on the server.");
       }
-    } catch (err) {
-      console.error("API Error:", err);
+    } catch (err: any) {
+      console.error("Network/Fetch Error:", err);
+      setErrorMsg(err.message || "Failed to reach the server.");
     } finally {
       setIsLoading(false);
     }
@@ -280,6 +286,18 @@ export default function BillCheckerPage() {
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
                 <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
                 <p className="text-sm font-bold text-gray-600 animate-pulse">Analyzing benchmarks...</p>
+              </div>
+            )}
+
+            {errorMsg && !isLoading && (
+              <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl max-w-full">
+                  <AlertTriangle className="w-8 h-8 text-red-600 mx-auto mb-2" />
+                  <h4 className="text-sm font-bold text-red-900 mb-1">Production Error Captured</h4>
+                  <p className="text-xs text-red-700 font-mono break-words text-left bg-red-100/50 p-2 rounded">
+                    {errorMsg}
+                  </p>
+                </div>
               </div>
             )}
 
