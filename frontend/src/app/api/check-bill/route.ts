@@ -95,14 +95,27 @@ export async function POST(req: Request) {
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
     
-    // Clean up markdown block if Gemini accidentally includes it
-    const cleanJsonString = responseText.replace(/```json\n?|```\n?/g, '').trim();
+    // Log the raw response to the server terminal for debugging
+    console.log("Raw Gemini Response:", responseText);
+
+    // Bulletproof JSON Extraction: Find the first '{' and the last '}'
+    const startIndex = responseText.indexOf('{');
+    const endIndex = responseText.lastIndexOf('}');
+
+    if (startIndex === -1 || endIndex === -1) {
+      throw new Error("Gemini response did not contain a valid JSON object.");
+    }
+
+    const cleanJsonString = responseText.substring(startIndex, endIndex + 1);
     const aiData = JSON.parse(cleanJsonString);
 
     return NextResponse.json(aiData, { status: 200 });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
-    return NextResponse.json({ error: "Failed to analyze bill" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Failed to analyze bill", 
+      details: error?.message || String(error) 
+    }, { status: 500 });
   }
 }
