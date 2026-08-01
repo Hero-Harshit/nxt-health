@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, FormEvent } from "react";
+import { addHistoryLog } from '@/utils/history';
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartPulse, Sparkles, RefreshCw, AlertCircle, ShieldCheck, ArrowRight, UserCheck, CheckCircle2 } from "lucide-react";
@@ -79,6 +80,21 @@ export default function PreventiveHealthPage() {
     setErrorMsg("");
     setPlan(null);
     setStatus("idle");
+
+    const plannerSummary = `Preventive Health Plan Requested - Inputs: ${
+      [
+        userQuery ? `Goal: ${userQuery}` : '',
+        profile?.age ? `Age: ${profile.age}` : '',
+        profile?.activity_level ? `Activity: ${profile.activity_level}` : '',
+        profile?.pre_existing_conditions?.length > 0 ? `Focus: ${profile.pre_existing_conditions.join(', ')}` : ''
+      ].filter(Boolean).join(' | ') || 'Custom Wellness Plan'
+    }`;
+
+    try {
+      addHistoryLog('planner', plannerSummary);
+    } catch (err) {
+      console.error('History log failed silently:', err);
+    }
 
     const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000").replace(/\/$/, "");
 
