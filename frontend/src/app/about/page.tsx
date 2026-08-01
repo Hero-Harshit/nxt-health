@@ -161,20 +161,20 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* 5. Privacy & Security Trust Banner */}
-        <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* 5. Privacy & Security Trust Banner (Light Blue Theme) */}
+        <div className="bg-gradient-to-r from-blue-50 via-indigo-50/60 to-blue-50 rounded-3xl p-6 sm:p-8 border border-blue-100/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-xs font-bold text-blue-300">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100/80 rounded-full text-xs font-bold text-blue-700">
               <Lock className="w-3.5 h-3.5" /> 100% Secure & Private
             </div>
-            <h3 className="text-xl font-bold">Your Health Data Belongs to You</h3>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-xl leading-relaxed">
+            <h3 className="text-xl font-bold text-gray-900">Your Health Data Belongs to You</h3>
+            <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-xl leading-relaxed">
               NXT Health is built with privacy at its core. Your personal information and records are securely managed and used solely to empower your personal healthcare journey with transparency and trust.
             </p>
           </div>
           <Link 
             href="/help"
-            className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-6 py-3.5 rounded-2xl shadow-lg transition-all shrink-0"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all shrink-0"
           >
             Visit Help Center
           </Link>
