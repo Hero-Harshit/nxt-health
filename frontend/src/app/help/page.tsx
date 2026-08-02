@@ -375,23 +375,25 @@ export default function HelpPage() {
       )}
       {/* Problem Statements & Solutions Modal */}
       {isProblemModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-4xl max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-4xl max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-blue-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
             
-            {/* Modal Header */}
-            <div className="p-6 sm:p-8 bg-slate-900 text-white flex items-start justify-between border-b border-slate-800 shrink-0">
+            {/* ✅ UPDATED LIGHT BLUE MODAL HEADER */}
+            <div className="p-6 sm:p-8 bg-gradient-to-r from-blue-50/90 via-sky-50/80 to-indigo-50/90 text-gray-900 flex items-start justify-between border-b border-blue-100/80 shrink-0">
               <div>
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">
-                  <ShieldCheck className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-700 uppercase tracking-wider mb-1">
+                  <ShieldCheck className="w-4 h-4 text-blue-600" />
                   <span>NxtHealth Problem & Solution Architecture</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-white">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
                   Problem Statements & Impact Matrix
                 </h2>
               </div>
+              {/* Clean Close Button */}
               <button
                 onClick={() => setIsProblemModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
+                className="p-2 text-gray-400 hover:text-gray-700 bg-white/80 hover:bg-white rounded-full border border-gray-200/80 shadow-xs transition-colors cursor-pointer"
+                aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
