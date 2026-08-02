@@ -1,0 +1,274 @@
+'use client';
+import React, { useState, useRef } from 'react';
+import Link from 'next/link';
+import {
+  Scan,
+  Upload,
+  Camera,
+  Sparkles,
+  ArrowLeft,
+  X,
+  FileText,
+  CheckCircle2,
+  AlertCircle,
+  Send,
+  RefreshCw,
+  Image as ImageIcon
+} from 'lucide-react';
+
+export default function ScanAnythingPage() {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [userPrompt, setUserPrompt] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sample quick-fill data for demo purposes
+  const handleQuickFill = (sampleType: string) => {
+    if (sampleType === 'prescription') {
+      setSelectedImage('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80');
+      setUserPrompt('Explain the medicines listed in this prescription, their dosages, and what precautions I should take.');
+    } else if (sampleType === 'lab') {
+      setSelectedImage('https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800&auto=format&fit=crop&q=80');
+      setUserPrompt('Summarize key abnormal values in this lab report and explain them in plain English.');
+    }
+  };
+
+  // File Change Handler
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Simulated Scan Submit (UI Only - Ready for backend integration)
+  const handleScanSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedImage) return;
+
+    setIsScanning(true);
+    setAnalysisResult(null);
+    // Simulated AI Response timeout
+    setTimeout(() => {
+      setIsScanning(false);
+      setAnalysisResult(
+        "### 📋 Scan Breakdown & Plain English Summary\n\n" +
+        "**1. Identified Document:** Doctor Prescription (General Medicine)\n\n" +
+        "**2. Key Medicines Detected:**\n" +
+        "- **Amoxicillin 500mg:** Antibiotic used for bacterial infections. Take 1 capsule every 8 hours after meals for 5 days.\n" +
+        "- **Paracetamol 650mg:** Fever and pain reliever. Take 1 tablet as needed (max 3 daily).\n\n" +
+        "**3. Important Instructions & Precautions:**\n" +
+        "- Complete the full 5-day antibiotic course even if feeling better.\n" +
+        "- Drink at least 2.5L of water daily.\n\n" +
+        "*Note: This is an AI explanation for health literacy and does not replace professional medical advice.*"
+      );
+    }, 2000);
+  };
+
+  const handleClearAll = () => {
+    setSelectedImage(null);
+    setUserPrompt('');
+    setAnalysisResult(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  return (
+    <main className="min-h-screen bg-slate-50/50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Back Link & Header */}
+        <div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Dashboard</span>
+          </Link>
+          {/* Banner Header Card */}
+          <div className="bg-gradient-to-r from-blue-50/90 via-sky-50/80 to-indigo-50/90 rounded-3xl border border-blue-100 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                {/* Status Pills */}
+                <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-xs font-black uppercase tracking-wider">
+                  OCR
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Gemini Vision AI</span>
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+                Scan Anything
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-600 font-medium leading-relaxed">
+                Upload prescriptions, lab reports, or medical bills to extract, translate, and explain clinical information instantly.
+              </p>
+            </div>
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+          </div>
+        </div>
+
+        {/* Demo Quick-Fill Chips */}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <span className="text-xs font-bold text-gray-500 mr-1">Demo Samples:</span>
+          <button
+            type="button"
+            onClick={() => handleQuickFill('prescription')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
+          >
+            <span>⚡ Sample Prescription</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickFill('lab')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
+          >
+            <span>⚡ Sample Lab Report</span>
+          </button>
+        </div>
+
+        {/* Main Input Form & Upload Area */}
+        <form onSubmit={handleScanSubmit} className="space-y-6">
+          <div className="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm space-y-6">
+            
+            {/* Upload Box / Image Preview */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                1. Select or Capture Document Photo
+              </label>
+              {!selectedImage ? (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-blue-200 hover:border-blue-400 bg-blue-50/30 hover:bg-blue-50/60 rounded-2xl p-8 text-center transition-all cursor-pointer space-y-3 group"
+                >
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm font-bold text-gray-800">
+                      Click to upload image or drag & drop
+                    </p>
+                    <p className="text-[11px] text-gray-400 font-medium mt-0.5">
+                      Supports PNG, JPG, WEBP medical document scans
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-3 pt-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-700 shadow-2xs">
+                      <Camera className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Camera</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-700 shadow-2xs">
+                      <ImageIcon className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Gallery</span>
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative rounded-2xl border border-blue-100 overflow-hidden bg-slate-900 max-h-80 flex items-center justify-center group">
+                  <img
+                    src={selectedImage}
+                    alt="Uploaded document preview"
+                    className="max-h-80 w-auto object-contain"
+                  />
+                  {/* Animated Scanner Bar when Scanning */}
+                  {isScanning && (
+                    <div className="absolute inset-0 bg-blue-500/10 pointer-events-none">
+                      <div className="w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_15px_#3b82f6] animate-pulse relative top-0" style={{ animation: 'scan 2s infinite linear' }} />
+                    </div>
+                  )}
+                  {/* Top Action Overlay */}
+                  <div className="absolute top-3 right-3 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleClearAll}
+                      className="p-2 bg-slate-900/80 hover:bg-slate-900 text-white rounded-full backdrop-blur-md transition-colors cursor-pointer"
+                      title="Remove image"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Text Prompt Input */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                2. Specific Question or Prompt (Optional)
+              </label>
+              <textarea
+                rows={3}
+                placeholder="e.g. What are the dosage instructions? Is there any warning I should know about?"
+                value={userPrompt}
+                onChange={(e) => setUserPrompt(e.target.value)}
+                className="w-full p-4 text-xs sm:text-sm font-medium border border-gray-200 rounded-2xl focus:outline-none focus:border-blue-500 leading-relaxed"
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex items-center justify-between gap-4 pt-2">
+              {selectedImage && (
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  className="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer"
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={!selectedImage || isScanning}
+                className={`ml-auto inline-flex items-center gap-2 px-6 py-3 text-xs sm:text-sm font-bold rounded-2xl shadow-md transition-all active:scale-95 cursor-pointer ${
+                  !selectedImage || isScanning
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20'
+                }`}
+              >
+                {isScanning ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Scanning Document...</span>
+                  </>
+                ) : (
+                  <>
+                    <Scan className="w-4 h-4" />
+                    <span>Scan & Analyze Document</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {/* Analysis Result Output Container */}
+        {analysisResult && (
+          <div className="bg-white rounded-3xl border border-blue-100 p-6 sm:p-8 shadow-sm space-y-4 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Analysis Complete</span>
+              </div>
+              <span className="text-[11px] text-gray-400 font-medium">Powered by Gemini OCR</span>
+            </div>
+            <div className="prose prose-slate max-w-none text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line font-medium">
+              {analysisResult}
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint, ReceiptText, HardDrive, Trophy, ChevronRight, Flame } from "lucide-react";
+import { HeartPulse, UserCheck, FileText, Activity, Layers, ArrowRight, ShieldCheck, Sparkles, Pill, AlertTriangle, ClipboardList, ShieldAlert, Fingerprint, ReceiptText, HardDrive, Trophy, ChevronRight, Flame, Scan } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -502,26 +502,36 @@ export default function HomePage() {
               </div>
             </Link>
 
-            {/* Module 6: Coming Soon Teaser */}
-            <div className="bg-slate-50/60 rounded-2xl border border-dashed border-slate-300 flex flex-col justify-between h-auto md:h-full p-4 sm:p-5 md:p-6 opacity-90 cursor-default">
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
-                  <div className="p-2.5 bg-slate-200/50 text-slate-500 rounded-xl shrink-0">
-                    <Sparkles className="w-5 h-5" />
+            {/* Module 6: Scan Anything */}
+            <Link
+              href="/scan-anything"
+              className="group relative flex flex-col justify-start md:justify-between h-auto min-h-0 md:h-full p-4 sm:p-5 md:p-6 bg-white rounded-2xl border border-slate-200 hover:border-sky-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
+            >
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="p-2.5 bg-blue-50/80 rounded-xl text-blue-600 group-hover:scale-105 transition-transform shrink-0">
+                    <Scan className="w-5 h-5" />
                   </div>
-                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-gray-100 text-gray-500 border-gray-200">
-                    IN ROADMAP
+                  <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-colors bg-blue-100 text-blue-800 border-blue-200">
+                    OCR
                   </span>
                 </div>
-                <h3 className="text-[#0F2744] font-bold text-xl mb-1.5 md:mb-2">More Modules Coming Soon</h3>
-                <p className="text-slate-500 text-xs leading-relaxed">
-                  We are building more transparent, explainable health tools to guide your healthcare decisions.
-                </p>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mb-1">
+                    Scan Anything
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Upload prescriptions or lab reports for OCR extraction and AI plain-English summaries.
+                  </p>
+                </div>
               </div>
-              <div className="text-xs font-semibold text-slate-400 mt-4 md:mt-6">
-                Stay Tuned &rarr;
+              <div className="mt-3 md:mt-6 pt-0 md:pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <span>Launch Scanner</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
-            </div>
+            </Link>
 
           </div>
         </section>
