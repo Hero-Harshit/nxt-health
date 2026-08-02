@@ -101,7 +101,7 @@ export default function AboutPage() {
           
           {/* Small Uppercase Centered Section Heading */}
           <div className="text-center mb-8">
-            <span className="text-xs sm:text-sm font-extrabold text-blue-600 uppercase tracking-widest">
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
               PLATFORM DATABASE & DIRECTORY
             </span>
           </div>
