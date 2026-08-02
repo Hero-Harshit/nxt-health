@@ -2,14 +2,16 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, HelpCircle, X, MessageSquare, ChevronDown, ChevronRight, BookOpen, Mail, Lightbulb, ExternalLink } from 'lucide-react';
+import { Search, HelpCircle, X, MessageSquare, ChevronDown, ChevronRight, BookOpen, Mail, Lightbulb, ExternalLink, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 import { faqData } from '@/data/faqs';
 import { moduleDocs, DocModule } from '@/data/documentation';
+import { PROBLEM_STATEMENTS, MAIN_PLATFORM_PROBLEM } from '@/data/problemStatements';
 
 export default function HelpPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeDoc, setActiveDoc] = useState<DocModule | null>(null);
   const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
+  const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
 
@@ -58,6 +60,33 @@ export default function HelpPage() {
             Browse FAQs <ChevronRight className="w-4 h-4" />
           </div>
         </button>
+
+        {/* FULL-WIDTH HORIZONTAL CARD: Comprehensive List of Problem Statements */}
+        <div 
+          onClick={() => setIsProblemModalOpen(true)}
+          className="group relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-md hover:shadow-xl hover:border-slate-700 transition-all cursor-pointer"
+        >
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 border border-blue-400/30 rounded-full text-xs font-bold text-blue-300">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Platform Vision & Engineering Architecture</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+                Comprehensive List of Problem Statements
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Discover how NxtHealth addresses systemic healthcare challenges—from emergency response delays to medical billing opacity—with structured technology solutions.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <button className="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-lg shadow-blue-600/30 transition-all group-hover:translate-x-1 cursor-pointer">
+                <span>Explore Solutions</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* 2. Module Explanations Placeholder */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100">
@@ -331,6 +360,100 @@ export default function HelpPage() {
               <span>Suggest a Feature</span>
               <ExternalLink className="w-3.5 h-3.5 opacity-70" />
             </a>
+          </div>
+        </div>
+      )}
+      {/* Problem Statements & Solutions Modal */}
+      {isProblemModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-4xl max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="p-6 sm:p-8 bg-slate-900 text-white flex items-start justify-between border-b border-slate-800 shrink-0">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>NxtHealth Problem & Solution Architecture</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  Problem Statements & Impact Matrix
+                </h2>
+              </div>
+              <button
+                onClick={() => setIsProblemModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {/* Modal Body - Scrollable */}
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-6 bg-slate-50/50">
+              
+              {/* Main Overarching Platform Problem Hero Box */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl p-6 space-y-3">
+                <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest">
+                  OVERARCHING PLATFORM MISSION
+                </span>
+                <h3 className="text-lg font-bold text-blue-950">
+                  {MAIN_PLATFORM_PROBLEM.title}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs leading-relaxed pt-1">
+                  <div className="bg-white/80 p-3.5 rounded-xl border border-blue-100">
+                    <strong className="text-red-700 block mb-1 font-bold">⚠️ Core Problem:</strong>
+                    <span className="text-slate-700">{MAIN_PLATFORM_PROBLEM.problem}</span>
+                  </div>
+                  <div className="bg-white/80 p-3.5 rounded-xl border border-blue-100">
+                    <strong className="text-emerald-700 block mb-1 font-bold">💡 NxtHealth Solution:</strong>
+                    <span className="text-slate-700">{MAIN_PLATFORM_PROBLEM.solution}</span>
+                  </div>
+                </div>
+              </div>
+              {/* Priority-Ordered Feature Cards List */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Feature-by-Feature Problem Statements (Ranked by Priority)
+                </h3>
+                <div className="grid grid-cols-1 gap-4">
+                  {PROBLEM_STATEMENTS.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:border-blue-300 transition-all space-y-3"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 bg-slate-100 text-slate-800 text-[10px] font-extrabold rounded-md border border-slate-200">
+                            {item.badge}
+                          </span>
+                          <h4 className="text-sm font-bold text-slate-900">{item.title}</h4>
+                        </div>
+                        <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                          {item.category}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed">
+                        <div className="p-3 bg-red-50/50 rounded-xl border border-red-100/60 text-slate-700">
+                          <strong className="text-red-700 block text-[11px] font-bold mb-0.5">Problem Statement:</strong>
+                          {item.problem}
+                        </div>
+                        <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100/60 text-slate-700">
+                          <strong className="text-emerald-700 block text-[11px] font-bold mb-0.5">How NxtHealth Solves It:</strong>
+                          {item.solution}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Modal Footer */}
+            <div className="p-4 bg-white border-t border-slate-100 flex items-center justify-end shrink-0">
+              <button
+                onClick={() => setIsProblemModalOpen(false)}
+                className="px-5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+              >
+                Close Module
+              </button>
+            </div>
           </div>
         </div>
       )}
