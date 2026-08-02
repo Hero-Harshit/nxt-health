@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { ChevronDown, User, LogOut, Settings, Menu, X, LayoutGrid, Activity, Award, History, HeartPulse, Users } from "lucide-react";
+import { ChevronDown, User, LogOut, Settings, Menu, X, LayoutGrid, Activity, Award, History, HeartPulse } from "lucide-react";
 import EmergencyHelplines from "./EmergencyHelplines";
 import LocalHospitals from "./LocalHospitals";
 
@@ -226,13 +226,7 @@ export default function Navbar() {
                       >
                         <Activity className="h-4 w-4 text-slate-400" /> Healthy Heatmap
                       </Link>
-                      <Link
-                        href="/community"
-                        className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
-                        onClick={() => setIsProfileOpen(false)}
-                      >
-                        <Users className="h-4.5 w-4.5 text-slate-400" /> Community and Friends
-                      </Link>
+
                       <Link
                         href="/awards"
                         className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
