@@ -318,12 +318,65 @@ export default function ScanAnythingPage() {
               </div>
               <span className="text-[11px] text-gray-400 font-medium">Powered by Gemini OCR</span>
             </div>
-            <div className="prose prose-slate max-w-none text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line font-medium">
-              {analysisResult}
-            </div>
+            {/* ✅ Formatted Output without raw asterisks */}
+            <FormattedMarkdown content={analysisResult} />
           </div>
         )}
       </div>
     </main>
   );
 }
+
+// Helper Component to render raw Gemini Markdown without asterisks
+function FormattedMarkdown({ content }: { content: string }) {
+  const lines = content.split('\n');
+  return (
+    <div className="space-y-2 text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+
+        if (!trimmed) return <div key={idx} className="h-1" />;
+        // Render Headers (###)
+        if (trimmed.startsWith('###')) {
+          const headerText = trimmed.replace(/^###\s*/, '');
+          return (
+            <h3 key={idx} className="text-sm sm:text-base font-extrabold text-gray-900 pt-2 pb-1 border-b border-gray-100">
+              {renderInlineFormatting(headerText)}
+            </h3>
+          );
+        }
+        // Render Bullet Points (* or -)
+        if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+          const bulletText = trimmed.replace(/^[\*\-]\s*/, '');
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-2">
+              <span className="text-blue-600 font-black shrink-0 mt-0.5">•</span>
+              <span>{renderInlineFormatting(bulletText)}</span>
+            </div>
+          );
+        }
+        // Regular Paragraphs
+        return <p key={idx}>{renderInlineFormatting(trimmed)}</p>;
+      })}
+    </div>
+  );
+}
+
+// Helper to parse bold text into strong tags
+function renderInlineFormatting(text: string) {
+  // Split by ** delimiters for bold text
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const boldText = part.slice(2, -2);
+      return (
+        <strong key={index} className="font-extrabold text-gray-900">
+          {boldText}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
