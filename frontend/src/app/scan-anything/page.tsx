@@ -65,6 +65,10 @@ export default function ScanAnythingPage() {
     setIsScanning(true);
     setAnalysisResult(null);
 
+    // Setup 45s AbortController timeout to account for Render cold starts
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
     try {
       const { base64, mimeType } = prepareImageData(selectedImage);
 
@@ -77,18 +81,25 @@ export default function ScanAnythingPage() {
 
       // Retrieve backend URL from existing env/config
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, "");
+      const fullUrl = `${backendUrl}/api/scan-ocr`;
       const { data: { session } } = await supabase.auth.getSession();
 
-      const response = await fetch(`${backendUrl}/api/scan-ocr`, {
+      console.log("Fetching from:", fullUrl, payload);
+
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token || ""}`,
         },
         body: JSON.stringify(payload),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
+        console.error("HTTP Error Status:", response.status);
         throw new Error(`Server returned status ${response.status}`);
       }
 
@@ -97,11 +108,18 @@ export default function ScanAnythingPage() {
       // Map response key matching your backend return key (e.g., data.result or data.explanation)
       const outputText = data.result || data.explanation || data.text || JSON.stringify(data, null, 2);
       setAnalysisResult(outputText);
-    } catch (error) {
+    } catch (error: any) {
+      clearTimeout(timeoutId);
       console.error('Scan Anything API Error:', error);
-      setAnalysisResult(
-        "⚠️ Analysis Unavailable: Failed to communicate with the AI scanning server. Please check your network connection or backend service status on Render."
-      );
+      if (error.name === 'AbortError') {
+        setAnalysisResult(
+          "⚠️ Request Timeout: The scanning server took longer than 45 seconds to respond. This is common if the backend on Render is waking up from a cold start. Please try submitting again."
+        );
+      } else {
+        setAnalysisResult(
+          `⚠️ Analysis Unavailable: Failed to communicate with the AI scanning server (Error: ${error.message || error}). The server may be waking up from a cold start on Render. Please verify your connection and try again.`
+        );
+      }
     } finally {
       setIsScanning(false);
     }

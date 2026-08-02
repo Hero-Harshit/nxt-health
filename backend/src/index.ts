@@ -858,6 +858,45 @@ app.post("/api/pam/chat", async (req, res) => {
   }
 });
 
+app.post("/api/scan-ocr", async (req, res) => {
+  try {
+    const { image, mimeType, prompt } = req.body ?? {};
+
+    if (!image || !mimeType) {
+      res.status(400).json({ error: "Missing image data or mimeType" });
+      return;
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: image,
+          mimeType: mimeType
+        }
+      },
+      prompt || "Analyze this medical document in detail. Identify prescribed medicines, dosages, diagnostic test values, and provide a plain-English explanation with key precautions."
+    ]);
+
+    const responseText = result.response.text();
+
+    const user = await getAuthUser(req);
+    if (user) {
+      await recordUserHistory(user.id, "Scan Anything", "Image scan request", responseText.substring(0, 200));
+    }
+
+    return res.status(200).json({ result: responseText });
+  } catch (error: any) {
+    console.error("Scan OCR Gemini API Error:", error);
+    return res.status(500).json({
+      error: "Failed to analyze document",
+      details: error.message || String(error)
+    });
+  }
+});
+
 const PORT = process.env.PORT ?? 5000;
 
 app.listen(PORT, () => {
