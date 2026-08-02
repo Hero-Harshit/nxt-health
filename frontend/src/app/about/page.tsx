@@ -74,7 +74,7 @@ export default function AboutPage() {
         {/* 2. By The Numbers Stats Bar (Light Blue Theme) */}
         <div className="bg-gradient-to-r from-blue-50 via-indigo-50/60 to-blue-50 rounded-3xl p-6 sm:p-8 border border-blue-100/80 shadow-sm">
           <h3 className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-6 text-center">
-            NXT Health By The Numbers
+            NXT HEALTH BY THE NUMBERS
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="space-y-1">
@@ -92,6 +92,57 @@ export default function AboutPage() {
             <div className="space-y-1">
               <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">100%</span>
               <p className="text-xs text-gray-600 font-semibold">Privacy Focused</p>
+            </div>
+          </div>
+        </div>
+
+        {/* SECOND STATS BANNER: Platform Database & Directory */}
+        <div className="mt-8 w-full bg-gradient-to-r from-blue-50/70 via-sky-50/50 to-blue-50/70 rounded-3xl border border-blue-100/80 p-8 sm:p-10 shadow-xs">
+          
+          {/* Small Uppercase Centered Section Heading */}
+          <div className="text-center mb-8">
+            <span className="text-xs sm:text-sm font-extrabold text-blue-600 uppercase tracking-widest">
+              PLATFORM DATABASE & DIRECTORY
+            </span>
+          </div>
+
+          {/* 4-Column Centered Statistics Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {/* Stat 1: Generic Medicines */}
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                111+
+              </div>
+              <div className="text-xs sm:text-sm font-medium text-gray-600 leading-snug">
+                Verified Generic Medicines
+              </div>
+            </div>
+            {/* Stat 2: Policies */}
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                42+
+              </div>
+              <div className="text-xs sm:text-sm font-medium text-gray-600 leading-snug">
+                Popular & Handpicked Policies
+              </div>
+            </div>
+            {/* Stat 3: Emergency Contacts */}
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                20+
+              </div>
+              <div className="text-xs sm:text-sm font-medium text-gray-600 leading-snug">
+                Emergency Contacts
+              </div>
+            </div>
+            {/* Stat 4: Verified Hospitals */}
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                17+
+              </div>
+              <div className="text-xs sm:text-sm font-medium text-gray-600 leading-snug">
+                Verified Hospitals
+              </div>
             </div>
           </div>
         </div>
