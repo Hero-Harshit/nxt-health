@@ -1,0 +1,100 @@
+{
+    "localHospitals": [
+        {
+            "hospitalName": "Apollo Hospitals",
+            "area": "Jubilee Hills, Hyderabad",
+            "emergencyNumber": "+91 40 6907 1200",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Apollo+Hospitals+Jubilee+Hills+Hyderabad"
+        },
+        {
+            "hospitalName": "CARE Hospitals",
+            "area": "Banjara Hills, Hyderabad",
+            "emergencyNumber": "+91 40 6810 6589",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=CARE+Hospitals+Banjara+Hills+Hyderabad"
+        },
+        {
+            "hospitalName": "KIMS Hospitals",
+            "area": "Begumpet, Hyderabad",
+            "emergencyNumber": "+91 40 4488 5000",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=KIMS+Hospitals+Begumpet+Hyderabad"
+        },
+        {
+            "hospitalName": "Yashoda Hospitals",
+            "area": "Secunderabad, Hyderabad",
+            "emergencyNumber": "+91 40 4567 4567",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Yashoda+Hospitals+Secunderabad+Hyderabad"
+        },
+        {
+            "hospitalName": "AIG Hospitals",
+            "area": "Gachibowli, Hyderabad",
+            "emergencyNumber": "+91 40 4244 4222",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=AIG+Hospitals+Gachibowli+Hyderabad"
+        },
+        {
+            "hospitalName": "Continental Hospitals",
+            "area": "Gachibowli, Hyderabad",
+            "emergencyNumber": "+91 40 6700 0000",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Continental+Hospitals+Gachibowli+Hyderabad"
+        },
+        {
+            "hospitalName": "Medicover Hospitals",
+            "area": "HITEC City, Hyderabad",
+            "emergencyNumber": "+91 40 6833 4455",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Medicover+Hospitals+HITEC+City+Hyderabad"
+        },
+        {
+            "hospitalName": "Sunshine Hospitals",
+            "area": "Paradise, Secunderabad",
+            "emergencyNumber": "+91 40 4455 0000",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Sunshine+Hospitals+Paradise+Secunderabad"
+        },
+        {
+            "hospitalName": "Citizens Specialty Hospital",
+            "area": "Nallagandla, Hyderabad",
+            "emergencyNumber": "+91 40 6719 1919",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Citizens+Specialty+Hospital+Nallagandla+Hyderabad"
+        },
+        {
+            "hospitalName": "Kamineni Hospitals",
+            "area": "L.B. Nagar, Hyderabad",
+            "emergencyNumber": "+91 70362 70362",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Kamineni+Hospitals+LB+Nagar+Hyderabad"
+        },
+        {
+            "hospitalName": "Gleneagles AWARE Hospital",
+            "area": "L.B. Nagar, Hyderabad",
+            "emergencyNumber": "+91 92402 61112",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Gleneagles+AWARE+Hospital+LB+Nagar+Hyderabad"
+        },
+        {
+            "hospitalName": "OMNI Hospitals",
+            "area": "Kukatpally, Hyderabad",
+            "emergencyNumber": "+91 88801 01000",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=OMNI+Hospitals+Kukatpally+Hyderabad"
+        }
+    {
+            "hospitalName": "Owaisi Hospital",
+            "area": "Kanchanbagh,Hyderabad",
+            "emergencyNumber": "+91 40243 42222",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Owaisi+Hospital+Kanchanbagh+Hyderabad"
+        },
+        {
+            "hospitalName": "Princess Esra Hospital",
+            "area": "Charminar,Hyderabad",
+            "emergencyNumber": "+91 40245 28911",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Princess+Esra+Hospital+Charminar+Hyderabad"
+        },
+        {
+            "hospitalName": "Osmania General Hospital",
+            "area": "Afzal Gunj,Hyderabad",
+            "emergencyNumber": "+91 40246 00190",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Osmania+General+Hospital+Afzal+Gunj+Hyderabad"
+        },
+        {
+            "hospitalName": "Government General Hospital",
+            "area": "King Koti,Hyderabad",
+            "emergencyNumber": "--",
+            "googleMapsLink": "https://www.google.com/maps/search/?api=1&query=Government+General+Hospital+King+Koti+Hyderabad"
+        }
+    ]
+}

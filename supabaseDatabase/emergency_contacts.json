@@ -1,0 +1,104 @@
+{
+  "nationalHelplines": [
+    {
+      "serviceName": "National Emergency Number",
+      "phoneNumber": "112",
+      "description": "All-in-one emergency number for Police, Fire, and Ambulance."
+    },
+    {
+      "serviceName": "Women's Helpline",
+      "phoneNumber": "1091",
+      "description": "Domestic abuse and women's safety emergencies."
+    },
+    {
+      "serviceName": "Health Helpline / Blood Bank Info",
+      "phoneNumber": "104",
+      "description": "State-run medical advisory line for health information, teleconsultation, and blood bank availability. Varies by state."
+    },
+    {
+      "serviceName": "Fire Brigade",
+      "phoneNumber": "101",
+      "description": "Direct line to report fires and fire-related emergencies."
+    },
+    {
+      "serviceName": "Ambulance",
+      "phoneNumber": "102",
+      "description": "Free ambulance service for medical emergencies."
+    },
+    {
+      "serviceName": "Emergency Medical Response",
+      "phoneNumber": "108",
+      "description": "State-run emergency response for accidents, trauma, and critical medical situations."
+    },
+    {
+      "serviceName": "National Poison Information Centre (AIIMS Delhi)",
+      "phoneNumber": "1066",
+      "description": "Guidance on poisoning cases, toxic exposure, and antidote information."
+    },
+    {
+      "serviceName": "Poison Control (AIIMS Delhi Alternate Line)",
+      "phoneNumber": "011-26593677",
+      "description": "Backup line for the National Poison Information Centre."
+    },
+    {
+      "serviceName": "KIRAN Mental Health Helpline",
+      "phoneNumber": "1800-599-0019",
+      "description": "24/7 toll-free mental health support, counseling, and crisis intervention."
+    },
+    {
+      "serviceName": "AIDS Helpline",
+      "phoneNumber": "1097",
+      "description": "Information, counseling, and support related to HIV/AIDS."
+    },
+    {
+      "serviceName": "COVID-19 Helpline",
+      "phoneNumber": "1075",
+      "description": "National helpline for COVID-19 related queries and assistance."
+    },
+    {
+      "serviceName": "Tuberculosis (TB) Helpline",
+      "phoneNumber": "1800-11-6666",
+      "description": "Support and information related to TB diagnosis and treatment."
+    },
+    {
+      "serviceName": "Organ Donation Helpline (NOTTO)",
+      "phoneNumber": "1800-11-4770",
+      "description": "National Organ and Tissue Transplant Organization helpline for organ donation queries."
+    },
+    {
+      "serviceName": "Air Ambulance",
+      "phoneNumber": "9540161344",
+      "description": "Emergency air transport for critical medical cases."
+    },
+    {
+      "serviceName": "Senior Citizen Helpline",
+      "phoneNumber": "14567",
+      "description": "Support line for elderly citizens including health and welfare assistance."
+    },
+    {
+      "serviceName": "Domestic Abuse Helpline",
+      "phoneNumber": "181",
+      "description": "24/7 support for women facing domestic violence."
+    },
+    {
+      "serviceName": "LPG Gas Leak Helpline",
+      "phoneNumber": "1906",
+      "description": "Report gas leaks to prevent fire hazards and explosions."
+    },
+    {
+      "serviceName": "Disaster Management (NDMA)",
+      "phoneNumber": "1078",
+      "description": "National Disaster Management Authority helpline for disaster-related emergencies."
+    },
+    {
+      "serviceName": "Road Accident Emergency Service",
+      "phoneNumber": "1073",
+      "description": "Assistance for road accident victims on highways."
+    },
+    {
+      "serviceName": "Railway Helpline (RPF Security)",
+      "phoneNumber": "1512",
+      "description": "Security, medical, and emergency assistance on trains."
+    }
+  ]
+}
