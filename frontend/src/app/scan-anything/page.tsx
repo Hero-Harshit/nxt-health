@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
+import { supabase } from "@/lib/supabaseClient";
 import {
   Scan,
   Upload,
@@ -46,28 +47,64 @@ export default function ScanAnythingPage() {
     }
   };
 
-  // Simulated Scan Submit (UI Only - Ready for backend integration)
-  const handleScanSubmit = (e: React.FormEvent) => {
+  // Helper to extract clean base64 data and mime-type
+  const prepareImageData = (dataUrl: string) => {
+    if (dataUrl.startsWith('data:')) {
+      const [header, base64] = dataUrl.split(',');
+      const mimeType = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+      return { base64, mimeType };
+    }
+    return { base64: dataUrl, mimeType: 'image/jpeg' };
+  };
+
+  // Live Asynchronous Scan Submit
+  const handleScanSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedImage) return;
 
     setIsScanning(true);
     setAnalysisResult(null);
-    // Simulated AI Response timeout
-    setTimeout(() => {
-      setIsScanning(false);
+
+    try {
+      const { base64, mimeType } = prepareImageData(selectedImage);
+
+      // Construct payload based on Medical Term Explainer pattern
+      const payload = {
+        image: base64,
+        mimeType: mimeType,
+        prompt: userPrompt.trim() || 'Analyze this medical document in detail. Identify prescribed medicines, dosages, diagnostic test values, and provide a plain-English explanation with key precautions.',
+      };
+
+      // Retrieve backend URL from existing env/config
+      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, "");
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(`${backendUrl}/api/scan-ocr`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Map response key matching your backend return key (e.g., data.result or data.explanation)
+      const outputText = data.result || data.explanation || data.text || JSON.stringify(data, null, 2);
+      setAnalysisResult(outputText);
+    } catch (error) {
+      console.error('Scan Anything API Error:', error);
       setAnalysisResult(
-        "### 📋 Scan Breakdown & Plain English Summary\n\n" +
-        "**1. Identified Document:** Doctor Prescription (General Medicine)\n\n" +
-        "**2. Key Medicines Detected:**\n" +
-        "- **Amoxicillin 500mg:** Antibiotic used for bacterial infections. Take 1 capsule every 8 hours after meals for 5 days.\n" +
-        "- **Paracetamol 650mg:** Fever and pain reliever. Take 1 tablet as needed (max 3 daily).\n\n" +
-        "**3. Important Instructions & Precautions:**\n" +
-        "- Complete the full 5-day antibiotic course even if feeling better.\n" +
-        "- Drink at least 2.5L of water daily.\n\n" +
-        "*Note: This is an AI explanation for health literacy and does not replace professional medical advice.*"
+        "⚠️ Analysis Unavailable: Failed to communicate with the AI scanning server. Please check your network connection or backend service status on Render."
       );
-    }, 2000);
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const handleClearAll = () => {
