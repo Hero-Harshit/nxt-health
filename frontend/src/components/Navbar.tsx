@@ -220,7 +220,7 @@ export default function Navbar() {
                         <Settings className="h-4 w-4 text-slate-400" /> View Profile
                       </Link>
                       <Link
-                        href="/health-heatmap"
+                        href="/heatmap"
                         className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-sky-600"
                         onClick={() => setIsProfileOpen(false)}
                       >
