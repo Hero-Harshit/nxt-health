@@ -61,29 +61,39 @@ export default function HelpPage() {
           </div>
         </button>
 
-        {/* FULL-WIDTH HORIZONTAL CARD: Comprehensive List of Problem Statements */}
-        <div 
-          onClick={() => setIsProblemModalOpen(true)}
-          className="group relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-md hover:shadow-xl hover:border-slate-700 transition-all cursor-pointer"
-        >
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 border border-blue-400/30 rounded-full text-xs font-bold text-blue-300">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Platform Vision & Engineering Architecture</span>
+        {/* FULL-WIDTH HORIZONTAL CARD: Light Blue Platform Theme */}
+        <div className="mt-12 w-full">
+          <div 
+            onClick={() => setIsProblemModalOpen(true)}
+            className="group relative overflow-hidden bg-gradient-to-r from-blue-50/90 via-sky-50/60 to-indigo-50/80 rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md border border-blue-100/90 transition-all cursor-pointer active:scale-[0.99]"
+          >
+            {/* Soft Ambient Background Glow */}
+            <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-200/30 rounded-full blur-3xl group-hover:bg-blue-300/40 transition-all pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              
+              {/* Left Content Area */}
+              <div className="space-y-2.5 max-w-2xl">
+                {/* Pill Badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100/80 border border-blue-200/80 rounded-full text-xs font-bold text-blue-800">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Platform Vision & Engineering Architecture</span>
+                </div>
+                {/* Title (Dark Text) */}
+                <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">
+                  Comprehensive List of Problem Statements
+                </h2>
+                {/* Description Paragraph (Readable Slate Text) */}
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">
+                  Discover how NxtHealth addresses systemic healthcare challenges—from emergency response delays to medical billing opacity—with structured technology solutions.
+                </p>
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-                Comprehensive List of Problem Statements
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Discover how NxtHealth addresses systemic healthcare challenges—from emergency response delays to medical billing opacity—with structured technology solutions.
-              </p>
-            </div>
-            <div className="shrink-0">
-              <button className="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-lg shadow-blue-600/30 transition-all group-hover:translate-x-1 cursor-pointer">
-                <span>Explore Solutions</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              {/* Right Action Button */}
+              <div className="shrink-0">
+                <button className="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-md shadow-blue-600/20 transition-all group-hover:translate-x-1">
+                  <span>Explore Solutions</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
